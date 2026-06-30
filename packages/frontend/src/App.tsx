@@ -14,6 +14,7 @@ import { useSearch } from './hooks/useSearch';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { MenuOverlay } from './components/MenuOverlay';
 import { NotFound } from './pages/NotFound';
+import { MobileBottomBar } from './components/MobileBottomBar';
 
 const EntryDetail = lazy(() => import('./components/EntryDetail'));
 
@@ -37,6 +38,7 @@ function AppContent() {
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem('darkMode') === 'true';
   });
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -147,6 +149,7 @@ function AppContent() {
   const handleCloseSearch = () => {
     setSearchMode('idle');
     setSearchTerm('');
+    setShowMobileSearch(false);
   };
 
   const handleInputChange = (value: string) => {
@@ -171,6 +174,26 @@ function AppContent() {
     inputRef.current?.blur();
   };
 
+  // ============================================
+  // MOBILE: Search öffnen (Bottom Bar)
+  // ============================================
+  const handleMobileSearchOpen = () => {
+    setShowMobileSearch(true);
+    // Fokus nach Render
+    setTimeout(() => {
+      const mobileInput = document.getElementById('mobile-search-input');
+      if (mobileInput) {
+        (mobileInput as HTMLInputElement).focus();
+      }
+    }, 100);
+  };
+
+  const handleMobileSearchClose = () => {
+    setShowMobileSearch(false);
+    setSearchTerm('');
+    setSearchMode('idle');
+  };
+
   const isLoading = authLoading || entriesLoading || topicsLoading;
 
   if (isLoading) {
@@ -193,18 +216,18 @@ function AppContent() {
       {/* Kopfzeile */}
       <header className="sticky top-0 z-10 bg-[var(--bg-primary)]/80 backdrop-blur-sm border-b border-[var(--border-color)] px-4 py-2 shadow-md shadow-black/5 dark:shadow-white/5 shrink-0">
         <div className="flex items-center justify-between gap-4 max-w-full relative">
-          {/* Logo links */}
-          <div className="shrink-0 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" className="w-8 h-8">
+          {/* Logo zentriert auf Mobile, links auf Desktop */}
+          <div className="flex-1 sm:flex-none flex items-center justify-center sm:justify-start gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" className="w-8 h-8 shrink-0">
               <circle cx="50" cy="50" r="42" fill="none" stroke="#B8860B" strokeWidth="2.5" />
               <text x="51" y="65" fontFamily="'Montserrat', sans-serif" fontSize="44" fontWeight="300" fill="#B8860B" textAnchor="middle">AM</text>
             </svg>
             <span className="text-xl font-medium text-gold-500 tracking-tight">ActiveMind</span>
           </div>
 
-          {/* Suchleiste */}
-          <div className="flex-1 max-w-sm mx-auto relative">
-            <div className="relative flex items-center">
+          {/* Suchleiste - nur Desktop */}
+          <div className="hidden sm:flex flex-1 max-w-sm mx-auto relative">
+            <div className="relative flex items-center w-full">
               <input
                 ref={inputRef}
                 type="text"
@@ -242,8 +265,8 @@ function AppContent() {
             )}
           </div>
 
-          {/* Burger-Menu */}
-          <div className="flex items-center gap-2 shrink-0">
+          {/* Burger-Menu - nur Desktop */}
+          <div className="hidden sm:flex items-center gap-2 shrink-0">
             <button
               onClick={toggleMenu}
               className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:bg-gold-500 hover:text-white transition-all duration-200 hover:scale-105 p-1.5 group"
@@ -256,6 +279,9 @@ function AppContent() {
               </svg>
             </button>
           </div>
+
+          {/* Mobile: Platzhalter für Balance */}
+          <div className="sm:hidden w-8" />
         </div>
       </header>
 
@@ -271,7 +297,7 @@ function AppContent() {
           selectedView={selectedView}
           selectedTopicId={selectedTopicId}
         />
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto pb-20 sm:pb-0">
           <div className="p-6 max-w-5xl mx-auto">
             {selectedView === 'dashboard' && <Dashboard onOpenEntry={setSelectedEntryId} showNewEntryForm={showNewEntryForm} setShowNewEntryForm={setShowNewEntryForm} />}
             {selectedView === 'trash' && <Trash />}
@@ -281,6 +307,60 @@ function AppContent() {
           </div>
         </main>
       </div>
+
+      {/* Mobile: Mobile Search Overlay */}
+      {showMobileSearch && (
+        <div className="fixed inset-0 z-[200] bg-black/30 backdrop-blur-sm" onClick={handleMobileSearchClose}>
+          <div className="absolute top-0 left-0 right-0 bg-[var(--bg-card)] p-4 border-b border-[var(--border-color)]" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleMobileSearchClose}
+                className="w-10 h-10 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--bg-secondary)] transition shrink-0"
+                aria-label="Close search"
+              >
+                ✕
+              </button>
+              <div className="relative flex-1">
+                <input
+                  id="mobile-search-input"
+                  type="text"
+                  placeholder="Search ..."
+                  value={searchTerm}
+                  onChange={(e) => handleInputChange(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className="w-full input rounded-full pl-4 pr-12 transition"
+                  autoFocus
+                />
+                <button
+                  onClick={handleSearch}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-transparent text-slate-400 hover:bg-gold-500 hover:!text-white transition flex items-center justify-center p-1.5"
+                  aria-label="Search"
+                >
+                  <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile: Mobile Bottom Bar */}
+      <MobileBottomBar
+        onSearch={handleMobileSearchOpen}
+        onDashboard={() => {
+          setSelectedView('dashboard');
+          setSelectedTopicId(null);
+        }}
+        onTopics={() => {
+          // Sidebar Overlay öffnen – wird in Schritt 2 implementiert
+          // TODO: Sidebar als Overlay für Mobile
+        }}
+        onNewEntry={() => setShowNewEntryForm(true)}
+        onMenu={toggleMenu}
+      />
 
       {/* SearchLayer */}
       {searchMode === 'searching' && (
