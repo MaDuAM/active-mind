@@ -85,6 +85,6 @@ This project is for demonstration and portfolio purposes.
 
 ## 👤 Author
 
-Martin – GitHub
+Martin – https://github.com/MaDuAM/active-mind
 
 Built with clarity, consistency, and a focus on meaningful progress.

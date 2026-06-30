@@ -222,7 +222,10 @@ export default function TopicView({
               {deleteTopicMutation.isPending ? 'Deleting...' : 'Delete Topic Block'}
             </button>
           )}
-          <button onClick={() => setShowNewEntryForm(true)} className="btn-primary text-sm px-3 py-1.5 w-28">
+          <button 
+            onClick={() => setShowNewEntryForm(true)} 
+            className="hidden sm:inline-block btn-primary text-sm px-3 py-1.5 w-28"
+          >
             + New Entry
           </button>
           <button onClick={toggleAll} className="btn-secondary text-sm px-3 py-1.5 w-28">

@@ -8,9 +8,16 @@ interface MenuOverlayProps {
   onClose: () => void;
   darkMode: boolean;
   onToggleDarkMode: () => void;
+  onSelectTrash?: () => void;
 }
 
-export function MenuOverlay({ isOpen, onClose, darkMode, onToggleDarkMode }: MenuOverlayProps) {
+export function MenuOverlay({ 
+  isOpen, 
+  onClose, 
+  darkMode, 
+  onToggleDarkMode,
+  onSelectTrash,
+}: MenuOverlayProps) {
   const { user, logout } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -36,17 +43,22 @@ export function MenuOverlay({ isOpen, onClose, darkMode, onToggleDarkMode }: Men
     }
   };
 
+  const handleTrashClick = () => {
+    if (onSelectTrash) {
+      onSelectTrash();
+      onClose();
+    }
+  };
+
   const avatarLetter = user?.username?.charAt(0).toUpperCase() || '?';
 
   return (
     <>
-      {/* Overlay – Klick schließt Menu */}
       <div
         className="fixed inset-0 z-[300] bg-black/10 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Side-Sheet von rechts – mit sanfter Animation */}
       <div className="fixed right-0 top-2 w-64 bg-[var(--bg-card)] shadow-dropdown z-[301] flex flex-col p-4 rounded-l-card animate-in fade-in slide-in-from-right duration-300 ease-out shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
         {/* Header: User-Info + X-Button */}
         <div className="flex items-center justify-between mb-4">
@@ -70,10 +82,9 @@ export function MenuOverlay({ isOpen, onClose, darkMode, onToggleDarkMode }: Men
           </button>
         </div>
 
-        {/* Trenner – dünner */}
         <hr className="border-[var(--border-color)] border-opacity-50" />
 
-        {/* Dark Mode Toggle – gesamte Zeile klickbar */}
+        {/* Dark Mode Toggle */}
         <div
           onClick={onToggleDarkMode}
           className="flex items-center justify-between px-3 py-3 rounded-button text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition cursor-pointer"
@@ -95,10 +106,21 @@ export function MenuOverlay({ isOpen, onClose, darkMode, onToggleDarkMode }: Men
           </div>
         </div>
 
-        {/* Trenner – dünner */}
         <hr className="border-[var(--border-color)] border-opacity-50" />
 
-        {/* Logout – mit rotem Icon */}
+        {/* Papierkorb - NUR Mobile */}
+        <div className="sm:hidden">
+          <div
+            onClick={handleTrashClick}
+            className="flex items-center gap-2 px-3 py-3 rounded-button text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition cursor-pointer"
+          >
+            <span className="w-6 shrink-0 text-base text-center">🗑️</span>
+            <span className="text-sm">Removed Entries</span>
+          </div>
+          <hr className="border-[var(--border-color)] border-opacity-50" />
+        </div>
+
+        {/* Logout */}
         <button
           onClick={handleLogout}
           disabled={isLoggingOut}
@@ -110,10 +132,8 @@ export function MenuOverlay({ isOpen, onClose, darkMode, onToggleDarkMode }: Men
           <span className="text-sm font-bold">{isLoggingOut ? 'Logging out...' : 'Logout'}</span>
         </button>
 
-        {/* Abstand (Weißraum) */}
         <div className="flex-1" />
 
-        {/* Version – mit Jahr */}
         <div className="px-3 pt-2 text-xs text-[var(--text-muted)]">
           ActiveMind · v1.0 · {new Date().getFullYear()}
         </div>

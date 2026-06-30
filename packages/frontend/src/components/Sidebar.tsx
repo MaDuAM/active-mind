@@ -1,6 +1,6 @@
 // frontend/src/components/Sidebar.tsx
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useTopics } from '../hooks';
 import { Topic } from '../types';
 
@@ -9,37 +9,81 @@ interface SidebarProps {
   onSelectTrash: () => void;
   selectedView: 'dashboard' | 'topic' | 'trash';
   selectedTopicId?: number | null;
+  isMobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
 export function Sidebar({ 
   onSelectTopic, 
   onSelectTrash, 
   selectedView, 
-  selectedTopicId 
+  selectedTopicId,
+  isMobileOpen = false,
+  onMobileClose,
 }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const { data: topics = [], isLoading } = useTopics();
 
-  const topicItems = useMemo(() => {
-    return topics.map((topic: Topic) => (
-      <div
-        key={topic.id}
-        onClick={() => onSelectTopic(topic.id)}
-        className={`cursor-pointer rounded-button px-2.5 py-2 text-sm transition-all duration-200 mr-1 ${
-          selectedView === 'topic' && selectedTopicId === topic.id
-            ? 'bg-gold-500 text-white'
-            : 'text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] hover:-translate-y-0.5'
-        } ${collapsed ? 'text-center' : ''}`}
-      >
-        {collapsed ? '📄' : topic.name}
-      </div>
-    ));
-  }, [topics, selectedView, selectedTopicId, collapsed, onSelectTopic]);
+  // ============================================
+  // MOBILE: Overlay
+  // ============================================
+  if (isMobileOpen) {
+    return (
+      <>
+        <div 
+          className="fixed inset-0 z-[300] bg-black/30 backdrop-blur-sm"
+          onClick={onMobileClose}
+        />
+        <div className="fixed inset-0 z-[301] bg-[var(--bg-card)] flex flex-col animate-in fade-in slide-in-from-bottom duration-300">
+          <div className="shrink-0 px-4 py-4 border-b border-[var(--border-color)] flex items-center justify-start">
+            <span className="text-xl font-semibold text-gold-500">
+              Topics
+            </span>
+          </div>
 
+          <div className="flex-1 overflow-y-auto px-4 py-3">
+            <div className="space-y-1">
+              {/* Dashboard ENTFERN – nur noch Topics */}
+              {topics.map((topic: Topic) => (
+                <div
+                  key={topic.id}
+                  onClick={() => {
+                    onSelectTopic(topic.id);
+                    if (onMobileClose) onMobileClose();
+                  }}
+                  className={`cursor-pointer rounded-button px-2.5 py-2 text-sm transition-all duration-200 ${
+                    selectedView === 'topic' && selectedTopicId === topic.id
+                      ? 'bg-gold-500 text-white'
+                      : 'text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] hover:-translate-y-0.5'
+                  }`}
+                >
+                  {topic.name}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="shrink-0 px-4 py-4 flex justify-center border-t border-[var(--border-color)]">
+            <button
+              onClick={onMobileClose}
+              className="w-12 h-12 rounded-full flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-gold-500 hover:text-white transition-colors text-2xl"
+              aria-label="Close topics"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // ============================================
+  // DESKTOP
+  // ============================================
   if (isLoading) {
     return (
       <aside
-        className={`h-full border-r border-[var(--border-color)] bg-[var(--bg-primary)] p-3 transition-all duration-200 flex flex-col ${
+        className={`hidden sm:block h-full border-r border-[var(--border-color)] bg-[var(--bg-primary)] p-3 transition-all duration-200 flex flex-col ${
           collapsed ? 'w-[68px]' : 'w-[210px]'
         } shadow-[2px_0_8px_-2px_rgba(0,0,0,0.05)] dark:shadow-[2px_0_8px_-2px_rgba(255,255,255,0.05)]`}
       >
@@ -48,13 +92,27 @@ export function Sidebar({
     );
   }
 
+  const topicItems = topics.map((topic: Topic) => (
+    <div
+      key={topic.id}
+      onClick={() => onSelectTopic(topic.id)}
+      className={`cursor-pointer rounded-button px-2.5 py-2 text-sm transition-all duration-200 mr-1 ${
+        selectedView === 'topic' && selectedTopicId === topic.id
+          ? 'bg-gold-500 text-white'
+          : 'text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] hover:-translate-y-0.5'
+      } ${collapsed ? 'text-center' : ''}`}
+    >
+      {collapsed ? '📄' : topic.name}
+    </div>
+  ));
+
   return (
     <aside
-      className={`h-full border-r border-[var(--border-color)] bg-[var(--bg-primary)] p-3 transition-all duration-200 flex flex-col ${
+      className={`hidden sm:flex h-full flex-col border-r border-[var(--border-color)] bg-[var(--bg-primary)] p-3 transition-all duration-200 ${
         collapsed ? 'w-[68px]' : 'w-[210px]'
       } shadow-[2px_0_8px_-2px_rgba(0,0,0,0.05)] dark:shadow-[2px_0_8px_-2px_rgba(255,255,255,0.05)]`}
     >
-      {/* Dashboard */}
+      {/* Dashboard - fix oben */}
       <div className="shrink-0">
         <div
           onClick={() => onSelectTopic(null)}
@@ -68,40 +126,34 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* Trennlinie */}
       <hr className="border-[var(--border-color)] my-3 shrink-0" />
 
-      {/* Topics-Überschrift + Einklapp-Button */}
-      <div className="flex items-center justify-between shrink-0 mb-2">
-        <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-          {collapsed ? '' : 'Topics'}
-        </span>
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-gold-500 hover:text-white transition-colors text-sm font-mono"
-          aria-label={collapsed ? 'Expand' : 'Collapse'}
-        >
-          <span className={collapsed ? 'translate-x-[1.25px]' : 'translate-x-[-1.25px]'}>
-            {collapsed ? '⫸' : '⫷'}
-          </span>
-        </button>
+      {/* Scrollbarer Bereich: Topics-Überschrift + Liste */}
+      <div className="flex-1 min-h-0 overflow-y-auto -mr-3 pr-3">
+        <div className="space-y-1 pb-2">
+          {/* Topics-Überschrift + Collapse-Button */}
+          <div className="flex items-center justify-between shrink-0 mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+              {collapsed ? '' : 'Topics'}
+            </span>
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-gold-500 hover:text-white transition-colors text-sm font-mono"
+              aria-label={collapsed ? 'Expand' : 'Collapse'}
+            >
+              <span className={collapsed ? 'translate-x-[1.25px]' : 'translate-x-[-1.25px]'}>
+                {collapsed ? '⫸' : '⫷'}
+              </span>
+            </button>
+          </div>
+
+          {/* Topics-Liste */}
+          <div className="space-y-1">{topicItems}</div>
+        </div>
       </div>
 
-      {/* Topics-Liste (scrollbar) */}
-      <div className="flex-1 overflow-y-auto min-h-0 -mr-3 pr-3">
-        <div className="space-y-1 pb-2">{topicItems}</div>
-      </div>
-
-      {/* Trennlinie + Verlauf kombiniert */}
-      <div className="relative shrink-0">
-        {/* Verlauf – oberhalb der Trennlinie */}
-        <div className="absolute bottom-full left-0 right-0 h-8 bg-gradient-to-t from-[var(--bg-card)] to-transparent pointer-events-none" />
-        {/* Trennlinie */}
-        <hr className="border-[var(--border-color)] my-1" />
-      </div>
-
-      {/* Papierkorb */}
-      <div className="shrink-0 pt-1">
+      {/* Papierkorb – fix am unteren Rand */}
+      <div className="shrink-0 pt-3 border-t border-[var(--border-color)] mt-1">
         <div
           onClick={onSelectTrash}
           className={`cursor-pointer rounded-button px-2.5 py-1.5 text-xs transition-all duration-200 mr-1 ${

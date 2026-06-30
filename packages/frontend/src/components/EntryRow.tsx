@@ -91,25 +91,44 @@ function EntryRowComponent({
     <div
       onClick={() => onClick(entry.id)}
       onMouseEnter={() => onHover?.(entry.id)}
-      className={`card cursor-pointer flex items-center justify-between gap-4 hover:ring-2 hover:ring-offset-0 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 py-2.5 px-4 ${getBorderColor(entry)} ${getRingColor(entry)} ${className}`}
+      className={`card cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4 hover:ring-2 hover:ring-offset-0 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 py-2.5 px-4 ${getBorderColor(entry)} ${getRingColor(entry)} ${className}`}
     >
-      {/* Linke Seite: Action Name (flexibel) */}
+      {/* Linke Seite: Action Name */}
       <span className="text-sm font-medium text-[var(--text-primary)] truncate flex-1 min-w-0">
         {entry.actionName || entry.essenceShort}
       </span>
 
-      {/* Rechte Seite: Feste Spalten für saubere Kante */}
-      <div className="flex items-center gap-4 shrink-0">
-        {/* Step-Box (nur bei ACTIVE) – Tablet+Desktop */}
+      {/* Mobile: Metadaten in zweiter Zeile */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-[var(--text-secondary)] sm:hidden">
+        {entry.status && (
+          <span className="inline-flex items-center gap-1">
+            <span className={`w-1.5 h-1.5 rounded-full ${getStatusDotColor(entry.status)}`} />
+            {getStatusLabel(entry.status)}
+          </span>
+        )}
         {isActive && (
-          <div className="hidden md:block w-[110px] text-left">
+          <span className="bg-[var(--bg-secondary)] px-2 py-0.5 rounded-full">
+            {stepInfo}
+          </span>
+        )}
+        {showTopic && topicName && (
+          <span className="truncate max-w-[100px]">{topicName}</span>
+        )}
+        <span className="text-[var(--text-muted)]">
+          {new Date(entry.createdAt).toLocaleDateString()}
+        </span>
+      </div>
+
+      {/* Desktop: Metadaten in einer Zeile */}
+      <div className="hidden sm:flex flex-wrap items-center gap-x-3 gap-y-0.5 sm:flex-nowrap sm:gap-4 shrink-0">
+        {isActive && (
+          <div className="w-auto sm:w-[110px] text-left">
             <span className="text-xs text-[var(--text-secondary)] bg-[var(--bg-secondary)] px-2 py-0.5 rounded-full">
               {stepInfo}
             </span>
           </div>
         )}
 
-        {/* Benefit-Box (optional) – nur Desktop */}
         {entry.benefit && (
           <div className="hidden lg:block w-[60px] text-left">
             <span className="text-xs text-gold-500 bg-gold-50/50 px-2 py-0.5 rounded-full truncate block">
@@ -118,7 +137,6 @@ function EntryRowComponent({
           </div>
         )}
 
-        {/* Topic-Box – ab Handy-Querformat */}
         {showTopic && topicName && (
           <div className="hidden sm:block w-[130px] text-left">
             <span className="text-xs text-[var(--text-secondary)] truncate block">
@@ -127,14 +145,12 @@ function EntryRowComponent({
           </div>
         )}
 
-        {/* Datum-Box – Tablet+Desktop */}
         <div className="hidden md:block w-[100px] text-left">
           <span className="text-xs text-[var(--text-secondary)] whitespace-nowrap">
             {new Date(entry.createdAt).toLocaleDateString()}
           </span>
         </div>
 
-        {/* Status-Box – ab Handy-Querformat */}
         {entry.status && (
           <div className="hidden sm:block w-[75px] text-left">
             <span className="inline-flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
@@ -144,7 +160,6 @@ function EntryRowComponent({
           </div>
         )}
 
-        {/* Pfeil-Box – immer sichtbar */}
         <div className="w-[40px] text-center shrink-0 flex items-center justify-center h-full">
           <span className="text-[var(--text-muted)] text-2xl font-mono leading-none">›</span>
         </div>

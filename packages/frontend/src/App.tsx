@@ -15,11 +15,13 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { MenuOverlay } from './components/MenuOverlay';
 import { NotFound } from './pages/NotFound';
 import { MobileBottomBar } from './components/MobileBottomBar';
+import { useMediaQuery } from './hooks/useMediaQuery';
 
 const EntryDetail = lazy(() => import('./components/EntryDetail'));
 
 function AppContent() {
   const { user, loading: authLoading } = useAuth();
+  const isMobile = useMediaQuery('(max-width: 639px)');
 
   const { data: entriesResponse, isLoading: entriesLoading } = usePaginatedEntries(
     undefined,
@@ -39,6 +41,7 @@ function AppContent() {
     return localStorage.getItem('darkMode') === 'true';
   });
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -179,7 +182,6 @@ function AppContent() {
   // ============================================
   const handleMobileSearchOpen = () => {
     setShowMobileSearch(true);
-    // Fokus nach Render
     setTimeout(() => {
       const mobileInput = document.getElementById('mobile-search-input');
       if (mobileInput) {
@@ -286,27 +288,43 @@ function AppContent() {
       </header>
 
       {/* Hauptbereich */}
-      <div className="flex flex-1 overflow-hidden relative">
-        {searchMode === 'searching' && (
-          <div className="absolute inset-0 z-[100] backdrop-blur-sm bg-black/5 dark:bg-white/5" onClick={handleCloseSearch} />
-        )}
-
+      <div className="flex flex-1 h-full overflow-hidden relative">
         <Sidebar
           onSelectTopic={handleSelectTopic}
           onSelectTrash={handleSelectTrash}
           selectedView={selectedView}
           selectedTopicId={selectedTopicId}
+          isMobileOpen={isMobileSidebarOpen}
+          onMobileClose={() => setIsMobileSidebarOpen(false)}
         />
         <main className="flex-1 overflow-y-auto pb-20 sm:pb-0">
           <div className="p-6 max-w-5xl mx-auto">
             {selectedView === 'dashboard' && <Dashboard onOpenEntry={setSelectedEntryId} showNewEntryForm={showNewEntryForm} setShowNewEntryForm={setShowNewEntryForm} />}
-            {selectedView === 'trash' && <Trash />}
             {selectedView === 'topic' && selectedTopicId && (
               <TopicView topicId={selectedTopicId} onOpenEntry={setSelectedEntryId} onTopicDeleted={handleTopicDeleted} showNewEntryForm={showNewEntryForm} setShowNewEntryForm={setShowNewEntryForm} />
             )}
+            {/* Desktop: Trash im Main-Bereich */}
+            {selectedView === 'trash' && !isMobile && <Trash />}
           </div>
         </main>
       </div>
+
+      {/* Mobile: Trash Overlay */}
+      {selectedView === 'trash' && isMobile && (
+        <div className="fixed inset-0 z-[200] bg-[var(--bg-card)] flex flex-col animate-in fade-in duration-200">
+          <div className="flex-1 overflow-y-auto p-4">
+            <Trash />
+          </div>
+          <div className="shrink-0 px-4 py-4 flex justify-center border-t border-[var(--border-color)]">
+            <button
+              onClick={() => setSelectedView('dashboard')}
+              className="w-12 h-12 rounded-full flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-gold-500 hover:text-white transition-colors text-2xl"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Mobile: Mobile Search Overlay */}
       {showMobileSearch && (
@@ -354,24 +372,31 @@ function AppContent() {
           setSelectedView('dashboard');
           setSelectedTopicId(null);
         }}
-        onTopics={() => {
-          // Sidebar Overlay öffnen – wird in Schritt 2 implementiert
-          // TODO: Sidebar als Overlay für Mobile
-        }}
+        onTopics={() => setIsMobileSidebarOpen(true)}
         onNewEntry={() => setShowNewEntryForm(true)}
         onMenu={toggleMenu}
       />
 
       {/* SearchLayer */}
       {searchMode === 'searching' && (
-        <SearchLayer
-          entries={filteredEntries}
-          topics={topics}
-          onSelectEntry={handleSelectEntry}
-          onClose={handleCloseSearch}
-          onHoverEntry={() => import('./components/EntryDetail')}
-          searchTerm={searchTerm}
-        />
+        <>
+          {/* Desktop: Blur-Overlay */}
+          {!isMobile && (
+            <div 
+              className="fixed inset-0 z-[100] backdrop-blur-sm bg-black/5 dark:bg-white/5" 
+              onClick={handleCloseSearch} 
+            />
+          )}
+          <SearchLayer
+            entries={filteredEntries}
+            topics={topics}
+            onSelectEntry={handleSelectEntry}
+            onClose={handleCloseSearch}
+            onHoverEntry={() => import('./components/EntryDetail')}
+            searchTerm={searchTerm}
+            isMobile={isMobile}
+          />
+        </>
       )}
 
       {/* EntryDetail Overlay */}
@@ -389,7 +414,13 @@ function AppContent() {
       )}
 
       {/* Menu Overlay */}
-      <MenuOverlay isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} darkMode={darkMode} onToggleDarkMode={toggleDarkMode} />
+      <MenuOverlay 
+        isOpen={isMenuOpen} 
+        onClose={() => setIsMenuOpen(false)} 
+        darkMode={darkMode} 
+        onToggleDarkMode={toggleDarkMode}
+        onSelectTrash={handleSelectTrash}
+      />
     </div>
   );
 }

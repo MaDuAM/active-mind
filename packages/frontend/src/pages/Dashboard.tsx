@@ -192,7 +192,10 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
       <div className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--border-color)]">
         <h1 className="text-2xl font-semibold text-gold-500 tracking-tight">Dashboard</h1>
         <div className="flex items-center gap-2">
-          <button onClick={() => setShowNewEntryForm(true)} className="btn-primary text-sm px-3 py-1.5 w-28">
+          <button 
+            onClick={() => setShowNewEntryForm(true)} 
+            className="hidden sm:inline-block btn-primary text-sm px-3 py-1.5 w-28"
+          >
             + New Entry
           </button>
           <button onClick={toggleAll} className="btn-secondary text-sm px-3 py-1.5 w-28">

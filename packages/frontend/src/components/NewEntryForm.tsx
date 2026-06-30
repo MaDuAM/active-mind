@@ -139,7 +139,7 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
         onClick={handleCancel}
       >
         <div 
-          className="fixed inset-y-0 right-0 w-[80vw] min-w-[350px] max-w-[800px] bg-[var(--bg-card)] shadow-dropdown border-l border-[var(--border-color)] p-6 overflow-y-auto"
+          className="fixed inset-y-0 right-0 w-full sm:w-[80vw] sm:min-w-[350px] sm:max-w-[800px] bg-[var(--bg-card)] shadow-dropdown border-l border-[var(--border-color)] p-6 overflow-y-auto flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="p-6 text-[var(--text-secondary)]">Loading Topics...</div>
@@ -154,12 +154,19 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
       onClick={handleCancel}
     >
       <div 
-        className="fixed inset-y-0 right-0 w-[80vw] min-w-[350px] max-w-[800px] bg-[var(--bg-card)] shadow-dropdown border-l border-[var(--border-color)] p-6 overflow-y-auto"
+        className="fixed inset-y-0 right-0 w-full sm:w-[80vw] sm:min-w-[350px] sm:max-w-[800px] bg-[var(--bg-card)] shadow-dropdown border-l border-[var(--border-color)] p-6 overflow-y-auto flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-6">New Entry</h2>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-gold-500 text-left w-full">
+            New Entry
+          </h2>
+          <div className="hidden sm:block w-8" />
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-4 flex-1 pb-20 sm:pb-0">
           <TopicSelector
             topics={topics}
             selectedTopicId={selectedTopicId}
@@ -212,7 +219,8 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
             />
           )}
 
-          <div className="flex gap-3 pt-4 border-t border-[var(--border-color)]">
+          {/* Desktop: Submit/Cancel Buttons */}
+          <div className="hidden sm:flex gap-3 pt-4 border-t border-[var(--border-color)]">
             <button
               type="submit"
               disabled={!isValid() || isSubmitting}
@@ -230,6 +238,27 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
             </button>
           </div>
         </form>
+
+        {/* Mobile: Action Buttons */}
+        <div className="sm:hidden shrink-0 pt-4 mt-4 border-t border-[var(--border-color)]">
+          <div className="flex gap-3">
+            <button
+              type="submit"
+              disabled={!isValid() || isSubmitting}
+              className="btn-primary text-sm px-3 py-2 flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? 'Creating...' : 'Create Entry'}
+            </button>
+            <button 
+              type="button" 
+              onClick={handleCancel} 
+              className="btn-secondary text-sm px-3 py-2 flex-1"
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
 
         <ConfirmDialog
           isOpen={showConfirmDialog}
