@@ -1,0 +1,171 @@
+/* frontend/src/index.css*/
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   CSS-Variablen für Light/Dark Mode
+   ============================================ */
+@layer base {
+  :root {
+    /* Hintergründe */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-input: #ffffff;
+    --bg-error: #fef2f2;
+
+    /* Textfarben */
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --text-error: #dc2626;
+
+    /* Border */
+    --border-color: #e2e8f0;
+    --border-error: #fecaca;
+
+    /* Shadow (angepasst für Dark Mode) */
+    --shadow-color: 0, 0, 0;
+    --shadow-opacity: 0.05;
+  }
+
+  .dark {
+    /* Hintergründe */
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-card: #1e293b;
+    --bg-input: #1e293b;
+    --bg-error: #7f1d1d;
+
+    /* Textfarben */
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --text-error: #fca5a5;
+
+    /* Border */
+    --border-color: #334155;
+    --border-error: #991b1b;
+
+    /* Shadow (heller für Dark Mode) */
+    --shadow-color: 255, 255, 255;
+    --shadow-opacity: 0.05;
+  }
+}
+
+/* ============================================
+   Globale Basis-Styles
+   ============================================ */
+@layer base {
+  html {
+    @apply antialiased scroll-smooth;
+  }
+
+  body {
+    @apply font-sans;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-feature-settings: "ss01" on, "ss02" on, "cv01" on, "calt" off;
+  }
+
+  h1 {
+    @apply text-2xl font-semibold tracking-tight;
+    color: var(--text-primary);
+  }
+
+  h2 {
+    @apply text-xl font-semibold tracking-tight;
+    color: var(--text-primary);
+  }
+
+  h3 {
+    @apply text-lg font-medium;
+    color: var(--text-primary);
+  }
+
+  p {
+    color: var(--text-secondary);
+  }
+
+  a {
+    @apply text-gold-500 hover:text-gold-600 transition-colors;
+  }
+
+  input,
+  textarea,
+  select {
+    @apply w-full px-3 py-2 border rounded-button placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-shadow;
+    background-color: var(--bg-input);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+  }
+
+  textarea {
+    @apply resize-y min-h-[80px];
+  }
+
+  button {
+    @apply px-4 py-2 rounded-button font-medium transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  ::-webkit-scrollbar {
+    @apply w-1.5 h-1.5;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: var(--bg-secondary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-slate-600 hover:bg-slate-500;
+  }
+}
+
+/* ============================================
+   Tailwind Component-Layer
+   ============================================ */
+@layer components {
+  .card {
+    @apply border rounded-card shadow-card py-2 px-3 transition-shadow hover:shadow-dropdown;
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+  }
+
+  .btn-primary {
+    @apply bg-gold-500 text-white hover:bg-gold-600 active:bg-gold-700 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md;
+  }
+
+  .btn-secondary {
+    @apply bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--border-color)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md;
+  }
+
+  .btn-danger {
+    @apply bg-error text-white hover:bg-red-600 transition-colors;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent transition-colors;
+    color: var(--text-secondary);
+  }
+  .btn-ghost:hover {
+    background-color: var(--bg-secondary);
+  }
+
+  .input {
+    @apply w-full px-3 py-2 border rounded-button placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-shadow;
+    background-color: var(--bg-input);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+  }
+
+  .label {
+    @apply block text-sm font-medium mb-1;
+    color: var(--text-secondary);
+  }
+}

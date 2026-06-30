@@ -1,0 +1,12 @@
+{
+  "name": "active-mind-mvp",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:backend": "cd packages/backend && npm run dev",
+    "dev:frontend": "cd packages/frontend && npm run dev",
+    "setup:all": "npm run setup:backend && npm run setup:frontend",
+    "setup:backend": "cd packages/backend && npm install && npx prisma generate && npx prisma migrate dev --name init",
+    "setup:frontend": "cd packages/frontend && npm install"
+  }
+}

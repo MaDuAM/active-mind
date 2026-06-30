@@ -1,0 +1,116 @@
+// backend/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Area {
+  KNOWLEDGE
+  PASSIVE
+  ACTIVE
+}
+
+enum Status {
+  WAITING
+  ACTIVE
+  PAUSED
+}
+
+enum TrackingType {
+  CREATION
+  STEP_CHANGE
+  STATUS_CHANGE
+  ENTRY_EDIT
+  MANUAL
+  RESTORE
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  username     String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  
+  sessions   Session[]
+  topics     Topic[]
+  entries    Entry[]
+}
+
+model Session {
+  id        String   @id
+  userId    Int
+  sess      Json
+  expire    DateTime
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([expire])
+}
+
+model Topic {
+  id        Int       @id @default(autoincrement())
+  name      String    @db.VarChar(100)
+  userId    Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries   Entry[]
+  
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+model Entry {
+  id                Int          @id @default(autoincrement())
+  essenceText       String       @db.VarChar(5000)
+  essenceShort      String       @db.VarChar(500)
+  area              Area
+  actionName        String?      @db.VarChar(100)
+  benefit           String?      @db.VarChar(500)
+  steps             Json?
+  status            Status?
+  pauseReason       String?      @db.VarChar(500)
+  currentStepIndex  Int?         @default(0)
+  deletedAt         DateTime?
+  permanentlyRemoved Boolean     @default(false)
+  topicId           Int
+  userId            Int
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  
+  topic             Topic        @relation(fields: [topicId], references: [id], onDelete: Restrict)
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trackings         Tracking[]
+  
+  @@index([userId])
+  @@index([topicId])
+  @@index([userId, deletedAt])
+  @@index([userId, status])
+  @@index([userId, area])
+  @@index([createdAt(sort: Desc)])
+}
+
+model Tracking {
+  id            Int          @id @default(autoincrement())
+  entryId       Int
+  trackingType  TrackingType
+  timestamp     DateTime     @default(now())
+  note          String?      @db.VarChar(500)
+  previousStep  String?      @db.VarChar(500)
+  newStep       String?      @db.VarChar(500)
+  oldStatus     Status?
+  newStatus     Status?
+  createdAt     DateTime     @default(now())
+  
+  entry         Entry        @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  
+  @@index([entryId])
+  @@index([timestamp(sort: Desc)])
+  @@index([entryId, timestamp(sort: Desc)])
+}
