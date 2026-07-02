@@ -91,7 +91,7 @@ function EntryRowComponent({
     <div
       onClick={() => onClick(entry.id)}
       onMouseEnter={() => onHover?.(entry.id)}
-      className={`card cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4 hover:ring-2 hover:ring-offset-0 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 py-2.5 px-4 ${getBorderColor(entry)} ${getRingColor(entry)} ${className}`}
+      className={`card cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-3 hover:ring-2 hover:ring-offset-0 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 py-2.5 px-4 ${getBorderColor(entry)} ${getRingColor(entry)} ${className}`}
     >
       {/* Linke Seite: Action Name */}
       <span className="text-sm font-medium text-[var(--text-primary)] truncate flex-1 min-w-0">
@@ -99,7 +99,7 @@ function EntryRowComponent({
       </span>
 
       {/* Mobile: Metadaten in zweiter Zeile */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-[var(--text-secondary)] sm:hidden">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-[var(--text-secondary)] sm:hidden">
         {entry.status && (
           <span className="inline-flex items-center gap-1">
             <span className={`w-1.5 h-1.5 rounded-full ${getStatusDotColor(entry.status)}`} />
@@ -119,10 +119,10 @@ function EntryRowComponent({
         </span>
       </div>
 
-      {/* Desktop: Metadaten in einer Zeile */}
-      <div className="hidden sm:flex flex-wrap items-center gap-x-3 gap-y-0.5 sm:flex-nowrap sm:gap-4 shrink-0">
+      {/* Desktop & Tablet: Metadaten mit reduzierten Abständen */}
+      <div className="hidden sm:flex items-center gap-2 lg:gap-3 shrink-0">
         {isActive && (
-          <div className="w-auto sm:w-[110px] text-left">
+          <div className="w-[80px] lg:w-[110px] text-left">
             <span className="text-xs text-[var(--text-secondary)] bg-[var(--bg-secondary)] px-2 py-0.5 rounded-full">
               {stepInfo}
             </span>
@@ -130,7 +130,7 @@ function EntryRowComponent({
         )}
 
         {entry.benefit && (
-          <div className="hidden lg:block w-[60px] text-left">
+          <div className="hidden xl:block w-[40px] lg:w-[60px] text-left">
             <span className="text-xs text-gold-500 bg-gold-50/50 px-2 py-0.5 rounded-full truncate block">
               ✨
             </span>
@@ -138,21 +138,21 @@ function EntryRowComponent({
         )}
 
         {showTopic && topicName && (
-          <div className="hidden sm:block w-[130px] text-left">
+          <div className="hidden md:block w-[80px] lg:w-[130px] text-left">
             <span className="text-xs text-[var(--text-secondary)] truncate block">
               {topicName}
             </span>
           </div>
         )}
 
-        <div className="hidden md:block w-[100px] text-left">
+        <div className="hidden sm:block w-[80px] lg:w-[100px] text-left">
           <span className="text-xs text-[var(--text-secondary)] whitespace-nowrap">
             {new Date(entry.createdAt).toLocaleDateString()}
           </span>
         </div>
 
         {entry.status && (
-          <div className="hidden sm:block w-[75px] text-left">
+          <div className="hidden sm:block w-[55px] lg:w-[75px] text-left">
             <span className="inline-flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
               <span className={`w-2 h-2 rounded-full ${getStatusDotColor(entry.status)}`} />
               {getStatusLabel(entry.status)}
@@ -160,8 +160,8 @@ function EntryRowComponent({
           </div>
         )}
 
-        <div className="w-[40px] text-center shrink-0 flex items-center justify-center h-full">
-          <span className="text-[var(--text-muted)] text-2xl font-mono leading-none">›</span>
+        <div className="w-[30px] lg:w-[40px] text-center shrink-0 flex items-center justify-center h-full">
+          <span className="text-[var(--text-muted)] text-xl lg:text-2xl font-mono leading-none">›</span>
         </div>
       </div>
     </div>

@@ -228,7 +228,7 @@ function AppContent() {
           </div>
 
           {/* Suchleiste - nur Desktop */}
-          <div className="hidden sm:flex flex-1 max-w-sm mx-auto relative">
+          <div className="hidden sm:flex flex-1 max-w-xs md:max-w-sm mx-auto relative">
             <div className="relative flex items-center w-full">
               <input
                 ref={inputRef}

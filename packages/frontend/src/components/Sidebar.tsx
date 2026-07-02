@@ -1,6 +1,6 @@
 // frontend/src/components/Sidebar.tsx
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTopics } from '../hooks';
 import { Topic } from '../types';
 
@@ -21,8 +21,27 @@ export function Sidebar({
   isMobileOpen = false,
   onMobileClose,
 }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const width = window.innerWidth;
+      return width >= 768 && width < 1024;
+    }
+    return false;
+  });
   const { data: topics = [], isLoading } = useTopics();
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width >= 768 && width < 1024) {
+        setCollapsed(true);
+      } else if (width >= 1024) {
+        setCollapsed(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // ============================================
   // MOBILE: Overlay
