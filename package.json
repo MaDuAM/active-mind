@@ -7,7 +7,9 @@
     "dev:frontend": "cd packages/frontend && npm run dev",
     "setup:all": "npm run setup:backend && npm run setup:frontend",
     "setup:backend": "cd packages/backend && npm install && npx prisma generate && npx prisma migrate dev --name init",
-    "setup:frontend": "cd packages/frontend && npm install"
+    "setup:frontend": "cd packages/frontend && npm install",
+    "test": "cd packages/frontend && npm test",
+    "test:e2e": "npx playwright test e2e/tests/critical-flow.spec.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",

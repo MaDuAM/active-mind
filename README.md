@@ -47,6 +47,7 @@ From initial concept to a production-ready prototype: approximately **4 weeks of
 | Database    | PostgreSQL, Prisma ORM                            |
 | Auth        | express-session, bcrypt, connect-pg-simple        |
 | Deployment  | Docker-ready, environment-based configuration     |
+| Testing     | Vitest, React Testing Library, MSW, Playwright    |
 
 ---
 
@@ -60,6 +61,25 @@ From initial concept to a production-ready prototype: approximately **4 weeks of
 - **Responsive Design:** Fully optimized for desktop, tablet (coming soon), and mobile
 - **Dark Mode:** System-aware theme toggle
 - **Pagination & Infinite Scroll:** For large entry sets
+
+---
+
+## Testing
+
+The project includes a growing test suite to ensure reliability and catch regressions early.
+
+| Test Type | Tools | Command | Status |
+|-----------|-------|---------|--------|
+| Unit / Integration | Vitest + React Testing Library + MSW | `npm test` (in frontend) | ✅ 12 tests passing |
+| Backend | Vitest + Supertest | `cd packages/backend && npm test` | ✅ Basic auth tests |
+| End-to-End | Playwright | `npm run test:e2e` | ⚠️ Experimental (WIP) |
+
+**Run all frontend tests:**
+```bash
+cd packages/frontend && npm test
+
+Run E2E tests (requires frontend + backend running):
+npm run test:e2e
 
 ---
 
