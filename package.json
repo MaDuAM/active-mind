@@ -8,5 +8,13 @@
     "setup:all": "npm run setup:backend && npm run setup:frontend",
     "setup:backend": "cd packages/backend && npm install && npx prisma generate && npx prisma migrate dev --name init",
     "setup:frontend": "cd packages/frontend && npm install"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@vitejs/plugin-react": "^6.0.3",
+    "jsdom": "^29.1.1",
+    "vitest": "^4.1.9"
   }
 }
