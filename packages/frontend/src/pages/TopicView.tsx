@@ -1,6 +1,6 @@
 // frontend/src/pages/TopicView.tsx
 
-import { useState, lazy, Suspense, useEffect, useMemo } from 'react';
+import { useState, lazy, Suspense, useEffect, useMemo, useCallback } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { usePaginatedEntries, useTopics, useDeleteTopic } from '../hooks';
 import { useSectionState } from '../hooks/useSectionState';
@@ -33,7 +33,7 @@ export default function TopicView({
   });
 
   // ============================================
-  // Querries
+  // Queries
   // ============================================
   const {
     data,
@@ -105,6 +105,14 @@ export default function TopicView({
     }),
     deps: [allEntries.length],
   });
+
+  // ============================================
+  // Memoized Callbacks
+  // ============================================
+  const handleEntryClick = useCallback(
+    (id: number) => onOpenEntry(id),
+    [onOpenEntry]
+  );
 
   // ============================================
   // Infinite Scroll
@@ -229,7 +237,7 @@ export default function TopicView({
         entries={sections.active}
         isExpanded={expanded.active}
         onToggle={() => toggleSection('active')}
-        onEntryClick={onOpenEntry}
+        onEntryClick={handleEntryClick}
         className="mb-3"
       />
 
@@ -247,7 +255,7 @@ export default function TopicView({
         entries={sections.passive}
         isExpanded={expanded.passive}
         onToggle={() => toggleSection('passive')}
-        onEntryClick={onOpenEntry}
+        onEntryClick={handleEntryClick}
         className="mb-3"
       />
 
@@ -265,7 +273,7 @@ export default function TopicView({
         entries={sections.knowledge}
         isExpanded={expanded.knowledge}
         onToggle={() => toggleSection('knowledge')}
-        onEntryClick={onOpenEntry}
+        onEntryClick={handleEntryClick}
         className="mb-3"
       />
 
@@ -284,7 +292,7 @@ export default function TopicView({
             entries={sections.waiting}
             isExpanded={expanded.waiting}
             onToggle={() => toggleSection('waiting')}
-            onEntryClick={onOpenEntry}
+            onEntryClick={handleEntryClick}
             className="mb-3"
           />
         </>
@@ -305,7 +313,7 @@ export default function TopicView({
             entries={sections.paused}
             isExpanded={expanded.paused}
             onToggle={() => toggleSection('paused')}
-            onEntryClick={onOpenEntry}
+            onEntryClick={handleEntryClick}
             className="opacity-70 mb-3"
           />
         </>
