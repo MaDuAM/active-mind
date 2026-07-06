@@ -58,7 +58,7 @@ From initial concept to a production-ready prototype: approximately **4 weeks of
 - **Soft Delete & Trash:** Restore or permanently remove entries
 - **Full-Text Search:** With suggestions and result layers
 - **Tracking Log:** Every status change, step update, and edit is recorded
-- **Responsive Design:** Fully optimized for desktop, tablet (coming soon), and mobile
+- **Responsive Design:** Fully optimized for desktop, tablet, and mobile
 - **Dark Mode:** System-aware theme toggle
 - **Pagination & Infinite Scroll:** For large entry sets
 
