@@ -1,0 +1,110 @@
+// components/EntrySection.tsx
+
+import { ReactNode } from 'react';
+import { Entry } from '../types';
+import { EntryRow } from './EntryRow';
+import { SectionKey } from '../hooks/useSectionState';
+
+interface EntrySectionProps {
+  /** Section identifier */
+  section: SectionKey;
+  /** Display title (e.g., "Active Actions") */
+  title: string;
+  /** Icon/emoji for empty state */
+  emptyIcon: string;
+  /** Empty state message */
+  emptyMessage: string;
+  /** Empty state sub-message */
+  emptySubMessage?: string;
+  /** Color class for the title (e.g., "text-green-400") */
+  titleColor: string;
+  /** Entries to display */
+  entries: Entry[];
+  /** Whether the section is expanded */
+  isExpanded: boolean;
+  /** Toggle handler */
+  onToggle: () => void;
+  /** Click handler for entry rows */
+  onEntryClick: (id: number) => void;
+  /** Optional hover handler for entry rows */
+  onEntryHover?: (id: number) => void;
+  /** Whether to show topic names */
+  showTopic?: boolean;
+  /** Map topic ID to topic name */
+  getTopicName?: (topicId: number) => string;
+  /** Additional class name */
+  className?: string;
+}
+
+export function EntrySection({
+  section,
+  title,
+  emptyIcon,
+  emptyMessage,
+  emptySubMessage = 'Create an entry to get started',
+  titleColor,
+  entries,
+  isExpanded,
+  onToggle,
+  onEntryClick,
+  onEntryHover,
+  showTopic = false,
+  getTopicName,
+  className = '',
+}: EntrySectionProps) {
+  const isEmpty = entries.length === 0;
+
+  return (
+    <section className={className}>
+      {/* Header */}
+      <div
+        className="flex items-center justify-between mb-3 cursor-pointer"
+        onClick={onToggle}
+      >
+        <h2 className={`text-sm font-semibold uppercase tracking-wider ${titleColor}`}>
+          {title} ({entries.length})
+        </h2>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle();
+          }}
+          className="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-gold-500 hover:text-white transition-colors text-xl"
+          aria-label={isExpanded ? 'Collapse' : 'Expand'}
+        >
+          <span className="-translate-y-0.5">
+            {isExpanded ? '⏶' : '⏷'}
+          </span>
+        </button>
+      </div>
+
+      {/* Content */}
+      {isExpanded && (
+        <>
+          {isEmpty ? (
+            <div className="flex items-center gap-3 py-3 text-[var(--text-muted)]">
+              <span className="text-xl">{emptyIcon}</span>
+              <div>
+                <p className="text-sm font-medium">{emptyMessage}</p>
+                <p className="text-xs opacity-60">{emptySubMessage}</p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {entries.map((entry) => (
+                <EntryRow
+                  key={entry.id}
+                  entry={entry}
+                  onClick={onEntryClick}
+                  onHover={onEntryHover}
+                  showTopic={showTopic}
+                  topicName={getTopicName?.(entry.topicId)}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </section>
+  );
+}

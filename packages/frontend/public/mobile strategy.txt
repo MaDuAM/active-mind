@@ -1,0 +1,87 @@
+Kritische Bereiche prüfen:
+Header				Suchleiste, Logo, Burger-Menu – passt alles?
+Sidebar				Kollabiert sie? Sind Buttons noch klickbar?
+Dashboard / TopicView		Brechen Sektionen um? Sind Toggle-Buttons noch erreichbar?
+EntryDetail / SearchLayer	Overlays – passen sie auf kleinen Bildschirmen?
+
+
+
+Tailwind-Responsive-Klassen (Überblick):
+Präfix	Bildschirmgröße
+sm:	≥ 640px (Handy quer)
+md:	≥ 768px (Tablet)
+lg:	≥ 1024px (Desktop)
+xl:	≥ 1280px (Großes Desktop)
+
+
+
+## Wir bearbeiten vorerst nur die handy version,
+## waehrend ich schaue das die Desktop version nicht kaputt geht
+
+
+Wie stellst du dir das Verhalten der Sidebar auf dem Handy vor?
+Vision für Handy (nicht fuer tablet!):
+1. Sidebar
+    Ausgeblendet – kein Platz
+    Button (name: Topics) öffnet sie als Overlay über volle Breite (ueber der neuen menu leiste)
+    Schließen: X Button – unten mittig (Thumb Zone)
+
+2. Neue untere Navigationsleiste (Bottom Bar)
+Button	Aktion
+🔍		Öffnet Suchleiste (Fokus auf Input)
+🏠		Dashboard
+📂		Topics (öffnet Sidebar-Overlay)
+➕	New Entry
+☰	Burger-Menü (Papierkorb + Logout + Dark Mode)
+
+3. Papierkorb
+ Wandert ins Burger-Menü – nicht in der Bottom Bar
+ Oeffnet sie als Overlay über volle Breite (ueber der neuen menu leiste)
+
+
+
+Struktur aenderungen fuer handy format:
+Header:
+- suchleiste kommt weg (ist im neuen menu)
+- burger menu kommt weg (ist im neuen menu)
+- icon+appname wird mittig gesetzt
+
+Sidebar:
+- wird zum overlay ueber komplette handy screen breite
+- overlay liegt komplett auf der unterliegenden zeite und verdeckt bottom-menu
+- auf & zuklapp button wird entfernt (seite erhaelt unten den kreis X button)
+- Seiten- Ueberschrift in kopfzeile wird zentriert
+- Papierkorb aus sidebar entfernen und in das burger menu transferieren
+- keine trennlinie zwischen close button und topic elemente
+
+
+Dashboard/Topicview:
+- wird zum overlay ueber komplette handy screen breite
+- Seiten- Ueberschrift in kopfzeile wird zentriert
+- inhalt bereits untereinander, wird aber schmaler
+- die entry row informationen brechen auf 2 zeilen in der kachel um (Actionname, darunter rest ist kleiner schrift
+- hoehe der Entry row bleibt gleich, abstaende inerhalb dieser muessen angepasst werden
+
+EntryDetail/EntryEdit:
+- wird zum overlay ueber komplette handy screen breite
+- overlay liegt komplett auf der unterliegenden seite und verdeckt bottom-menu
+- zuerueck/schliessen button wird entfernt (seite erhaelt unten den kreis X button)
+- Seiten- Ueberschrift in kopfzeile wird zentriert
+
+Search-Button:
+- search button in bottom-menu leiste klick oeffnet die searchbar direkt ueber dem menu
+- oeffnen der eingabe tastatur schiebt sie weiter nach oben (direkt ueber der eingabe tastatur
+- Lupe oder enter fuer such-start oeffnet search result layer
+
+SearchResultLayer:
+- wird zum overlay ueber komplette handy screen breite
+- overlay liegt komplett auf der unterliegenden seite und verdeckt bottom-menu
+- zuerueck/schliessen button wird entfernt (seite erhaelt unten den kreis X button)
+- Kopfzeile enthaelt die suchleiste
+- unter suchleiste die zeile die sagt wieviel results fuer suche "X" gefunden wurden
+- darunter eintraege der suchergebnisse
+
+Burger Menu:
+- bleibt weitestgehend wie er ist mit blurr effekt wenn geoeffnet
+- erhaelt papierkorb button der bei klick papierkorb overlay oeffnet und burger menu schliesst
+

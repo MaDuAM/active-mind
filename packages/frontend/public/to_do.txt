@@ -1,0 +1,22 @@
+Optimierungspotenzial
+
+#	Problem				Priorität	Aufwand	Begründung
+-	-------				---------	-------	----------
+1	Testing (0% Coverage)		95		85	Unit/E2E für 20+ Komponenten + 10 API-Routen. Größte Baustelle.
+2	Kein Design-System / CSS-in-JS	65		70	Tailwind oder Styled-Components + komplette Überarbeitung. Groß.
+3	Keine Responsiveness		60		55	Mobile-View + Media-Queries. Mittel-groß.
+4	Keine API-Dokumentation		55		40	OpenAPI + Swagger-UI. Mittel.
+5	Kein Logger (Backend)		50		30	Winston/Pino + structured Logs. Mittel.
+6	Session in Memory (Backend)	45		60	Redis + connect-redis. Größerer Umbau.
+7	Kein Prettier/Eslint-Config	25		15	Config-Dateien + einmalig formatieren. Klein.
+8	Kein Backup-Konzept		20		25	pg_dump + Cron-Job. Klein-mittel.
+9	Kein Feature-Flag-System	10		20	Zu früh – aber mit LaunchDarkly schnell.
+10	Keine i18n			5		40	Internationalisierung – für MVP unnötig.
+
+
+
+Zusätzliche Punkte
+
+11	Kein CI/CD			70		50	GitHub Actions + Deploy-Pipeline. Mittel-groß.
+12	Kein Monitoring (Sentry)	65		30	Sentry-Integration für Frontend/Backend. Mittel.
+13	Kein DB-Migrations-Rollback	40		20	Prisma migrate + Prisma Studio. Klein.
