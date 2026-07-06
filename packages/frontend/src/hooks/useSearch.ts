@@ -29,7 +29,7 @@ export function useSearch(
   }, [searchTerm, delay]);
 
   // ============================================
-  // SUCHE: Gefilterte Einträge
+  // SEARCH: Filtered entries
   // ============================================
   const filteredEntries = useMemo(() => {
     const term = debouncedTerm.trim().toLowerCase();

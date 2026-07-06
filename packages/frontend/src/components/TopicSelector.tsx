@@ -31,7 +31,7 @@ export function TopicSelector({
       setCreateNew(true);
       setNewTopicName('');
     } else if (value === '') {
-      // Leerer Wert → nichts tun
+      // Empty value → do nothing
       return;
     } else {
       setCreateNew(false);

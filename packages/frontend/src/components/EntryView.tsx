@@ -15,7 +15,7 @@ interface EntryViewProps {
 }
 
 // ============================================
-// TRACKING LABELS
+// Tracking Labels
 // ============================================
 const trackingLabels: Record<TrackingType, string> = {
   CREATION: 'Created',
@@ -27,7 +27,7 @@ const trackingLabels: Record<TrackingType, string> = {
 };
 
 // ============================================
-// STATUS BADGE
+// Status Badge
 // ============================================
 function StatusBadge({ status }: { status?: Status }) {
   if (!status) return null;
@@ -52,7 +52,7 @@ function StatusBadge({ status }: { status?: Status }) {
 }
 
 // ============================================
-// COPY BUTTON
+// Copy Button
 // ============================================
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -102,7 +102,7 @@ function CopyButton({ text }: { text: string }) {
 }
 
 // ============================================
-// ENTRY VIEW
+// Entry View
 // ============================================
 export function EntryView({
   entry,
@@ -179,7 +179,7 @@ export function EntryView({
   return (
     <div className="space-y-4">
       {/* ============================================ */}
-      {/* STATUS (unterhalb der Überschrift) */}
+      {/* Status (under the headline) */}
       {/* ============================================ */}
       {entry.status && (
         <div className="flex items-center gap-2">
@@ -189,7 +189,7 @@ export function EntryView({
       )}
 
       {/* ============================================ */}
-      {/* ESSENCE LONG KACHEL – mit professionellem Icon */}
+      {/* Essence Long tile – with proper icon */}
       {/* ============================================ */}
       <div className="card space-y-3 max-h-[40vh] overflow-y-auto">
         <div className="flex items-center justify-between">
@@ -204,7 +204,7 @@ export function EntryView({
       </div>
 
       {/* ============================================ */}
-      {/* ESSENCE SHORT KACHEL */}
+      {/* Essence Short tile */}
       {/* ============================================ */}
       <div className="card space-y-1">
         <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wider">
@@ -214,7 +214,7 @@ export function EntryView({
       </div>
 
       {/* ============================================ */}
-      {/* STEPS – mit optimierter Hervorhebung */}
+      {/* Steps */}
       {/* ============================================ */}
       {entry.area === 'ACTIVE' && entry.steps && entry.steps.length > 0 && (
         <div className="card space-y-2">
@@ -263,7 +263,7 @@ export function EntryView({
       )}
 
       {/* ============================================ */}
-      {/* ACTIONS */}
+      {/* Actions */}
       {/* ============================================ */}
       <div className="flex flex-wrap gap-3 pt-4 border-t border-[var(--border-color)]">
         <button onClick={onEdit} className="btn-secondary text-sm px-3 py-1.5 hover:bg-gold-500 hover:text-white">
@@ -315,7 +315,7 @@ export function EntryView({
       </div>
 
       {/* ============================================ */}
-      {/* TRACKING LOG */}
+      {/* Tracking Log */}
       {/* ============================================ */}
       {entry.trackings && entry.trackings.length > 0 && (
         <div className="pt-4 border-t border-[var(--border-color)]">

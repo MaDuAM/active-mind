@@ -8,4 +8,4 @@ declare module 'express-session' {
   }
 }
 
-export {}; // Macht Datei zum Modul
+export {}; // Makes file into module

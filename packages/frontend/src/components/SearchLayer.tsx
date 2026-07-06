@@ -27,7 +27,7 @@ export function SearchLayer({
   const getTopicName = (topicId: number) => topics.find((t) => t.id === topicId)?.name || '?';
 
   // ============================================
-  // MOBILE: Fullscreen Overlay
+  // Mobile: Fullscreen Overlay
   // ============================================
   if (isMobile) {
     if (isLoading) {
@@ -140,7 +140,7 @@ export function SearchLayer({
   }
 
   // ============================================
-  // DESKTOP: Original (zentriertes Fenster)
+  // Desktop: Original (centered window)
   // ============================================
   if (isLoading) {
     return (

@@ -21,16 +21,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { showNotification } = useNotification();
 
   // ============================================
-  // AUTH CHECK: Nur einmal pro Session (auch bei StrictMode / HMR)
+  // Auth Check: Only once per session (even in Strict Mode / HMR)
   // ============================================
   useEffect(() => {
-    // Prüfen ob bereits in dieser Session geprüft wurde
+    // Check if the check has already been performed in this session.
     if (sessionStorage.getItem('auth_check_done') === 'true') {
       setLoading(false);
       return;
     }
 
-    // Markieren dass Check läuft
+    // Mark that check is running
     sessionStorage.setItem('auth_check_done', 'true');
 
     apiClient
@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (data?.id) setUser(data);
       })
       .catch(() => {
-        // 401/404 → nicht eingeloggt, still ignorieren (kein Toast)
+        // 401/404 → not logged in, silently ignore (no toast)
       })
       .finally(() => {
         setLoading(false);
@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // ============================================
-  // LOGIN
+  // Login
   // ============================================
   const login = async (username: string, password: string) => {
     try {
@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // ============================================
-  // REGISTER
+  // Register
   // ============================================
   const register = async (username: string, password: string) => {
     try {
@@ -79,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // ============================================
-  // LOGOUT
+  // Logout
   // ============================================
   const logout = async () => {
     try {

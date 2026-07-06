@@ -212,7 +212,7 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
   };
 
   // ============================================
-  // SKELETON LOADING STATE
+  // Skeleton Loading State
   // ============================================
   if (isLoading) {
     return (
@@ -287,12 +287,12 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* ============================================ */}
-        {/* HEADER: Desktop: Zurück-Button + Action Name */}
-        {/* Mobile: nur zentrierter Action Name */}
+        {/* HEADER: Desktop: Back-Button + Action Name */}
+        {/* Mobile: only centered Action Name */}
         {/* ============================================ */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            {/* Desktop: Zurück-Button */}
+            {/* Desktop: Back-Button */}
             <button
               onClick={handleClose}
               className="hidden sm:flex w-8 h-8 rounded-full items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-gold-500 hover:text-white transition-colors disabled:opacity-50 text-xl font-serif leading-none"
@@ -312,11 +312,11 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
               )}
             </div>
           </div>
-          {/* Desktop: Platzhalter für Balance */}
+          {/* Desktop: Placeholder for balance */}
           <div className="hidden sm:block w-8" />
         </div>
 
-        {/* Inhalt */}
+        {/* Content */}
         <div className="flex-1">
           {!isEditing ? (
             <EntryView
@@ -340,7 +340,7 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
           )}
         </div>
 
-        {/* Mobile: X-Button unten mittig (Thumb-Zone) - NUR wenn nicht im Edit-Modus */}
+        {/* Mobile: X-Button bottom mid (Thumb-Zone) - only while non-edit mode */}
         {!isEditing && (
           <div className="sm:hidden shrink-0 pt-4 mt-4 border-t border-[var(--border-color)] flex justify-center">
             <button

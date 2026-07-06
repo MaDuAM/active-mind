@@ -44,7 +44,7 @@ export function Trash() {
   const allEntries = data?.pages.flatMap((page) => page.data) || [];
 
   // ============================================
-  // CLEAR ALL MUTATION
+  // Clear All Mutation
   // ============================================
   const clearTrashMutation = useMutation({
     mutationFn: async () => {
@@ -82,7 +82,7 @@ export function Trash() {
         queryKey: ['entries-paginated']
       });
     } catch (_error) {
-      // Fehler wird global behandelt
+      // Error handled globaly
     }
   };
 
@@ -101,7 +101,7 @@ export function Trash() {
         queryKey: ['entries-paginated']
       });
     } catch (_error) {
-      // Fehler wird global behandelt
+      // Error handled globaly
     } finally {
       setShowDeleteConfirm(false);
       setPendingDeleteId(null);
@@ -114,7 +114,7 @@ export function Trash() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      {/* Header mit Clear All Button (immer sichtbar) */}
+      {/* Header with Clear All button (always visible) */}
       <div className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--border-color)]">
         <h1 className="text-2xl font-semibold text-gold-500 tracking-tight">Removed Entries</h1>
         <button
@@ -126,7 +126,7 @@ export function Trash() {
         </button>
       </div>
 
-      {/* Empty State oder Entry-Liste */}
+      {/* Empty State or Entry-List */}
       {allEntries.length === 0 ? (
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-[var(--text-muted)]">
           <span className="text-2xl mb-4">🗑️</span>
@@ -199,7 +199,7 @@ export function Trash() {
         </div>
       )}
 
-      {/* Confirm Dialog für einzelnen permanenten Delete */}
+      {/* Confirm dialog for individual permanent delete */}
       <ConfirmDialog
         isOpen={showDeleteConfirm}
         title="Delete entry permanently?"
@@ -213,7 +213,7 @@ export function Trash() {
         isPending={permanentDeleteMutation.isPending}
       />
 
-      {/* Confirm Dialog für Clear All */}
+      {/* Confirm dialog for Clear All */}
       <ConfirmDialog
         isOpen={showClearConfirm}
         title="Clear Removed Entries?"

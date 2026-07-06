@@ -93,12 +93,12 @@ function EntryRowComponent({
       onMouseEnter={() => onHover?.(entry.id)}
       className={`card cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-3 hover:ring-2 hover:ring-offset-0 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 py-2.5 px-4 ${getBorderColor(entry)} ${getRingColor(entry)} ${className}`}
     >
-      {/* Linke Seite: Action Name */}
+      {/* Left side: Action Name */}
       <span className="text-sm font-medium text-[var(--text-primary)] truncate flex-1 min-w-0">
         {entry.actionName || entry.essenceShort}
       </span>
 
-      {/* Mobile: Metadaten in zweiter Zeile */}
+      {/* Mobile: metadata in 2nd line */}
       <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-[var(--text-secondary)] sm:hidden">
         {entry.status && (
           <span className="inline-flex items-center gap-1">
@@ -119,7 +119,7 @@ function EntryRowComponent({
         </span>
       </div>
 
-      {/* Desktop & Tablet: Metadaten mit reduzierten Abständen */}
+      {/* Desktop & Tablet: metadata with smaller gap */}
       <div className="hidden sm:flex items-center gap-2 lg:gap-3 shrink-0">
         {isActive && (
           <div className="w-[80px] lg:w-[110px] text-left">

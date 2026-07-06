@@ -17,7 +17,7 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType | null>(null);
 
 // ============================================
-// MAXIMALE ANZAHL TOASTS (verhindert UI-Überflutung)
+// Maximum toast amount (prevents UI flooding)
 // ============================================
 const MAX_NOTIFICATIONS = 5;
 
@@ -28,7 +28,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     const id = Date.now().toString();
     setNotifications(prev => {
       const updated = [...prev, { id, type, message }];
-      // Nur MAX_NOTIFICATIONS behalten (älteste fallen weg)
+      // Keep only MAX_NOTIFICATIONS (discard the oldest ones)
       return updated.slice(-MAX_NOTIFICATIONS);
     });
     setTimeout(() => removeNotification(id), 5000);

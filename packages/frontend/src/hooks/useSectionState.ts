@@ -1,4 +1,4 @@
-// hooks/useSectionState.ts
+// frontend/src/hooks/useSectionState.ts
 
 import { useState, useEffect } from 'react';
 

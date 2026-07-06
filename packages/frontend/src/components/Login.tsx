@@ -31,7 +31,7 @@ export function Login() {
         await login(username, password);
       }
     } catch (_error) {
-      // Fehler wird bereits von AuthContext via Toast angezeigt
+      // The error is already displayed by AuthContext via toast.
     } finally {
       setIsSubmitting(false);
     }
@@ -86,7 +86,7 @@ export function Login() {
             />
           </div>
 
-          {/* Password Confirm (nur bei Registrierung) */}
+          {/* Password Confirm (only upon registration) */}
           {isRegisterMode && (
             <div>
               <label htmlFor="password-confirm" className="label">

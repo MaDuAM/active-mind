@@ -30,11 +30,11 @@ export function ManualTrackPopup({
   if (!isOpen) return null;
 
   const handleConfirm = () => {
-    // ============================================
-    // datetime-local Input liefert Format: YYYY-MM-DDTHH:MM
-    // Backend erwartet ISO-String mit Sekunden: YYYY-MM-DDTHH:MM:SS
-    // Daher Sekunden auf 00 setzen für Konsistenz
-    // ============================================
+  // ============================================
+  // datetime-local input provides format: YYYY-MM-DDTHH:MM
+  // Backend expects ISO string with seconds: YYYY-MM-DDTHH:MM:SS
+  // Set seconds to 00 for consistency
+  // ============================================
     onConfirm(timestamp + ':00', note);
   };
 

@@ -108,7 +108,7 @@ export function MenuOverlay({
 
         <hr className="border-[var(--border-color)] border-opacity-50" />
 
-        {/* Papierkorb - NUR Mobile */}
+        {/* Removed Entries - ONLY Mobile */}
         <div className="sm:hidden">
           <div
             onClick={handleTrashClick}

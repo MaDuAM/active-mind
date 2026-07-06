@@ -13,7 +13,7 @@ declare module 'express-session' {
 const prisma = new PrismaClient();
 const router = Router();
 
-// Hilfsfunktionen für Validierung
+// Auxiliary functions for validation
 const isValidUsername = (username: string): boolean => {
   return /^[a-zA-Z0-9_]{3,20}$/.test(username);
 };
@@ -22,7 +22,7 @@ const isValidPassword = (password: string): boolean => {
   return password.length >= 6 && password.length <= 100;
 };
 
-// Setup – einmalig Admin erstellen (nur wenn kein User existiert)
+// Setup – create admin account once (only if no user exists)
 router.post('/setup', async (req, res) => {
   const existing = await prisma.user.findFirst();
   if (existing) {
@@ -42,7 +42,7 @@ router.post('/setup', async (req, res) => {
 router.post('/register', async (req, res) => {
   const { username, password } = req.body;
   
-  // 1. username prüfen
+  // 1. check username
   if (!username) {
     return res.status(400).json({ error: 'Username required' });
   }
@@ -55,7 +55,7 @@ router.post('/register', async (req, res) => {
     });
   }
   
-  // 2. password prüfen
+  // 2. Check password
   if (!password) {
     return res.status(400).json({ error: 'Password required' });
   }
@@ -68,7 +68,7 @@ router.post('/register', async (req, res) => {
     });
   }
   
-  // 3. Duplikat prüfen (DB-Constraint fängt auch ab, aber wir geben bessere Fehlermeldung)
+  // 3. Check for duplicates (DB constraint also catches them, but we provide a better error message)
   const existing = await prisma.user.findUnique({ where: { username } });
   if (existing) {
     return res.status(400).json({ error: 'Username already taken' });
@@ -87,7 +87,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
   
-  // 1. username prüfen
+  // 1. check username
   if (!username) {
     return res.status(400).json({ error: 'Username required' });
   }
@@ -95,7 +95,7 @@ router.post('/login', async (req, res) => {
     return res.status(400).json({ error: 'Username must be a string' });
   }
   
-  // 2. password prüfen
+  // 2. Check password
   if (!password) {
     return res.status(400).json({ error: 'Password required' });
   }

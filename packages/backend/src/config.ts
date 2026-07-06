@@ -3,7 +3,7 @@
 import { z } from 'zod';
 
 // ============================================
-// Schema Definition
+// Schema definition
 // ============================================
 const envSchema = z.object({
   // Server
@@ -17,13 +17,13 @@ const envSchema = z.object({
   // Database
   DATABASE_URL: z.string().url().min(1, 'DATABASE_URL is required'),
 
-  // Optional: Cookie Domain (nur in Production)
+  // Optional: Cookie Domain (only in Production)
   COOKIE_DOMAIN: z.string().optional(),
 
   // Optional: CORS
   ALLOWED_ORIGINS: z.string().optional().default(''),
 
-  // Optional: Session Table Name (für connect-pg-simple)
+  // Optional: Session Table Name (for connect-pg-simple)
   SESSION_TABLE_NAME: z.string().default('session'),
 });
 
@@ -41,6 +41,6 @@ if (!parsed.success) {
 export const config = parsed.data;
 
 // ============================================
-// Type Export für TypeScript
+// Type Export for TypeScript
 // ============================================
 export type Config = z.infer<typeof envSchema>;

@@ -215,10 +215,10 @@ function AppContent() {
 
   return (
     <div className="h-screen bg-[var(--bg-secondary)] flex flex-col">
-      {/* Kopfzeile */}
+      {/* Header */}
       <header className="sticky top-0 z-10 bg-[var(--bg-primary)]/80 backdrop-blur-sm border-b border-[var(--border-color)] px-4 py-2 shadow-md shadow-black/5 dark:shadow-white/5 shrink-0">
         <div className="flex items-center justify-between gap-4 max-w-full relative">
-          {/* Logo zentriert auf Mobile, links auf Desktop */}
+          {/* Logo centered on mobile, left on desktop */}
           <div className="flex-1 sm:flex-none flex items-center justify-center sm:justify-start gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" className="w-8 h-8 shrink-0">
               <circle cx="50" cy="50" r="42" fill="none" stroke="#B8860B" strokeWidth="2.5" />
@@ -227,7 +227,7 @@ function AppContent() {
             <span className="text-xl font-medium text-gold-500 tracking-tight">ActiveMind</span>
           </div>
 
-          {/* Suchleiste - nur Desktop */}
+          {/* Search bar - Desktop only */}
           <div className="hidden sm:flex flex-1 max-w-xs md:max-w-sm mx-auto relative">
             <div className="relative flex items-center w-full">
               <input
@@ -267,7 +267,7 @@ function AppContent() {
             )}
           </div>
 
-          {/* Burger-Menu - nur Desktop */}
+          {/* Burger menu - desktop only */}
           <div className="hidden sm:flex items-center gap-2 shrink-0">
             <button
               onClick={toggleMenu}
@@ -282,12 +282,12 @@ function AppContent() {
             </button>
           </div>
 
-          {/* Mobile: Platzhalter für Balance */}
+          {/* Mobile: Placeholder for balance */}
           <div className="sm:hidden w-8" />
         </div>
       </header>
 
-      {/* Hauptbereich */}
+      {/* Main area */}
       <div className="flex flex-1 h-full overflow-hidden relative">
         <Sidebar
           onSelectTopic={handleSelectTopic}
@@ -303,7 +303,7 @@ function AppContent() {
             {selectedView === 'topic' && selectedTopicId && (
               <TopicView topicId={selectedTopicId} onOpenEntry={setSelectedEntryId} onTopicDeleted={handleTopicDeleted} showNewEntryForm={showNewEntryForm} setShowNewEntryForm={setShowNewEntryForm} />
             )}
-            {/* Desktop: Trash im Main-Bereich */}
+            {/* Desktop: Trash in the main area */}
             {selectedView === 'trash' && !isMobile && <Trash />}
           </div>
         </main>

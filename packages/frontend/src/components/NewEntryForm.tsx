@@ -76,7 +76,7 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
       setSelectedTopicId(newTopic.id);
       showNotification('success', `Topic "${name}" created`);
     } catch (_error) {
-      // Fehler wird global behandelt
+      // Error handled globaly
     }
   };
 
@@ -108,14 +108,14 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
       }
 
       if (area === 'ACTIVE') {
-        payload.steps = steps.map((s) => ({ description: s.description }));
+        payload.steps = steps.map((s: Step) => ({ description: s.description }));
       }
 
       await createEntryMutation.mutateAsync(payload);
       showNotification('success', 'Entry successfully created');
       onSuccess();
     } catch (_error) {
-      // Fehler wird global behandelt
+      // Error handled globaly
     }
   };
 

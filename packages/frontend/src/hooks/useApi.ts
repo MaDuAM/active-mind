@@ -13,7 +13,7 @@ export const queryKeys = {
 };
 
 // ============================================
-// API FETCH FUNCTIONS
+// API fetch functions
 // ============================================
 const api = {
   getEntries: async (filters?: {
@@ -95,7 +95,7 @@ const api = {
 };
 
 // ============================================
-// QUERY HOOKS
+// Query Hooks
 // ============================================
 
 export const usePaginatedEntries = (
@@ -152,7 +152,7 @@ export const useTopics = (enabled: boolean = true) => {
 };
 
 // ============================================
-// MUTATION HOOKS
+// Mutation Hooks
 // ============================================
 
 export const useStatusChange = () => {

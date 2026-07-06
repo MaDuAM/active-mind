@@ -89,9 +89,6 @@ export function StepEditor({
                 🗑️
               </button>
             )}
-            {/* ============================================ */}
-            {/* FIX: aria-label für Barrierefreiheit */}
-            {/* ============================================ */}
             <button
               type="button"
               onClick={() => moveStep(idx, 'up')}

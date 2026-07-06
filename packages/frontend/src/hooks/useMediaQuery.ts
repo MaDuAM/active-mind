@@ -1,4 +1,5 @@
 // frontend/src/hooks/useMediaQuery.ts
+
 import { useState, useEffect } from 'react';
 
 export function useMediaQuery(query: string) {

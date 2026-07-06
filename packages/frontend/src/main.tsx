@@ -14,7 +14,7 @@ import { BrowserRouter } from 'react-router-dom';
 // Tailwind CSS
 import './index.css';
 
-// Globaler QueryClient mit zentralem Error-Handling
+// Global query client with centralized error handling
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -28,7 +28,7 @@ const queryClient = new QueryClient({
   },
 });
 
-// Error-Handler für React Query - IGNORIERT AUTH-FEHLER
+// Error handler for React Query - IGNORES AUTH ERRORS
 function QueryErrorHandler() {
   const { showNotification } = useNotification();
   
@@ -37,7 +37,7 @@ function QueryErrorHandler() {
       if (event.type === 'updated' && event.action?.type === 'error') {
         const error = event.action?.error;
         if (error instanceof Error) {
-          // Auth-Fehler (401, 403) ignorieren - werden von AuthContext behandelt
+          // Ignore authentication errors (401, 403) - they are handled by AuthContext
           if (error.message.includes('401') || 
               error.message.includes('403') || 
               error.message.includes('Not authenticated') ||

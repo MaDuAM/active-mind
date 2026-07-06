@@ -72,7 +72,7 @@ export interface CreateEntryPayload {
 }
 
 // ============================================
-// NEU: Pagination Types
+// Pagination Types
 // ============================================
 export interface PaginationMeta {
   page: number;

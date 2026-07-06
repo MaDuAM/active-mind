@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 const router = Router();
 
 // ============================================
-// GET /entries - mit Pagination & Filter
+// Get /entries - with pagination and filters
 // ============================================
 router.get('/', async (req, res) => {
   const userId = (req.session as any).userId;
@@ -28,12 +28,12 @@ router.get('/', async (req, res) => {
     sortOrder = 'desc',
   } = req.query;
 
-  // Validierungen
+  // Validations
   const pageNum = Math.max(1, Number(page));
   const limitNum = Math.min(100, Math.max(1, Number(limit)));
   const skip = (pageNum - 1) * limitNum;
 
-  // Where-Bedingungen
+  // Where conditions
   const where: Prisma.EntryWhereInput = {
     userId,
   };
@@ -60,12 +60,12 @@ router.get('/', async (req, res) => {
     where.deletedAt = null;
   }
 
-  // Sortierung validieren
+  // Validate sorting
   const allowedSortFields = ['createdAt', 'updatedAt', 'id', 'essenceShort', 'status', 'area', 'deletedAt'];
   const sortField = allowedSortFields.includes(sortBy as string) ? sortBy : 'createdAt';
   const sortDirection = sortOrder === 'asc' ? 'asc' : 'desc';
 
-  // Select-Felder für Papierkorb vs. normale Ansicht
+  // Select fields for trash can vs. normal view
   const selectFields = deletedOnly === 'true'
     ? {
         id: true,
@@ -124,7 +124,7 @@ router.get('/', async (req, res) => {
 });
 
 // ============================================
-// GET /entries/:id - Einzelner Entry mit Trackings
+// Get /entries/:id - Single entry with tracking
 // ============================================
 router.get('/:id', async (req, res) => {
   const userId = (req.session as any).userId;
@@ -152,7 +152,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // ============================================
-// POST /entries - Neuen Entry erstellen
+// Post /entries - Create new entry
 // ============================================
 router.post('/', async (req, res) => {
   const userId = (req.session as any).userId;
@@ -162,7 +162,7 @@ router.post('/', async (req, res) => {
 
   const { area, topicId, essenceText, essenceShort, actionName, benefit, steps, status } = req.body;
 
-  // 1. Grundvalidierungen
+  // 1. Basic validations
   if (!essenceText || essenceText.length > 5000) {
     return res.status(400).json({ error: 'essenceText required, max 5000 characters' });
   }
@@ -170,12 +170,12 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: 'essenceShort required, max 500 characters' });
   }
 
-  // 2. area-Enum prüfen
+  // 2. check area enum
   if (!area || !isValidArea(area)) {
     return res.status(400).json({ error: 'Invalid area. Must be KNOWLEDGE, PASSIVE, or ACTIVE' });
   }
 
-  // 3. topicId prüfen (existiert und gehört zum User)
+  // 3. Check topicId (exists and belongs to the user)
   const topic = await prisma.topic.findFirst({
     where: { id: Number(topicId), userId },
   });
@@ -183,7 +183,7 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Topic not found or not owned by user' });
   }
 
-  // 4. Bereichsspezifische Validierungen
+  // 4. Domain-specific validations
   const baseData: {
     essenceText: string;
     essenceShort: string;
@@ -206,7 +206,7 @@ router.post('/', async (req, res) => {
   };
 
   if (area === 'KNOWLEDGE') {
-    // Keine weiteren Pflichtfelder
+    // No other required fields
   } else if (area === 'PASSIVE') {
     if (!actionName || actionName.length > 30) {
       return res.status(400).json({ error: 'actionName required, max 100 characters' });
@@ -272,7 +272,7 @@ router.post('/', async (req, res) => {
 });
 
 // ============================================
-// PUT /entries/:id - Entry aktualisieren
+// Put /entries/:id - Update Entry
 // ============================================
 router.put('/:id', async (req, res) => {
   const userId = (req.session as any).userId;
@@ -287,7 +287,7 @@ router.put('/:id', async (req, res) => {
   });
   if (!entry) return res.status(404).json({ error: 'Not found' });
 
-  // Validierungen
+  // Validations
   if (essenceText !== undefined) {
     if (!essenceText || essenceText.length === 0 || essenceText.length > 5000) {
       return res.status(400).json({ error: 'essenceText must be 1-5000 characters' });
@@ -326,7 +326,7 @@ router.put('/:id', async (req, res) => {
     return res.status(400).json({ error: 'steps only allowed for ACTIVE entries' });
   }
 
-  // steps mit order-Index versehen
+  // Steps labelled with order index
   let stepsWithOrder = undefined;
   if (steps !== undefined) {
     if (!Array.isArray(steps) || steps.length === 0) {
@@ -365,7 +365,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // ============================================
-// DELETE /entries/:id - Soft-Delete
+// Delete /entries/:id - Soft-Delete
 // ============================================
 router.delete('/:id', async (req, res) => {
   const userId = (req.session as any).userId;
@@ -386,7 +386,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // ============================================
-// POST /entries/:id/restore - Aus Papierkorb wiederherstellen
+// Post /entries/:id/restore - Restore from Recycle Bin
 // ============================================
 router.post('/:id/restore', async (req, res) => {
   const userId = (req.session as any).userId;
@@ -419,7 +419,7 @@ router.post('/:id/restore', async (req, res) => {
 });
 
 // ============================================
-// DELETE /entries/:id/permanent - Permanent löschen
+// Delete /entries/:id/permanent - Permanently delete
 // ============================================
 router.delete('/:id/permanent', async (req, res) => {
   const userId = (req.session as any).userId;
@@ -440,7 +440,7 @@ router.delete('/:id/permanent', async (req, res) => {
 });
 
 // ============================================
-// POST /entries/:id/status - Status ändern
+// Post /entries/:id/status - Change status
 // ============================================
 router.post('/:id/status', async (req, res) => {
   const userId = (req.session as any).userId;
@@ -487,7 +487,7 @@ router.post('/:id/status', async (req, res) => {
 });
 
 // ============================================
-// POST /entries/:id/step - Step ändern
+// Post /entries/:id/step - Change step
 // ============================================
 router.post('/:id/step', async (req, res) => {
   const userId = (req.session as any).userId;
@@ -546,7 +546,7 @@ router.post('/:id/step', async (req, res) => {
 });
 
 // ============================================
-// POST /entries/:id/tracking/manual - Manuelles Tracking
+// Post /entries/:id/tracking/manual - Manual tracking
 // ============================================
 router.post('/:id/tracking/manual', async (req, res) => {
   const userId = (req.session as any).userId;

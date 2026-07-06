@@ -33,7 +33,7 @@ class ApiClient {
   }
 
   private buildUrl(endpoint: string, params?: Record<string, any>): string {
-    // Absolute URL: mit URL constructor
+    // Absolute URL: with URL constructor
     if (this.baseUrl.startsWith('http://') || this.baseUrl.startsWith('https://')) {
       const url = new URL(endpoint, this.baseUrl);
       if (params) {
@@ -46,7 +46,7 @@ class ApiClient {
       return url.toString();
     }
 
-    // Relative URL: manuell zusammensetzen
+    // Relative URL: manually construct
     let url = `${this.baseUrl}${endpoint}`;
     if (params) {
       const searchParams = new URLSearchParams();
@@ -74,7 +74,7 @@ class ApiClient {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          ...options.headers,
+          ...(options.headers as Record<string, string>),
         },
       });
       clearTimeout(timeoutId);
@@ -116,7 +116,7 @@ class ApiClient {
         }
 
         if (!response.ok) {
-          // Bei 401: einfacher Error, AuthContext kümmert sich
+          // For 401: simple error, AuthContext takes care of it.
           if (response.status === 401) {
             throw new Error('Unauthorized');
           }

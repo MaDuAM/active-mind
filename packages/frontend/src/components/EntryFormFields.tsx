@@ -70,7 +70,7 @@ export function EntryFormFields({
         </div>
       </div>
 
-      {/* Bereichs-spezifische Felder */}
+      {/* Area-specific fields */}
       {area !== 'KNOWLEDGE' && (
         <>
           <div>

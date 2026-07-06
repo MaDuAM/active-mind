@@ -1,9 +1,10 @@
 // frontend/src/pages/TopicView.tsx
 
-import { useState, lazy, Suspense, useEffect } from 'react';
+import { useState, lazy, Suspense, useEffect, useMemo } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { usePaginatedEntries, useTopics, useDeleteTopic } from '../hooks';
-import { EntryRow } from '../components/EntryRow';
+import { useSectionState } from '../hooks/useSectionState';
+import { EntrySection } from '../components/EntrySection';
 import { Entry } from '../types';
 
 const NewEntryForm = lazy(() => import('../components/NewEntryForm'));
@@ -21,57 +22,19 @@ export default function TopicView({
   onOpenEntry,
   onTopicDeleted,
   showNewEntryForm,
-  setShowNewEntryForm
- }: TopicViewProps) {
+  setShowNewEntryForm,
+}: TopicViewProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [limit] = useState(25);
-
-  // ============================================
-  // SECTION EXPAND STATE 
-  // ============================================
-  const [expanded, setExpanded] = useState({
-    active: false,
-    passive: false,
-    waiting: false,
-    paused: false,
-    knowledge: false,
-  });
-
-  const [allExpanded, setAllExpanded] = useState<'all' | 'none'>('all');
-
-  const toggleSection = (section: keyof typeof expanded) => {
-    setExpanded((prev) => ({ ...prev, [section]: !prev[section] }));
-    setAllExpanded('none');
-  };
-
-  const toggleAll = () => {
-    if (allExpanded === 'none') {
-      setExpanded({
-        active: active.length > 0,
-        passive: passive.length > 0,
-        waiting: waiting.length > 0,
-        paused: paused.length > 0,
-        knowledge: knowledge.length > 0,
-      });
-      setAllExpanded('all');
-    } else {
-      setExpanded({
-        active: false,
-        passive: false,
-        waiting: false,
-        paused: false,
-        knowledge: false,
-      });
-      setAllExpanded('none');
-    }
-  };
 
   const { ref, inView } = useInView({
     threshold: 0.1,
     rootMargin: '100px',
   });
 
-  // Haupt-Query: Aktive Einträge
+  // ============================================
+  // Querries
+  // ============================================
   const {
     data,
     fetchNextPage,
@@ -81,9 +44,6 @@ export default function TopicView({
     refetch: refetchEntries,
   } = usePaginatedEntries({ topicId, limit }, true);
 
-  // ============================================
-  // TRASH COUNT: Extra API-Call für Papierkorb-Count
-  // ============================================
   const {
     data: trashData,
   } = usePaginatedEntries(
@@ -96,46 +56,69 @@ export default function TopicView({
 
   const isLoading = entriesLoading || topicsLoading;
 
-  // Flache Liste aller geladenen Entries
+  // ============================================
+  // Computed Data
+  // ============================================
   const allEntries = data?.pages.flatMap((page) => page.data) || [];
   const trashCount = trashData?.pages?.[0]?.pagination?.total || 0;
 
+  const sections = useMemo(() => {
+    const activeEntries = allEntries.filter((e: Entry) => !e.deletedAt && e.topicId === topicId);
+
+    const active = activeEntries.filter(
+      (e: Entry) => e.area === 'ACTIVE' && e.status === 'ACTIVE'
+    );
+    const passive = activeEntries.filter(
+      (e: Entry) => e.area === 'PASSIVE' && e.status === 'ACTIVE'
+    );
+    const waiting = activeEntries.filter(
+      (e: Entry) => e.status === 'WAITING' && e.area !== 'KNOWLEDGE'
+    );
+    const paused = activeEntries.filter(
+      (e: Entry) => e.status === 'PAUSED' && e.area !== 'KNOWLEDGE'
+    );
+    const knowledge = activeEntries.filter(
+      (e: Entry) => e.area === 'KNOWLEDGE'
+    );
+
+    return {
+      active,
+      passive,
+      waiting,
+      paused,
+      knowledge,
+      total: activeEntries.length,
+    };
+  }, [allEntries, topicId]);
+
+  // ============================================
+  // Section State
+  // ============================================
+  const { expanded, allExpanded, toggleSection, toggleAll } = useSectionState({
+    autoExpand: true,
+    getSectionHasItems: () => ({
+      active: sections.active.length > 0,
+      passive: sections.passive.length > 0,
+      waiting: sections.waiting.length > 0,
+      paused: sections.paused.length > 0,
+      knowledge: sections.knowledge.length > 0,
+    }),
+    deps: [allEntries.length],
+  });
+
+  // ============================================
+  // Infinite Scroll
+  // ============================================
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  // ============================================
+  // Handlers
+  // ============================================
   const topicName = topics.find((t) => t.id === topicId)?.name || 'Unbekannt';
-  const activeEntries = allEntries.filter((e: Entry) => !e.deletedAt && e.topicId === topicId);
-
-  // ============================================
-  // FILTERS
-  // ============================================
-  const knowledge = activeEntries.filter((e: Entry) => e.area === 'KNOWLEDGE');
-  const active = activeEntries.filter((e: Entry) => e.area === 'ACTIVE' && e.status === 'ACTIVE');
-  const passive = activeEntries.filter((e: Entry) => e.area === 'PASSIVE' && e.status === 'ACTIVE');
-  const waiting = activeEntries.filter(
-    (e: Entry) => e.status === 'WAITING' && e.area !== 'KNOWLEDGE'
-  );
-  const paused = activeEntries.filter(
-    (e: Entry) => e.status === 'PAUSED' && e.area !== 'KNOWLEDGE'
-  );
-
-  // ============================================
-  // AUTO-OPEN: Sektionen mit Einträgen (initial)
-  // ============================================
-  useEffect(() => {
-    if (!isLoading && allEntries.length > 0) {
-      setExpanded({
-        active: active.length > 0,
-        passive: passive.length > 0,
-        waiting: waiting.length > 0,
-        paused: paused.length > 0,
-        knowledge: knowledge.length > 0,
-      });
-    }
-  }, [data, isLoading, allEntries.length, active.length, passive.length, waiting.length, paused.length, knowledge.length]);
 
   const handleDeleteTopic = async () => {
     try {
@@ -151,7 +134,7 @@ export default function TopicView({
   };
 
   // ============================================
-  // SKELETON LOADING STATE
+  // Skeleton Loading State
   // ============================================
   if (isLoading && allEntries.length === 0) {
     return (
@@ -203,17 +186,17 @@ export default function TopicView({
       <div className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--border-color)]">
         <div>
           <h1 className="text-2xl font-semibold text-gold-500 tracking-tight">{topicName}</h1>
-          {activeEntries.length === 0 && trashCount === 0 && (
+          {sections.total === 0 && trashCount === 0 && (
             <p className="text-sm text-[var(--text-muted)] mt-1">(empty topic block)</p>
           )}
-          {activeEntries.length === 0 && trashCount > 0 && (
+          {sections.total === 0 && trashCount > 0 && (
             <p className="text-sm text-[var(--text-muted)] mt-1">
               (empty – {trashCount} Entries in Removed Entries)
             </p>
           )}
         </div>
         <div className="flex items-center gap-2">
-          {activeEntries.length === 0 && trashCount === 0 && (
+          {sections.total === 0 && trashCount === 0 && (
             <button
               onClick={() => setShowDeleteConfirm(true)}
               disabled={deleteTopicMutation.isPending}
@@ -222,8 +205,8 @@ export default function TopicView({
               {deleteTopicMutation.isPending ? 'Deleting...' : 'Delete Topic Block'}
             </button>
           )}
-          <button 
-            onClick={() => setShowNewEntryForm(true)} 
+          <button
+            onClick={() => setShowNewEntryForm(true)}
             className="hidden sm:inline-block btn-primary text-sm px-3 py-1.5 w-28"
           >
             + New Entry
@@ -235,246 +218,102 @@ export default function TopicView({
       </div>
 
       {/* ============================================ */}
-      {/* 1. ACTIVE (immer sichtbar) */}
+      {/* 1. Active */}
       {/* ============================================ */}
-      <section className="mb-3">
-        <div 
-          className="flex items-center justify-between mb-3 cursor-pointer"
-          onClick={() => toggleSection('active')}
-        >
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-green-400 dark:text-green-300">
-            Active ({active.length})
-          </h2>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleSection('active');
-            }}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-gold-500 hover:text-white transition-colors text-xl"
-            aria-label={expanded.active ? 'Collapse' : 'Expand'}
-          >
-            <span className="-translate-y-0.5">
-              {expanded.active ? '⏶' : '⏷'}
-            </span>
-          </button>
-        </div>
-        {expanded.active && (
-          <>
-            {active.length === 0 ? (
-              <div className="flex items-center gap-3 py-3 text-[var(--text-muted)]">
-                <span className="text-xl">⚡</span>
-                <div>
-                  <p className="text-sm font-medium">No active actions yet</p>
-                  <p className="text-xs opacity-60">Create an entry to get started</p>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {active.map((e: Entry) => (
-                  <EntryRow
-                    key={e.id}
-                    entry={e}
-                    onClick={onOpenEntry}
-                    onHover={() => import('../components/EntryDetail')}
-                  />
-                ))}
-              </div>
-            )}
-          </>
-        )}
-      </section>
+      <EntrySection
+        section="active"
+        title="Active"
+        emptyIcon="⚡"
+        emptyMessage="No active actions yet"
+        titleColor="text-green-400 dark:text-green-300"
+        entries={sections.active}
+        isExpanded={expanded.active}
+        onToggle={() => toggleSection('active')}
+        onEntryClick={onOpenEntry}
+        className="mb-3"
+      />
 
       <hr className="border-[var(--border-color)] my-6" />
 
       {/* ============================================ */}
-      {/* 2. PASSIVE (immer sichtbar) */}
+      {/* 2. Passive */}
       {/* ============================================ */}
-      <section className="mb-3">
-        <div 
-          className="flex items-center justify-between mb-3 cursor-pointer"
-          onClick={() => toggleSection('passive')}
-        >
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-amber-400 dark:text-amber-300">
-            Passive ({passive.length})
-          </h2>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleSection('passive');
-            }}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-gold-500 hover:text-white transition-colors text-xl"
-            aria-label={expanded.passive ? 'Collapse' : 'Expand'}
-          >
-            <span className="-translate-y-0.5">
-              {expanded.passive ? '⏶' : '⏷'}
-            </span>
-          </button>
-        </div>
-        {expanded.passive && (
-          <>
-            {passive.length === 0 ? (
-              <div className="flex items-center gap-3 py-3 text-[var(--text-muted)]">
-                <span className="text-xl">💡</span>
-                <div>
-                  <p className="text-sm font-medium">No passive actions yet</p>
-                  <p className="text-xs opacity-60">Create an entry to get started</p>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {passive.map((e: Entry) => (
-                  <EntryRow
-                    key={e.id}
-                    entry={e}
-                    onClick={onOpenEntry}
-                    onHover={() => import('../components/EntryDetail')}
-                  />
-                ))}
-              </div>
-            )}
-          </>
-        )}
-      </section>
+      <EntrySection
+        section="passive"
+        title="Passive"
+        emptyIcon="💡"
+        emptyMessage="No passive actions yet"
+        titleColor="text-amber-400 dark:text-amber-300"
+        entries={sections.passive}
+        isExpanded={expanded.passive}
+        onToggle={() => toggleSection('passive')}
+        onEntryClick={onOpenEntry}
+        className="mb-3"
+      />
 
       <hr className="border-[var(--border-color)] my-6" />
 
       {/* ============================================ */}
-      {/* 3. KNOWLEDGE (immer sichtbar) */}
+      {/* 3. Knowledge */}
       {/* ============================================ */}
-      <section className="mb-3">
-        <div 
-          className="flex items-center justify-between mb-3 cursor-pointer"
-          onClick={() => toggleSection('knowledge')}
-        >
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-500">
-            Knowledge ({knowledge.length})
-          </h2>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleSection('knowledge');
-            }}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-gold-500 hover:text-white transition-colors text-xl"
-            aria-label={expanded.knowledge ? 'Collapse' : 'Expand'}
-          >
-            <span className="-translate-y-0.5">
-              {expanded.knowledge ? '⏶' : '⏷'}
-            </span>
-          </button>
-        </div>
-        {expanded.knowledge && (
-          <>
-            {knowledge.length === 0 ? (
-              <div className="flex items-center gap-3 py-3 text-[var(--text-muted)]">
-                <span className="text-xl">📚</span>
-                <div>
-                  <p className="text-sm font-medium">No knowledge entries yet</p>
-                  <p className="text-xs opacity-60">Create an entry to get started</p>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {knowledge.map((e: Entry) => (
-                  <EntryRow
-                    key={e.id}
-                    entry={e}
-                    onClick={onOpenEntry}
-                    onHover={() => import('../components/EntryDetail')}
-                  />
-                ))}
-              </div>
-            )}
-          </>
-        )}
-      </section>
+      <EntrySection
+        section="knowledge"
+        title="Knowledge"
+        emptyIcon="📚"
+        emptyMessage="No knowledge entries yet"
+        titleColor="text-amber-800 dark:text-amber-500"
+        entries={sections.knowledge}
+        isExpanded={expanded.knowledge}
+        onToggle={() => toggleSection('knowledge')}
+        onEntryClick={onOpenEntry}
+        className="mb-3"
+      />
 
       {/* ============================================ */}
-      {/* 4. WAITING (nur wenn Einträge) */}
+      {/* 4. Waiting (only if entries exist) */}
       {/* ============================================ */}
-      {waiting.length > 0 && (
+      {sections.waiting.length > 0 && (
         <>
           <hr className="border-[var(--border-color)] my-6" />
-          <section className="mb-3">
-            <div 
-              className="flex items-center justify-between mb-3 cursor-pointer"
-              onClick={() => toggleSection('waiting')}
-            >
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-blue-400 dark:text-blue-300">
-                Waiting ({waiting.length})
-              </h2>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleSection('waiting');
-                }}
-                className="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-gold-500 hover:text-white transition-colors text-xl"
-                aria-label={expanded.waiting ? 'Collapse' : 'Expand'}
-              >
-                <span className="-translate-y-0.5">
-                  {expanded.waiting ? '⏶' : '⏷'}
-                </span>
-              </button>
-            </div>
-            {expanded.waiting && (
-              <div className="space-y-2">
-                {waiting.map((e: Entry) => (
-                  <EntryRow
-                    key={e.id}
-                    entry={e}
-                    onClick={onOpenEntry}
-                    onHover={() => import('../components/EntryDetail')}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
+          <EntrySection
+            section="waiting"
+            title="Waiting"
+            emptyIcon="⏳"
+            emptyMessage="No waiting actions"
+            titleColor="text-blue-400 dark:text-blue-300"
+            entries={sections.waiting}
+            isExpanded={expanded.waiting}
+            onToggle={() => toggleSection('waiting')}
+            onEntryClick={onOpenEntry}
+            className="mb-3"
+          />
         </>
       )}
 
       {/* ============================================ */}
-      {/* 5. PAUSED (nur wenn Einträge) */}
+      {/* 5. Paused (only if entries exist) */}
       {/* ============================================ */}
-      {paused.length > 0 && (
+      {sections.paused.length > 0 && (
         <>
           <hr className="border-[var(--border-color)] my-6" />
-          <section className="mb-3">
-            <div 
-              className="flex items-center justify-between mb-3 cursor-pointer"
-              onClick={() => toggleSection('paused')}
-            >
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                Paused ({paused.length})
-              </h2>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleSection('paused');
-                }}
-                className="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-gold-500 hover:text-white transition-colors text-xl"
-                aria-label={expanded.paused ? 'Collapse' : 'Expand'}
-              >
-                <span className="-translate-y-0.5">
-                  {expanded.paused ? '⏶' : '⏷'}
-                </span>
-              </button>
-            </div>
-            {expanded.paused && (
-              <div className="space-y-2">
-                {paused.map((e: Entry) => (
-                  <EntryRow
-                    key={e.id}
-                    entry={e}
-                    onClick={onOpenEntry}
-                    onHover={() => import('../components/EntryDetail')}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
+          <EntrySection
+            section="paused"
+            title="Paused"
+            emptyIcon="⏸️"
+            emptyMessage="No paused actions"
+            titleColor="text-[var(--text-muted)]"
+            entries={sections.paused}
+            isExpanded={expanded.paused}
+            onToggle={() => toggleSection('paused')}
+            onEntryClick={onOpenEntry}
+            className="opacity-70 mb-3"
+          />
         </>
       )}
 
+      {/* ============================================ */}
       {/* Infinite Scroll Trigger */}
+      {/* ============================================ */}
       {hasNextPage && (
         <div ref={ref} className="py-6 text-center">
           {isFetchingNextPage ? (

@@ -75,7 +75,7 @@ app.use('/api/v1/auth/login', authLimiter);
 app.use('/api/v1/auth/register', authLimiter);
 app.use('/api/v1/', globalLimiter);
 
-// 4. Session-Konfiguration (mit Production-Tauglichkeit)
+// 4. Session configuration (with production suitability)
 const sessionStore = config.NODE_ENV === 'production' 
   ? new (require('connect-pg-simple')(session))({
       conString: config.DATABASE_URL,
@@ -105,7 +105,7 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/topics', topicRouter);
 app.use('/api/v1/entries', entryRouter);
 
-// 6. Health-Check (mit DB)
+// 6. Health-Check (with DB)
 app.get('/api/v1/health', async (req, res) => {
   const health = {
     status: 'ok',
@@ -125,7 +125,7 @@ app.get('/api/v1/health', async (req, res) => {
   }
 });
 
-// 7. Export für Tests
+// 7. Export for tests
 export default app;
 
 // 8. Server-Start

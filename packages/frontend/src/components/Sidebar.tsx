@@ -44,7 +44,7 @@ export function Sidebar({
   }, []);
 
   // ============================================
-  // MOBILE: Overlay
+  // Mobile: Overlay
   // ============================================
   if (isMobileOpen) {
     return (
@@ -62,7 +62,7 @@ export function Sidebar({
 
           <div className="flex-1 overflow-y-auto px-4 py-3">
             <div className="space-y-1">
-              {/* Dashboard ENTFERN – nur noch Topics */}
+              {/* Dashboard removed – only topics */}
               {topics.map((topic: Topic) => (
                 <div
                   key={topic.id}
@@ -97,7 +97,7 @@ export function Sidebar({
   }
 
   // ============================================
-  // DESKTOP
+  // Desktop
   // ============================================
   if (isLoading) {
     return (
@@ -131,7 +131,6 @@ export function Sidebar({
         collapsed ? 'w-[68px]' : 'w-[210px]'
       } shadow-[2px_0_8px_-2px_rgba(0,0,0,0.05)] dark:shadow-[2px_0_8px_-2px_rgba(255,255,255,0.05)]`}
     >
-      {/* Dashboard - fix oben */}
       <div className="shrink-0">
         <div
           onClick={() => onSelectTopic(null)}
@@ -147,10 +146,10 @@ export function Sidebar({
 
       <hr className="border-[var(--border-color)] my-3 shrink-0" />
 
-      {/* Scrollbarer Bereich: Topics-Überschrift + Liste */}
+      {/* Scroll-Area: Topics-Headline + list */}
       <div className="flex-1 min-h-0 overflow-y-auto -mr-3 pr-3">
         <div className="space-y-1 pb-2">
-          {/* Topics-Überschrift + Collapse-Button */}
+          {/* Topics-Headline + Collapse-Button */}
           <div className="flex items-center justify-between shrink-0 mb-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
               {collapsed ? '' : 'Topics'}
@@ -166,12 +165,12 @@ export function Sidebar({
             </button>
           </div>
 
-          {/* Topics-Liste */}
+          {/* Topics-List */}
           <div className="space-y-1">{topicItems}</div>
         </div>
       </div>
 
-      {/* Papierkorb – fix am unteren Rand */}
+      {/* Removed Entries – bottom position fix */}
       <div className="shrink-0 pt-3 border-t border-[var(--border-color)] mt-1">
         <div
           onClick={onSelectTrash}
