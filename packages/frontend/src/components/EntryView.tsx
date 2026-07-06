@@ -242,18 +242,14 @@ export function EntryView({
               ◀ Previous
             </button>
             <button
-              onClick={() =>
-                onStepChange(
-                  Math.min(
-                    (entry.steps?.length || 1) - 1,
-                    (entry.currentStepIndex || 0) + 1
-                  )
-                )
-              }
-              disabled={
-                isStepPending ||
-                (entry.currentStepIndex || 0) >= (entry.steps?.length || 1) - 1
-              }
+              onClick={() => {
+                const totalSteps = entry.steps?.length || 1;
+                const current = entry.currentStepIndex || 0;
+                // Wenn am letzten Step, springe zu 0, sonst +1
+                const next = current >= totalSteps - 1 ? 0 : current + 1;
+                onStepChange(next);
+              }}
+              disabled={isStepPending}
               className="btn-secondary text-xs disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next ▶
