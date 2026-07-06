@@ -1,6 +1,6 @@
 // frontend/src/pages/Dashboard.tsx
 
-import { useState, lazy, Suspense, useEffect, useMemo } from 'react';
+import { useState, lazy, Suspense, useEffect, useMemo, useCallback } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { usePaginatedEntries, useTopics } from '../hooks';
 import { useSectionState } from '../hooks/useSectionState';
@@ -89,6 +89,19 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
   });
 
   // ============================================
+  // Memoized Callbacks
+  // ============================================
+  const getTopicName = useCallback(
+    (topicId: number) => topics.find((t) => t.id === topicId)?.name || '?',
+    [topics]
+  );
+
+  const handleEntryClick = useCallback(
+    (id: number) => onOpenEntry(id),
+    [onOpenEntry]
+  );
+
+  // ============================================
   // Infinite Scroll
   // ============================================
   useEffect(() => {
@@ -96,9 +109,6 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
       fetchNextPage();
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  const getTopicName = (topicId: number) =>
-    topics.find((t) => t.id === topicId)?.name || '?';
 
   // ============================================
   // Skeleton Loading State
@@ -174,7 +184,7 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
         entries={sections.active}
         isExpanded={expanded.active}
         onToggle={() => toggleSection('active')}
-        onEntryClick={onOpenEntry}
+        onEntryClick={handleEntryClick}
         showTopic
         getTopicName={getTopicName}
         className="mb-3"
@@ -194,7 +204,7 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
         entries={sections.passive}
         isExpanded={expanded.passive}
         onToggle={() => toggleSection('passive')}
-        onEntryClick={onOpenEntry}
+        onEntryClick={handleEntryClick}
         showTopic
         getTopicName={getTopicName}
         className="mb-3"
@@ -215,7 +225,7 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
             entries={sections.waiting}
             isExpanded={expanded.waiting}
             onToggle={() => toggleSection('waiting')}
-            onEntryClick={onOpenEntry}
+            onEntryClick={handleEntryClick}
             showTopic
             getTopicName={getTopicName}
             className="mb-3"
@@ -238,7 +248,7 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
             entries={sections.paused}
             isExpanded={expanded.paused}
             onToggle={() => toggleSection('paused')}
-            onEntryClick={onOpenEntry}
+            onEntryClick={handleEntryClick}
             showTopic
             getTopicName={getTopicName}
             className="opacity-70 mb-3"
