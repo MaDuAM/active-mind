@@ -16,6 +16,8 @@ import { MenuOverlay } from './components/MenuOverlay';
 import { NotFound } from './pages/NotFound';
 import { MobileBottomBar } from './components/MobileBottomBar';
 import { useMediaQuery } from './hooks/useMediaQuery';
+import { LoadingOverlay } from './components/LoadingOverlay';
+
 
 // Lazy load EntryDetail to reduce initial bundle size
 // Only loads when user clicks on an entry
@@ -242,14 +244,7 @@ function AppContent() {
   const isLoading = authLoading || entriesLoading || topicsLoading;
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-[var(--bg-secondary)]">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-gold-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <div className="text-sm text-[var(--text-secondary)]">Loading ActiveMind...</div>
-        </div>
-      </div>
-    );
+    return <LoadingOverlay message="Loading ActiveMind..." />;
   }
 
   if (!user) {

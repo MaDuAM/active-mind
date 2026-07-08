@@ -16,3 +16,4 @@ export { Login } from './Login';
 export { MenuOverlay } from './MenuOverlay';
 export { Toast } from './Toast';
 export { ErrorBoundary } from './ErrorBoundary';
+export { LoadingOverlay } from './LoadingOverlay';

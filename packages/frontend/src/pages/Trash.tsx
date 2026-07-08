@@ -8,6 +8,7 @@ import { useNotification } from '../context/NotificationContext';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { Entry } from '../types';
 import { apiClient } from '../lib/apiClient';
+import { LoadingOverlay } from '../components/LoadingOverlay';
 
 export function Trash() {
   const { showNotification } = useNotification();
@@ -125,7 +126,7 @@ export function Trash() {
   // Skeleton Loading State
   // ============================================
   if (isLoading && allEntries.length === 0) {
-    return <div className="p-6 text-[var(--text-secondary)]">Loading Removed Entries...</div>;
+    return <LoadingOverlay message="Loading removed entries..." fullScreen={false} />;
   }
 
   return (

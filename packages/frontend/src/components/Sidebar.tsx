@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTopics } from '../hooks';
 import { Topic } from '../types';
+import { LoadingOverlay } from './LoadingOverlay';
 
 interface SidebarProps {
   onSelectTopic: (topicId: number | null) => void;
@@ -116,7 +117,7 @@ export function Sidebar({
           collapsed ? 'w-[68px]' : 'w-[210px]'
         } shadow-[2px_0_8px_-2px_rgba(0,0,0,0.05)] dark:shadow-[2px_0_8px_-2px_rgba(255,255,255,0.05)]`}
       >
-        <div className="text-sm text-[var(--text-secondary)]">Loading Topics...</div>
+        <LoadingOverlay message="Loading topics..." fullScreen={false} />
       </aside>
     );
   }

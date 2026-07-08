@@ -2,6 +2,7 @@
 
 import { EntryRow } from './EntryRow';
 import { Entry, Topic } from '../types';
+import { LoadingOverlay } from './LoadingOverlay';
 
 interface SearchLayerProps {
   entries: Entry[];
@@ -163,6 +164,9 @@ export function SearchLayer({
           >
             ✕
           </button>
+        </div>
+        <div className="p-10 flex items-center justify-center">
+          <LoadingOverlay message="Loading..." fullScreen={false} />
         </div>
       </div>
     );

@@ -6,6 +6,7 @@ import { usePaginatedEntries, useTopics, useDeleteTopic } from '../hooks';
 import { useSectionState } from '../hooks/useSectionState';
 import { EntrySection } from '../components/EntrySection';
 import { Entry } from '../types';
+import { LoadingOverlay } from '../components/LoadingOverlay';
 
 const NewEntryForm = lazy(() => import('../components/NewEntryForm'));
 
@@ -153,34 +154,7 @@ export default function TopicView({
   // Skeleton Loading State
   // ============================================
   if (isLoading && allEntries.length === 0) {
-    return (
-      <div className="max-w-7xl mx-auto animate-pulse">
-        <div className="flex items-center justify-between mb-6">
-          <div className="space-y-1">
-            <div className="h-8 w-48 bg-[var(--bg-secondary)] rounded" />
-            <div className="h-4 w-32 bg-[var(--bg-secondary)] rounded" />
-          </div>
-          <div className="h-9 w-28 bg-[var(--bg-secondary)] rounded" />
-        </div>
-        <div className="mb-8">
-          <div className="h-4 w-32 bg-[var(--bg-secondary)] rounded mb-3" />
-          <div className="space-y-2">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-12 bg-[var(--bg-secondary)] rounded" />
-            ))}
-          </div>
-        </div>
-        <hr className="border-[var(--border-color)] my-6" />
-        <div className="mb-8">
-          <div className="h-4 w-32 bg-[var(--bg-secondary)] rounded mb-3" />
-          <div className="space-y-2">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-12 bg-[var(--bg-secondary)] rounded" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingOverlay message="Loading entries..." fullScreen={false} />;
   }
 
   return (

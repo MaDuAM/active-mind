@@ -8,6 +8,7 @@ import { EntryFormFields } from './EntryFormFields';
 import { StepEditor } from './StepEditor';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Area, Status, Step, CreateEntryPayload } from '../types';
+import { LoadingOverlay } from './LoadingOverlay';
 
 interface NewEntryFormProps {
   onSuccess: () => void;
@@ -166,10 +167,10 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
         onClick={handleCancel}
       >
         <div 
-          className="fixed inset-y-0 right-0 w-full sm:w-[80vw] sm:min-w-[350px] sm:max-w-[800px] bg-[var(--bg-card)] shadow-dropdown border-l border-[var(--border-color)] p-6 overflow-y-auto flex flex-col"
+          className="fixed inset-y-0 right-0 w-full sm:w-[80vw] sm:min-w-[350px] sm:max-w-[800px] bg-[var(--bg-card)] shadow-dropdown border-l border-[var(--border-color)] p-6 overflow-y-auto flex flex-col items-center justify-center"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="p-6 text-[var(--text-secondary)]">Loading Topics...</div>
+          <LoadingOverlay message="Loading topics..." fullScreen={false} />
         </div>
       </div>
     );

@@ -9,6 +9,7 @@ import { TrackingPopup } from './TrackingPopup';
 import { ManualTrackPopup } from './ManualTrackPopup';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Status, Step } from '../types';
+import { LoadingOverlay } from './LoadingOverlay';
 
 interface EntryDetailProps {
   entryId: number;
@@ -262,25 +263,10 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
         onClick={onClose}
       >
         <div 
-          className="fixed inset-y-0 right-0 w-full sm:w-[85vw] sm:min-w-[400px] sm:max-w-[900px] bg-[var(--bg-card)] shadow-dropdown border-l border-[var(--border-color)] p-6 overflow-y-auto flex flex-col"
+          className="fixed inset-y-0 right-0 w-full sm:w-[85vw] sm:min-w-[400px] sm:max-w-[900px] bg-[var(--bg-card)] shadow-dropdown border-l border-[var(--border-color)] p-6 overflow-y-auto flex flex-col items-center justify-center"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-[var(--bg-secondary)]" />
-              <div className="h-7 w-40 bg-[var(--bg-secondary)] rounded" />
-            </div>
-            <div className="w-8 h-8 rounded-full bg-[var(--bg-secondary)]" />
-          </div>
-
-          <div className="space-y-4 animate-pulse flex-1">
-            {/* Skeleton content */}
-          </div>
-
-          {/* Mobile X-Button skeleton */}
-          <div className="sm:hidden shrink-0 pt-4 mt-4 border-t border-[var(--border-color)] flex justify-center">
-            <div className="w-12 h-12 rounded-full bg-[var(--bg-secondary)]" />
-          </div>
+          <LoadingOverlay message="Loading entry..." fullScreen={false} />
         </div>
       </div>
     );
