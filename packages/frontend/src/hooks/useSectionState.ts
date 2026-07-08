@@ -1,17 +1,12 @@
 // frontend/src/hooks/useSectionState.ts
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export type SectionKey = 'active' | 'passive' | 'waiting' | 'paused' | 'knowledge';
 
 export interface UseSectionStateOptions {
-  /** Auto-expand sections that have entries */
   autoExpand?: boolean;
-  /** Initial expanded state (default: all false) */
   initialExpanded?: Partial<Record<SectionKey, boolean>>;
-  /** Dependency array to trigger auto-expand recalculation */
-  deps?: any[];
-  /** Function that returns which sections have entries */
   getSectionHasItems?: () => Record<SectionKey, boolean>;
 }
 
@@ -19,7 +14,6 @@ export function useSectionState(options: UseSectionStateOptions = {}) {
   const {
     autoExpand = true,
     initialExpanded = {},
-    deps = [],
     getSectionHasItems,
   } = options;
 
@@ -33,6 +27,7 @@ export function useSectionState(options: UseSectionStateOptions = {}) {
   }));
 
   const [allExpanded, setAllExpanded] = useState<'all' | 'none'>('none');
+  const hasAutoExpanded = useRef(false);
 
   const toggleSection = (section: SectionKey) => {
     setExpanded((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -68,9 +63,12 @@ export function useSectionState(options: UseSectionStateOptions = {}) {
     }
   };
 
-  // Auto-expand sections that have entries
+  // ============================================
+  // Auto-Expand: Only runs once on first mount
+  // Prevents overriding manual user toggles
+  // ============================================
   useEffect(() => {
-    if (!autoExpand || !getSectionHasItems) return;
+    if (!autoExpand || !getSectionHasItems || hasAutoExpanded.current) return;
 
     const sectionHasItems = getSectionHasItems();
     const anyItems = Object.values(sectionHasItems).some(Boolean);
@@ -83,9 +81,10 @@ export function useSectionState(options: UseSectionStateOptions = {}) {
         paused: sectionHasItems.paused,
         knowledge: sectionHasItems.knowledge,
       });
+      hasAutoExpanded.current = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoExpand, getSectionHasItems, ...deps]);
+  }, [autoExpand, getSectionHasItems]);
 
   return {
     expanded,

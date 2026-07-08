@@ -58,14 +58,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
       <NotificationProvider>
-        <AuthProvider>
-          <QueryClientProvider client={queryClient}>
-            <QueryErrorHandler />
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
             <App />
-            <Toast />
-            <ReactQueryDevtools initialIsOpen={false} />
-          </QueryClientProvider>
-        </AuthProvider>
+          </AuthProvider>
+        </QueryClientProvider>
       </NotificationProvider>
     </BrowserRouter>
   </React.StrictMode>

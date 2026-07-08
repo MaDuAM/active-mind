@@ -1,6 +1,7 @@
 // frontend/src/context/AuthContext.tsx
 
 import { createContext, useContext, useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNotification } from './NotificationContext';
 import { User } from '../types';
 import { apiClient } from '../lib/apiClient';
@@ -19,6 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const { showNotification } = useNotification();
+  const queryClient = useQueryClient();
 
   // ============================================
   // AUTH CHECK: Only once per browser session
@@ -64,6 +66,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const user = await apiClient.post<User>('/auth/login', { username, password });
       setUser(user);
+      // Clear cache on login to ensure fresh data
+      queryClient.clear();
       showNotification('success', `Welcome back, ${user.username}!`);
     } catch (error) {
       if (error instanceof Error) {
@@ -84,6 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const user = await apiClient.post<User>('/auth/register', { username, password });
       setUser(user);
+      queryClient.clear();
       showNotification('success', `Account created! Welcome, ${user.username}!`);
     } catch (error) {
       if (error instanceof Error) {
@@ -103,8 +108,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await apiClient.post<{ ok: true }>('/auth/logout');
       setUser(null);
-      // Reset session flag so next login triggers a fresh auth check
       sessionStorage.removeItem('auth_check_done');
+      // Clear all cached data on logout
+      queryClient.clear();
       showNotification('info', 'Logged out successfully');
     } catch (error) {
       showNotification('error', error instanceof Error ? error.message : 'Logout failed');
