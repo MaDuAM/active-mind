@@ -60,7 +60,8 @@ From initial concept to a production-ready prototype: approximately **4 weeks of
 - **Tracking Log:** Every status change, step update, and edit is recorded
 - **Responsive Design:** Fully optimized for desktop, tablet, and mobile
 - **Dark Mode:** System-aware theme toggle
-- **Pagination & Infinite Scroll:** For large entry sets
+- **Infinite Scroll:** For large entry sets with pagination
+- **Unified Loading States:** Centralized overlay with debounce (200ms) to prevent flicker
 
 ---
 
@@ -78,8 +79,45 @@ The project includes a growing test suite to ensure reliability and catch regres
 ```bash
 cd packages/frontend && npm test
 
+
 Run E2E tests (requires frontend + backend running):
 npm run test:e2e
+
+---
+
+## Development & Testing Data
+
+The project includes a seeding script to populate the database with realistic test data:
+
+# Navigate to backend
+cd backend
+
+# Run the seed script
+npm run db:seed
+# or
+npx prisma db seed
+
+What the seed creates:
+- 1 admin user (admin / admin123)
+- 30 topics with realistic names (Backend, Frontend, DevOps, etc.)
+- ~250 entries distributed across all categories (KNOWLEDGE, PASSIVE, ACTIVE)
+- ~120 entries in the first topic for performance testing
+- Realistic statuses, steps, benefits, and pause reasons
+
+---
+
+## Code Quality & Architecture
+
+Backend Structure:
+- entries.ts split into route-based modules (routes/entries/)
+- Each HTTP method in its own file (get.ts, post.ts, put.ts, delete.ts, status.ts, step.ts, tracking.ts)
+- Clean separation of concerns — easier to test and maintain
+
+Frontend Optimizations:
+- LoadingOverlay component with backdrop blur for consistent UX
+- useLoadingDebounce hook to prevent overlay flicker on fast loads
+- useSectionState hook with auto-expand only once (prevents overriding manual user toggles)
+- queryClient.clear() on auth actions to prevent cross-user data leaks
 
 ---
 
