@@ -17,6 +17,8 @@ import { NotFound } from './pages/NotFound';
 import { MobileBottomBar } from './components/MobileBottomBar';
 import { useMediaQuery } from './hooks/useMediaQuery';
 
+// Lazy load EntryDetail to reduce initial bundle size
+// Only loads when user clicks on an entry
 const EntryDetail = lazy(() => import('./components/EntryDetail'));
 
 function AppContent() {
@@ -30,23 +32,43 @@ function AppContent() {
   const { data: topics = [], isLoading: topicsLoading } = useTopics(!!user);
   const entries = entriesResponse?.pages.flatMap((page) => page.data) || [];
 
+  // ============================================
+  // Navigation State
+  // - Dashboard: Shows all entries grouped by status/area
+  // - Topic: Shows entries filtered by selected topic
+  // - Trash: Shows soft-deleted entries
+  // ============================================
   const [selectedView, setSelectedView] = useState<'dashboard' | 'topic' | 'trash'>('dashboard');
   const [selectedTopicId, setSelectedTopicId] = useState<number | null>(null);
+
+  // ============================================
+  // Search State Machine
+  // idle → suggesting (user types, shows word autocomplete)
+  // suggesting → searching (user presses Enter or clicks search)
+  // ============================================
   const [searchTerm, setSearchTerm] = useState('');
   const [searchMode, setSearchMode] = useState<'idle' | 'suggesting' | 'searching'>('idle');
   const [selectedEntryId, setSelectedEntryId] = useState<number | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showNewEntryForm, setShowNewEntryForm] = useState(false);
+  
+  // ============================================
+  // Dark Mode: Persists across sessions via localStorage
+  // Applied to <html> element for Tailwind dark: classes
+  // ============================================
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem('darkMode') === 'true';
   });
+  
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
   // ============================================
-  // TASTATUR-SHORTCUT: ⌘N / Ctrl+N → New Entry
+  // Keyboard Shortcuts
+  // ⌘N / Ctrl+N → Opens New Entry Form
+  // Escape → Closes search layers
   // ============================================
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -59,8 +81,16 @@ function AppContent() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // ============================================
+  // Search Logic: Full-text search across entries
+  // Returns up to maxResults (50) matching entries
+  // ============================================
   const searchResults = useSearch(entries, searchTerm, { maxResults: 50 });
   
+  // ============================================
+  // Autocomplete Suggestions: Extract unique words from entries
+  // Used in suggesting mode to show typeahead options
+  // ============================================
   const suggestions = useMemo(() => {
     if (!searchTerm.trim() || searchMode !== 'suggesting') return [];
     const words = new Set<string>();
@@ -77,6 +107,9 @@ function AppContent() {
 
   const filteredEntries = searchMode === 'searching' ? searchResults : [];
 
+  // ============================================
+  // Dark Mode Toggle: Applies/removes 'dark' class on <html>
+  // ============================================
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleDarkMode = () => {
     setDarkMode((prev) => {
@@ -94,6 +127,9 @@ function AppContent() {
     }
   }, [darkMode]);
 
+  // ============================================
+  // Escape Key: Closes search layers
+  // ============================================
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -110,6 +146,9 @@ function AppContent() {
     return () => document.removeEventListener('keydown', handleEsc);
   }, [searchMode]);
 
+  // ============================================
+  // Navigation Handlers
+  // ============================================
   const handleTopicDeleted = () => {
     setSelectedView('dashboard');
     setSelectedTopicId(null);
@@ -142,6 +181,9 @@ function AppContent() {
     setSearchMode('idle');
   };
 
+  // ============================================
+  // Search Input Handlers
+  // ============================================
   const handleSearch = () => {
     if (searchTerm.trim()) {
       setSearchMode('searching');
@@ -178,7 +220,8 @@ function AppContent() {
   };
 
   // ============================================
-  // MOBILE: Search öffnen (Bottom Bar)
+  // Mobile: Search overlay (fullscreen)
+  // Desktop: Search uses dropdown panel
   // ============================================
   const handleMobileSearchOpen = () => {
     setShowMobileSearch(true);
@@ -215,10 +258,12 @@ function AppContent() {
 
   return (
     <div className="h-screen bg-[var(--bg-secondary)] flex flex-col">
-      {/* Header */}
+      {/* ============================================ */}
+      {/* HEADER */}
+      {/* ============================================ */}
       <header className="sticky top-0 z-10 bg-[var(--bg-primary)]/80 backdrop-blur-sm border-b border-[var(--border-color)] px-4 py-2 shadow-md shadow-black/5 dark:shadow-white/5 shrink-0">
         <div className="flex items-center justify-between gap-4 max-w-full relative">
-          {/* Logo centered on mobile, left on desktop */}
+          {/* Logo */}
           <div className="flex-1 sm:flex-none flex items-center justify-center sm:justify-start gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" className="w-8 h-8 shrink-0">
               <circle cx="50" cy="50" r="42" fill="none" stroke="#B8860B" strokeWidth="2.5" />
@@ -227,7 +272,7 @@ function AppContent() {
             <span className="text-xl font-medium text-gold-500 tracking-tight">ActiveMind</span>
           </div>
 
-          {/* Search bar - Desktop only */}
+          {/* Desktop Search */}
           <div className="hidden sm:flex flex-1 max-w-xs md:max-w-sm mx-auto relative">
             <div className="relative flex items-center w-full">
               <input
@@ -252,6 +297,7 @@ function AppContent() {
               </button>
             </div>
 
+            {/* Autocomplete Suggestions */}
             {searchMode === 'suggesting' && suggestions.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-card shadow-dropdown z-[150] overflow-hidden">
                 {suggestions.map((suggestion, idx) => (
@@ -267,7 +313,7 @@ function AppContent() {
             )}
           </div>
 
-          {/* Burger menu - desktop only */}
+          {/* Menu Button (Desktop) */}
           <div className="hidden sm:flex items-center gap-2 shrink-0">
             <button
               onClick={toggleMenu}
@@ -287,7 +333,9 @@ function AppContent() {
         </div>
       </header>
 
-      {/* Main area */}
+      {/* ============================================ */}
+      {/* MAIN LAYOUT: Sidebar + Content */}
+      {/* ============================================ */}
       <div className="flex flex-1 h-full overflow-hidden relative">
         <Sidebar
           onSelectTopic={handleSelectTopic}
@@ -303,13 +351,15 @@ function AppContent() {
             {selectedView === 'topic' && selectedTopicId && (
               <TopicView topicId={selectedTopicId} onOpenEntry={setSelectedEntryId} onTopicDeleted={handleTopicDeleted} showNewEntryForm={showNewEntryForm} setShowNewEntryForm={setShowNewEntryForm} />
             )}
-            {/* Desktop: Trash in the main area */}
+            {/* Desktop: Trash in main area */}
             {selectedView === 'trash' && !isMobile && <Trash />}
           </div>
         </main>
       </div>
 
-      {/* Mobile: Trash Overlay */}
+      {/* ============================================ */}
+      {/* MOBILE: Trash Fullscreen Overlay */}
+      {/* ============================================ */}
       {selectedView === 'trash' && isMobile && (
         <div className="fixed inset-0 z-[200] bg-[var(--bg-card)] flex flex-col animate-in fade-in duration-200">
           <div className="flex-1 overflow-y-auto p-4">
@@ -326,7 +376,9 @@ function AppContent() {
         </div>
       )}
 
-      {/* Mobile: Mobile Search Overlay */}
+      {/* ============================================ */}
+      {/* MOBILE: Search Fullscreen Overlay */}
+      {/* ============================================ */}
       {showMobileSearch && (
         <div className="fixed inset-0 z-[200] bg-black/30 backdrop-blur-sm" onClick={handleMobileSearchClose}>
           <div className="absolute top-0 left-0 right-0 bg-[var(--bg-card)] p-4 border-b border-[var(--border-color)]" onClick={(e) => e.stopPropagation()}>
@@ -365,7 +417,9 @@ function AppContent() {
         </div>
       )}
 
-      {/* Mobile: Mobile Bottom Bar */}
+      {/* ============================================ */}
+      {/* MOBILE: Bottom Navigation Bar */}
+      {/* ============================================ */}
       <MobileBottomBar
         onSearch={handleMobileSearchOpen}
         onDashboard={() => {
@@ -377,10 +431,14 @@ function AppContent() {
         onMenu={toggleMenu}
       />
 
-      {/* SearchLayer */}
+      {/* ============================================ */}
+      {/* SEARCH LAYER: Results overlay */}
+      {/* Desktop: Centered floating panel with blur backdrop */}
+      {/* Mobile: Fullscreen overlay with close button */}
+      {/* ============================================ */}
       {searchMode === 'searching' && (
         <>
-          {/* Desktop: Blur-Overlay */}
+          {/* Desktop: Blur backdrop */}
           {!isMobile && (
             <div 
               className="fixed inset-0 z-[100] backdrop-blur-sm bg-black/5 dark:bg-white/5" 
@@ -399,7 +457,10 @@ function AppContent() {
         </>
       )}
 
-      {/* EntryDetail Overlay */}
+      {/* ============================================ */}
+      {/* ENTRY DETAIL: Lazy-loaded overlay */}
+      {/* Only renders when an entry is selected */}
+      {/* ============================================ */}
       {selectedEntryId && (
         <Suspense fallback={<div className="fixed top-1/2 right-6">Loading ...</div>}>
           <ErrorBoundary fallback={
@@ -413,7 +474,9 @@ function AppContent() {
         </Suspense>
       )}
 
-      {/* Menu Overlay */}
+      {/* ============================================ */}
+      {/* MENU OVERLAY: User menu with dark mode toggle */}
+      {/* ============================================ */}
       <MenuOverlay 
         isOpen={isMenuOpen} 
         onClose={() => setIsMenuOpen(false)} 
@@ -425,6 +488,9 @@ function AppContent() {
   );
 }
 
+// ============================================
+// APP ROOT: Wraps with ErrorBoundary and Routes
+// ============================================
 function App() {
   return (
     <ErrorBoundary>

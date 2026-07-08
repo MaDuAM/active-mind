@@ -19,10 +19,13 @@ export function MobileBottomBar({
 }: MobileBottomBarProps) {
   const { user } = useAuth();
 
+  // Only show when user is logged in
   if (!user) return null;
 
   return (
     <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--bg-card)] border-t border-[var(--border-color)] flex items-center justify-around px-2 py-1.5 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] dark:shadow-[0_-2px_10px_rgba(255,255,255,0.05)]">
+      
+      {/* Search Button */}
       <button
         onClick={onSearch}
         className="flex flex-col items-center justify-center w-12 h-12 text-[var(--text-muted)] hover:text-gold-500 transition-colors"
@@ -35,6 +38,7 @@ export function MobileBottomBar({
         <span className="text-[10px]">Search</span>
       </button>
 
+      {/* Dashboard Button */}
       <button
         onClick={onDashboard}
         className="flex flex-col items-center justify-center w-12 h-12 text-[var(--text-muted)] hover:text-gold-500 transition-colors"
@@ -49,6 +53,7 @@ export function MobileBottomBar({
         <span className="text-[10px]">Dashboard</span>
       </button>
 
+      {/* New Entry Button (FAB style - raised) */}
       <button
         onClick={onNewEntry}
         className="flex flex-col items-center justify-center w-12 h-12 -mt-4 bg-gold-500 text-white rounded-full shadow-md hover:bg-gold-600 transition-colors"
@@ -60,6 +65,7 @@ export function MobileBottomBar({
         </svg>
       </button>
 
+      {/* Topics Button */}
       <button
         onClick={onTopics}
         className="flex flex-col items-center justify-center w-12 h-12 text-[var(--text-muted)] hover:text-gold-500 transition-colors"
@@ -71,6 +77,7 @@ export function MobileBottomBar({
         <span className="text-[10px]">Topics</span>
       </button>
 
+      {/* Menu Button */}
       <button
         onClick={onMenu}
         className="flex flex-col items-center justify-center w-12 h-12 text-[var(--text-muted)] hover:text-gold-500 transition-colors"

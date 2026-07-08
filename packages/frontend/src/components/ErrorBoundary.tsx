@@ -13,6 +13,18 @@ interface State {
   error: Error | null;
 }
 
+// ============================================
+// Error Boundary Component
+// 
+// Catches JavaScript errors in child component tree.
+// Prevents the entire app from crashing on UI errors.
+// 
+// Features:
+// - Renders fallback UI when error occurs
+// - Logs errors to console
+// - Optional custom error handler callback
+// - Reset functionality to recover from errors
+// ============================================
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -22,6 +34,10 @@ export class ErrorBoundary extends Component<Props, State> {
     };
   }
 
+  // ============================================
+  // Static getDerivedStateFromError
+  // Updates state when error is thrown in child component
+  // ============================================
   static getDerivedStateFromError(error: Error): State {
     return {
       hasError: true,
@@ -29,6 +45,10 @@ export class ErrorBoundary extends Component<Props, State> {
     };
   }
 
+  // ============================================
+  // componentDidCatch
+  // Logs error and calls optional onError callback
+  // ============================================
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
 
@@ -37,6 +57,10 @@ export class ErrorBoundary extends Component<Props, State> {
     }
   }
 
+  // ============================================
+  // handleReset
+  // Resets error state to recover from error
+  // ============================================
   handleReset = () => {
     this.setState({
       hasError: false,
@@ -45,11 +69,16 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   render() {
+    // ============================================
+    // Error State: Render fallback UI
+    // ============================================
     if (this.state.hasError) {
+      // Use custom fallback if provided
       if (this.props.fallback) {
         return this.props.fallback;
       }
 
+      // Default fallback UI
       return (
         <div className="p-10 m-5 max-w-xl mx-auto text-center bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-card">
           <h2 className="text-error font-semibold text-xl mt-0">Something went wrong.</h2>
@@ -61,7 +90,7 @@ export class ErrorBoundary extends Component<Props, State> {
               onClick={this.handleReset}
               className="btn-primary"
             >
-              Neu laden
+              Try again
             </button>
             <button
               onClick={() => window.location.reload()}
@@ -74,6 +103,9 @@ export class ErrorBoundary extends Component<Props, State> {
       );
     }
 
+    // ============================================
+    // No Error: Render children normally
+    // ============================================
     return this.props.children;
   }
 }

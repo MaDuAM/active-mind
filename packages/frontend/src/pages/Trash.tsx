@@ -1,6 +1,6 @@
 // frontend/src/pages/Trash.tsx
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { usePaginatedEntries, useTopics, useRestoreEntry, usePermanentDeleteEntry } from '../hooks';
@@ -22,6 +22,9 @@ export function Trash() {
     rootMargin: '100px',
   });
 
+  // ============================================
+  // Data Fetching
+  // ============================================
   const {
     data,
     fetchNextPage,
@@ -40,7 +43,6 @@ export function Trash() {
   const permanentDeleteMutation = usePermanentDeleteEntry();
 
   const isLoading = entriesLoading || topicsLoading;
-
   const allEntries = data?.pages.flatMap((page) => page.data) || [];
 
   // ============================================
@@ -64,15 +66,26 @@ export function Trash() {
     },
   });
 
+  // ============================================
+  // Infinite Scroll
+  // ============================================
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const getTopicName = (topicId: number) =>
-    topics.find((t) => t.id === topicId)?.name || '?';
+  // ============================================
+  // Memoized Callbacks
+  // ============================================
+  const getTopicName = useCallback(
+    (topicId: number) => topics.find((t) => t.id === topicId)?.name || '?',
+    [topics]
+  );
 
+  // ============================================
+  // Handlers
+  // ============================================
   const handleRestore = async (id: number) => {
     try {
       await restoreMutation.mutateAsync(id);
@@ -82,7 +95,7 @@ export function Trash() {
         queryKey: ['entries-paginated']
       });
     } catch (_error) {
-      // Error handled globaly
+      // Error is handled globally
     }
   };
 
@@ -101,20 +114,23 @@ export function Trash() {
         queryKey: ['entries-paginated']
       });
     } catch (_error) {
-      // Error handled globaly
+      // Error is handled globally
     } finally {
       setShowDeleteConfirm(false);
       setPendingDeleteId(null);
     }
   };
 
+  // ============================================
+  // Skeleton Loading State
+  // ============================================
   if (isLoading && allEntries.length === 0) {
     return <div className="p-6 text-[var(--text-secondary)]">Loading Removed Entries...</div>;
   }
 
   return (
     <div className="max-w-7xl mx-auto">
-      {/* Header with Clear All button (always visible) */}
+      {/* Header with Clear All button */}
       <div className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--border-color)]">
         <h1 className="text-2xl font-semibold text-gold-500 tracking-tight">Removed Entries</h1>
         <button
@@ -126,7 +142,7 @@ export function Trash() {
         </button>
       </div>
 
-      {/* Empty State or Entry-List */}
+      {/* Empty State or Entry List */}
       {allEntries.length === 0 ? (
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-[var(--text-muted)]">
           <span className="text-2xl mb-4">🗑️</span>
@@ -181,6 +197,7 @@ export function Trash() {
             </div>
           ))}
 
+          {/* Infinite Scroll Trigger */}
           {hasNextPage && (
             <div ref={ref} className="py-6 text-center">
               {isFetchingNextPage ? (
@@ -199,7 +216,7 @@ export function Trash() {
         </div>
       )}
 
-      {/* Confirm dialog for individual permanent delete */}
+      {/* Confirm Dialog for single permanent delete */}
       <ConfirmDialog
         isOpen={showDeleteConfirm}
         title="Delete entry permanently?"
@@ -213,7 +230,7 @@ export function Trash() {
         isPending={permanentDeleteMutation.isPending}
       />
 
-      {/* Confirm dialog for Clear All */}
+      {/* Confirm Dialog for Clear All */}
       <ConfirmDialog
         isOpen={showClearConfirm}
         title="Clear Removed Entries?"

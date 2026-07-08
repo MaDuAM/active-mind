@@ -6,6 +6,8 @@ import { apiClient } from '../lib/apiClient';
 
 // ============================================
 // QUERY KEYS
+// Centralized cache keys for React Query
+// Enables consistent invalidation across hooks
 // ============================================
 export const queryKeys = {
   entry: (id: number) => ['entry', id] as const,
@@ -13,8 +15,16 @@ export const queryKeys = {
 };
 
 // ============================================
-// API fetch functions
+// API FETCH FUNCTIONS
+// Thin wrappers around apiClient with typed responses
+// Each function maps directly to a backend endpoint
 // ============================================
+
+/**
+ * Fetch paginated entries with optional filters
+ * @param filters - Topic ID, area, status, deleted-only, pagination params
+ * @returns Paginated response with entries and metadata
+ */
 const api = {
   getEntries: async (filters?: {
     topicId?: number;
@@ -37,18 +47,32 @@ const api = {
     }>('/entries', filters);
   },
 
+  /**
+   * Fetch a single entry by ID with its tracking history
+   */
   getEntry: async (id: number) => {
     return apiClient.get<Entry & { trackings: Tracking[] }>(`/entries/${id}`);
   },
 
+  /**
+   * Fetch all topics for the current user
+   */
   getTopics: async () => {
     return apiClient.get<Topic[]>('/topics');
   },
 
+  /**
+   * Create a new entry
+   * @param data - Entry data including area, topic, essence, etc.
+   */
   createEntry: async (data: CreateEntryPayload) => {
     return apiClient.post<Entry>('/entries', data);
   },
 
+  /**
+   * Update an existing entry
+   * @param data - Entry ID + fields to update + optional change note
+   */
   updateEntry: async ({ id, ...data }: {
     id: number;
     essenceText?: string;
@@ -61,43 +85,77 @@ const api = {
     return apiClient.put<Entry>(`/entries/${id}`, data);
   },
 
+  /**
+   * Soft-delete an entry (moves to trash)
+   */
   deleteEntry: async (id: number) => {
     return apiClient.delete<{ ok: true }>(`/entries/${id}`);
   },
 
+  /**
+   * Restore an entry from trash
+   */
   restoreEntry: async (id: number) => {
     return apiClient.post<{ ok: true }>(`/entries/${id}/restore`);
   },
 
+  /**
+   * Permanently delete an entry (cannot be undone)
+   */
   permanentDeleteEntry: async (id: number) => {
     return apiClient.delete<{ ok: true }>(`/entries/${id}/permanent`);
   },
 
+  /**
+   * Change entry status (WAITING ↔ ACTIVE ↔ PAUSED)
+   * Triggers a STATUS_CHANGE tracking entry
+   */
   changeStatus: async ({ id, newStatus, note }: { id: number; newStatus: string; note?: string }) => {
     return apiClient.post<{ ok: true }>(`/entries/${id}/status`, { newStatus, note });
   },
 
+  /**
+   * Change current step index for ACTIVE entries
+   * Triggers a STEP_CHANGE tracking entry
+   */
   changeStep: async ({ id, newStepIndex, note }: { id: number; newStepIndex: number; note?: string }) => {
     return apiClient.post<{ ok: true }>(`/entries/${id}/step`, { newStepIndex, note });
   },
 
+  /**
+   * Add a manual tracking entry with custom timestamp
+   * Used for backdating progress or offline work
+   */
   addManualTracking: async ({ id, timestamp, note }: { id: number; timestamp: string; note?: string }) => {
     return apiClient.post<{ ok: true }>(`/entries/${id}/tracking/manual`, { timestamp, note });
   },
 
+  /**
+   * Create a new topic
+   */
   createTopic: async (name: string) => {
     return apiClient.post<Topic>('/topics', { name });
   },
 
+  /**
+   * Delete a topic (only allowed when no entries remain)
+   */
   deleteTopic: async (id: number) => {
     return apiClient.delete<{ ok: true }>(`/topics/${id}`);
   },
 };
 
 // ============================================
-// Query Hooks
+// QUERY HOOKS
+// React Query hooks for data fetching
 // ============================================
 
+/**
+ * Infinite query for paginated entries with scroll-based loading
+ * @param filters - Filters and pagination options
+ * @param enabled - Whether the query should run
+ * @returns Infinite query result with fetchNextPage, hasNextPage, etc.
+ */
 export const usePaginatedEntries = (
   filters?: {
     topicId?: number;
@@ -120,6 +178,10 @@ export const usePaginatedEntries = (
         page: pageParam,
         limit,
       }),
+    /**
+     * Determines the next page from the last response
+     * Returns undefined when no more pages exist
+     */
     getNextPageParam: (lastPage) => {
       const { page, hasNextPage } = lastPage.pagination;
       return hasNextPage ? page + 1 : undefined;
@@ -134,6 +196,11 @@ export const usePaginatedEntries = (
   });
 };
 
+/**
+ * Fetch a single entry by ID with its trackings
+ * @param id - Entry ID
+ * @returns Query result containing entry + trackings
+ */
 export const useEntry = (id: number) => {
   return useQuery({
     queryKey: queryKeys.entry(id),
@@ -142,19 +209,30 @@ export const useEntry = (id: number) => {
   });
 };
 
+/**
+ * Fetch all topics for the current user
+ * @param enabled - Whether the query should run
+ * @returns Query result with topics array
+ */
 export const useTopics = (enabled: boolean = true) => {
   return useQuery({
     queryKey: queryKeys.topics(),
     queryFn: api.getTopics,
-    staleTime: 300000,
+    staleTime: 300000, // 5 minutes - topics rarely change
     enabled,
   });
 };
 
 // ============================================
-// Mutation Hooks
+// MUTATION HOOKS
+// React Query mutations for data modifications
+// Each hook invalidates relevant queries on success
 // ============================================
 
+/**
+ * Change entry status (WAITING/ACTIVE/PAUSED)
+ * Invalidates entry list cache on success
+ */
 export const useStatusChange = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -165,6 +243,10 @@ export const useStatusChange = () => {
   });
 };
 
+/**
+ * Change current step index for ACTIVE entries
+ * Invalidates entry list cache on success
+ */
 export const useStepChange = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -175,6 +257,10 @@ export const useStepChange = () => {
   });
 };
 
+/**
+ * Soft-delete entry (moves to trash)
+ * Invalidates entry list cache on success
+ */
 export const useDeleteEntry = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -185,6 +271,10 @@ export const useDeleteEntry = () => {
   });
 };
 
+/**
+ * Restore entry from trash
+ * Invalidates entry list cache on success
+ */
 export const useRestoreEntry = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -195,6 +285,10 @@ export const useRestoreEntry = () => {
   });
 };
 
+/**
+ * Update entry fields (essence, actionName, steps, etc.)
+ * Invalidates both list and single entry cache on success
+ */
 export const useUpdateEntry = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -206,6 +300,10 @@ export const useUpdateEntry = () => {
   });
 };
 
+/**
+ * Create a new entry
+ * Invalidates entry list cache on success
+ */
 export const useCreateEntry = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -216,6 +314,10 @@ export const useCreateEntry = () => {
   });
 };
 
+/**
+ * Permanently delete entry (cannot be undone)
+ * Invalidates entry list cache on success
+ */
 export const usePermanentDeleteEntry = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -226,6 +328,10 @@ export const usePermanentDeleteEntry = () => {
   });
 };
 
+/**
+ * Add manual tracking entry with custom timestamp
+ * Invalidates entry list cache on success
+ */
 export const useManualTracking = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -236,6 +342,10 @@ export const useManualTracking = () => {
   });
 };
 
+/**
+ * Create a new topic
+ * Invalidates topics cache on success
+ */
 export const useCreateTopic = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -246,6 +356,10 @@ export const useCreateTopic = () => {
   });
 };
 
+/**
+ * Delete a topic (only when empty)
+ * Invalidates topics and entry list caches on success
+ */
 export const useDeleteTopic = () => {
   const queryClient = useQueryClient();
   return useMutation({

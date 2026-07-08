@@ -5,8 +5,12 @@ import { useNotification } from '../context/NotificationContext';
 export function Toast() {
   const { notifications, removeNotification } = useNotification();
 
+  // No notifications to display
   if (notifications.length === 0) return null;
 
+  // ============================================
+  // Helper: Get border color based on notification type
+  // ============================================
   const getBorderColor = (type: string) => {
     switch (type) {
       case 'success':
@@ -29,10 +33,16 @@ export function Toast() {
           key={n.id}
           className={`bg-white dark:bg-gray-800 border-l-4 ${getBorderColor(n.type)} rounded-card shadow-dropdown px-4 py-3 flex items-center gap-3 animate-in slide-in-from-top-5 duration-200 w-full`}
         >
-          <span className="text-sm text-[var(--text-primary)] flex-1 text-center">{n.message}</span>
+          {/* Message */}
+          <span className="text-sm text-[var(--text-primary)] flex-1 text-center">
+            {n.message}
+          </span>
+
+          {/* Close Button */}
           <button
             onClick={() => removeNotification(n.id)}
             className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition shrink-0 text-lg leading-none"
+            aria-label="Close notification"
           >
             ✕
           </button>

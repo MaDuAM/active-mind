@@ -15,7 +15,9 @@ const prisma = new PrismaClient();
 const app = express();
 const PORT = config.PORT;
 
-// 1. Helmet (Security Headers + CSP)
+// ============================================
+// 1. Security: Helmet with CSP
+// ============================================
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -39,7 +41,9 @@ app.use(
   })
 );
 
-// 2. CORS
+// ============================================
+// 2. CORS Configuration
+// ============================================
 const allowedOrigins = [
   'http://localhost:5173',
   config.FRONTEND_URL,
@@ -53,29 +57,34 @@ app.use(cors({
 
 app.use(express.json());
 
-// 3. Rate-Limiting
+// ============================================
+// 3. Rate Limiting
+// ============================================
 const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // 100 requests per window
   message: { error: 'Too many requests, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 10 requests per window (stricter for auth)
   message: { error: 'Too many login attempts, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
-  skipSuccessfulRequests: true,
+  skipSuccessfulRequests: true, // Don't count successful logins
 });
 
 app.use('/api/v1/auth/login', authLimiter);
 app.use('/api/v1/auth/register', authLimiter);
 app.use('/api/v1/', globalLimiter);
 
-// 4. Session configuration (with production suitability)
+// ============================================
+// 4. Session Configuration
+// Uses PostgreSQL session store in production
+// ============================================
 const sessionStore = config.NODE_ENV === 'production' 
   ? new (require('connect-pg-simple')(session))({
       conString: config.DATABASE_URL,
@@ -91,21 +100,26 @@ app.use(session({
   store: sessionStore,
   cookie: {
     httpOnly: true,
-    secure: config.NODE_ENV === 'production',  // <- NUR in Production
+    secure: config.NODE_ENV === 'production', // HTTPS only in production
     sameSite: 'lax',
-    maxAge: 24 * 60 * 60 * 1000,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
     ...(config.NODE_ENV === 'production' && config.COOKIE_DOMAIN && {
       domain: config.COOKIE_DOMAIN,
     })
   }
 }));
 
+// ============================================
 // 5. Routes
+// ============================================
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/topics', topicRouter);
 app.use('/api/v1/entries', entryRouter);
 
-// 6. Health-Check (with DB)
+// ============================================
+// 6. Health Check
+// Verifies database connectivity
+// ============================================
 app.get('/api/v1/health', async (req, res) => {
   const health = {
     status: 'ok',
@@ -125,10 +139,14 @@ app.get('/api/v1/health', async (req, res) => {
   }
 });
 
-// 7. Export for tests
+// ============================================
+// 7. Export for Testing
+// ============================================
 export default app;
 
-// 8. Server-Start
+// ============================================
+// 8. Server Start
+// ============================================
 if (config.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     console.log(`Backend running on http://localhost:${PORT}`);

@@ -23,6 +23,9 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
     rootMargin: '100px',
   });
 
+  // ============================================
+  // Data Fetching
+  // ============================================
   const {
     data,
     fetchNextPage,
@@ -35,12 +38,11 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
   const { data: topics = [], isLoading: topicsLoading } = useTopics(true);
 
   const isLoading = entriesLoading || topicsLoading;
+  const allEntries = data?.pages.flatMap((page) => page.data) || [];
 
   // ============================================
   // Computed Data: Group entries by section
   // ============================================
-  const allEntries = data?.pages.flatMap((page) => page.data) || [];
-
   const sections = useMemo(() => {
     const active = allEntries.filter(
       (e: Entry) => e.area === 'ACTIVE' && e.status === 'ACTIVE'
@@ -58,7 +60,6 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
       (e: Entry) => e.area === 'PASSIVE' && e.status === 'PAUSED'
     );
     const paused = [...pausedActive, ...pausedPassive];
-
     const knowledge = allEntries.filter((e: Entry) => e.area === 'KNOWLEDGE');
 
     return {
@@ -74,7 +75,7 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
   }, [allEntries]);
 
   // ============================================
-  // Section State
+  // Section Expansion State
   // ============================================
   const { expanded, allExpanded, toggleSection, toggleAll } = useSectionState({
     autoExpand: true,
@@ -100,6 +101,15 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
     (id: number) => onOpenEntry(id),
     [onOpenEntry]
   );
+
+  const handleNewEntrySuccess = useCallback(() => {
+    setShowNewEntryForm(false);
+    refetchEntries();
+  }, [setShowNewEntryForm, refetchEntries]);
+
+  const handleNewEntryCancel = useCallback(() => {
+    setShowNewEntryForm(false);
+  }, [setShowNewEntryForm]);
 
   // ============================================
   // Infinite Scroll
@@ -147,11 +157,8 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
       {showNewEntryForm && (
         <Suspense fallback={<div className="p-6 text-[var(--text-secondary)]">Loading Form...</div>}>
           <NewEntryForm
-            onSuccess={() => {
-              setShowNewEntryForm(false);
-              refetchEntries();
-            }}
-            onCancel={() => setShowNewEntryForm(false)}
+            onSuccess={handleNewEntrySuccess}
+            onCancel={handleNewEntryCancel}
           />
         </Suspense>
       )}

@@ -20,11 +20,17 @@ function EntryRowComponent({
   topicName,
   className = '',
 }: EntryRowProps) {
+  // ============================================
+  // Computed Values
+  // ============================================
   const isActive = entry.area === 'ACTIVE' && entry.steps && entry.steps.length > 0;
   const stepInfo = isActive
     ? `Step ${(entry.currentStepIndex || 0) + 1}/${entry.steps!.length}`
     : '';
 
+  // ============================================
+  // Status Helpers
+  // ============================================
   const getStatusLabel = (status?: string) => {
     if (!status) return '';
     switch (status) {
@@ -49,6 +55,9 @@ function EntryRowComponent({
     }
   };
 
+  // ============================================
+  // Styling Helpers
+  // ============================================
   const getBorderColor = (entry: Entry) => {
     if (entry.status === 'WAITING') {
       return 'border-blue-200 dark:border-blue-400/40';
@@ -93,12 +102,16 @@ function EntryRowComponent({
       onMouseEnter={() => onHover?.(entry.id)}
       className={`card cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-3 hover:ring-2 hover:ring-offset-0 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 py-2.5 px-4 ${getBorderColor(entry)} ${getRingColor(entry)} ${className}`}
     >
-      {/* Left side: Action Name */}
+      {/* ============================================ */}
+      {/* Left: Action Name */}
+      {/* ============================================ */}
       <span className="text-sm font-medium text-[var(--text-primary)] truncate flex-1 min-w-0">
         {entry.actionName || entry.essenceShort}
       </span>
 
-      {/* Mobile: metadata in 2nd line */}
+      {/* ============================================ */}
+      {/* Mobile: Metadata in second line */}
+      {/* ============================================ */}
       <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-[var(--text-secondary)] sm:hidden">
         {entry.status && (
           <span className="inline-flex items-center gap-1">
@@ -119,8 +132,11 @@ function EntryRowComponent({
         </span>
       </div>
 
-      {/* Desktop & Tablet: metadata with smaller gap */}
+      {/* ============================================ */}
+      {/* Desktop & Tablet: Metadata with compact spacing */}
+      {/* ============================================ */}
       <div className="hidden sm:flex items-center gap-2 lg:gap-3 shrink-0">
+        {/* Step Info (only for ACTIVE entries) */}
         {isActive && (
           <div className="w-[80px] lg:w-[110px] text-left">
             <span className="text-xs text-[var(--text-secondary)] bg-[var(--bg-secondary)] px-2 py-0.5 rounded-full">
@@ -129,6 +145,7 @@ function EntryRowComponent({
           </div>
         )}
 
+        {/* Benefit Star (only if benefit exists) */}
         {entry.benefit && (
           <div className="hidden xl:block w-[40px] lg:w-[60px] text-left">
             <span className="text-xs text-gold-500 bg-gold-50/50 px-2 py-0.5 rounded-full truncate block">
@@ -137,6 +154,7 @@ function EntryRowComponent({
           </div>
         )}
 
+        {/* Topic Name (optional) */}
         {showTopic && topicName && (
           <div className="hidden md:block w-[80px] lg:w-[130px] text-left">
             <span className="text-xs text-[var(--text-secondary)] truncate block">
@@ -145,12 +163,14 @@ function EntryRowComponent({
           </div>
         )}
 
+        {/* Created Date */}
         <div className="hidden sm:block w-[80px] lg:w-[100px] text-left">
           <span className="text-xs text-[var(--text-secondary)] whitespace-nowrap">
             {new Date(entry.createdAt).toLocaleDateString()}
           </span>
         </div>
 
+        {/* Status Badge */}
         {entry.status && (
           <div className="hidden sm:block w-[55px] lg:w-[75px] text-left">
             <span className="inline-flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
@@ -160,6 +180,7 @@ function EntryRowComponent({
           </div>
         )}
 
+        {/* Chevron/Arrow indicator */}
         <div className="w-[30px] lg:w-[40px] text-center shrink-0 flex items-center justify-center h-full">
           <span className="text-[var(--text-muted)] text-xl lg:text-2xl font-mono leading-none">›</span>
         </div>

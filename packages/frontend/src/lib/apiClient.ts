@@ -15,6 +15,19 @@ interface ApiResponse<T> {
   status: number;
 }
 
+// ============================================
+// API CLIENT
+// 
+// HTTP client with built-in retry logic, timeout handling,
+// and automatic error transformation.
+// 
+// Features:
+// - Automatic retries with exponential backoff
+// - Request timeout with abort controller
+// - Query parameter serialization
+// - Credentials: include (sends cookies)
+// - Error normalization (ApiError)
+// ============================================
 class ApiClient {
   private baseUrl: string;
   private defaultTimeout: number;
@@ -25,6 +38,7 @@ class ApiClient {
     defaultTimeout: number = 30000,
     defaultRetries: number = 2
   ) {
+    // Use environment variable or fallback to relative path
     this.baseUrl = baseUrl || 
       (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) || 
       '/api/v1';
@@ -32,8 +46,12 @@ class ApiClient {
     this.defaultRetries = defaultRetries;
   }
 
+  // ============================================
+  // buildUrl: Builds URL with query parameters
+  // Handles both absolute and relative URLs
+  // ============================================
   private buildUrl(endpoint: string, params?: Record<string, any>): string {
-    // Absolute URL: with URL constructor
+    // Absolute URL: use URL constructor
     if (this.baseUrl.startsWith('http://') || this.baseUrl.startsWith('https://')) {
       const url = new URL(endpoint, this.baseUrl);
       if (params) {
@@ -46,7 +64,7 @@ class ApiClient {
       return url.toString();
     }
 
-    // Relative URL: manually construct
+    // Relative URL: manual concatenation
     let url = `${this.baseUrl}${endpoint}`;
     if (params) {
       const searchParams = new URLSearchParams();
@@ -63,6 +81,12 @@ class ApiClient {
     return url;
   }
 
+  // ============================================
+  // fetchWithTimeout: Wraps fetch with abort controller
+  // 
+  // Why: Browser fetch has no built-in timeout.
+  // This creates an AbortController that aborts after `timeout` ms.
+  // ============================================
   private async fetchWithTimeout(url: string, options: RequestInit, timeout: number): Promise<Response> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -71,7 +95,7 @@ class ApiClient {
       const response = await fetch(url, {
         ...options,
         signal: controller.signal,
-        credentials: 'include',
+        credentials: 'include', // Required for session cookies
         headers: {
           'Content-Type': 'application/json',
           ...(options.headers as Record<string, string>),
@@ -88,6 +112,14 @@ class ApiClient {
     }
   }
 
+  // ============================================
+  // request: Core request method with retry logic
+  // 
+  // Retry strategy:
+  // - Only retries on network errors or 5xx responses
+  // - Does NOT retry on 4xx (client errors)
+  // - Exponential backoff: 1s, 2s, 4s, ...
+  // ============================================
   private async request<T>(
     endpoint: string,
     options: ApiClientOptions = {}
@@ -115,8 +147,13 @@ class ApiClient {
           data = await response.text();
         }
 
+        // ============================================
+        // Error handling: Normalize API errors
+        // - 401: Unauthorized (AuthContext handles this)
+        // - 4xx/5xx: Transform to ApiError with message
+        // ============================================
         if (!response.ok) {
-          // For 401: simple error, AuthContext takes care of it.
+          // 401: Let AuthContext handle it
           if (response.status === 401) {
             throw new Error('Unauthorized');
           }
@@ -145,14 +182,17 @@ class ApiClient {
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
 
+        // Client errors (4xx): Don't retry
         if (error instanceof ApiError && error.status && error.status >= 400 && error.status < 500) {
           throw error;
         }
 
+        // Last attempt: throw the error
         if (attempt === retries) {
           throw lastError;
         }
 
+        // Exponential backoff: wait 1s, 2s, 4s, ...
         const delay = Math.pow(2, attempt) * 1000;
         await new Promise(resolve => setTimeout(resolve, delay));
       }
@@ -160,6 +200,11 @@ class ApiClient {
 
     throw lastError || new Error('Request failed');
   }
+
+  // ============================================
+  // PUBLIC HTTP METHODS
+  // Type-safe wrappers around request()
+  // ============================================
 
   async get<T>(endpoint: string, params?: Record<string, any>, options?: ApiClientOptions): Promise<T> {
     const response = await this.request<T>(endpoint, {
@@ -203,4 +248,8 @@ class ApiClient {
   }
 }
 
+// ============================================
+// SINGLETON EXPORT
+// Re-export a single instance for the entire app
+// ============================================
 export const apiClient = new ApiClient();

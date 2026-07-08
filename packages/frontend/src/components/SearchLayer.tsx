@@ -24,12 +24,16 @@ export function SearchLayer({
   searchTerm = '',
   isMobile = false,
 }: SearchLayerProps) {
+  // ============================================
+  // Helper: Get topic name by ID
+  // ============================================
   const getTopicName = (topicId: number) => topics.find((t) => t.id === topicId)?.name || '?';
 
   // ============================================
   // Mobile: Fullscreen Overlay
   // ============================================
   if (isMobile) {
+    // Loading State
     if (isLoading) {
       return (
         <div className="fixed inset-0 z-[200] bg-[var(--bg-card)] flex flex-col animate-in fade-in duration-200">
@@ -51,6 +55,7 @@ export function SearchLayer({
       );
     }
 
+    // Empty Results
     if (entries.length === 0) {
       return (
         <div className="fixed inset-0 z-[200] bg-[var(--bg-card)] flex flex-col animate-in fade-in duration-200">
@@ -85,8 +90,10 @@ export function SearchLayer({
       );
     }
 
+    // Results
     return (
       <div className="fixed inset-0 z-[200] bg-[var(--bg-card)] flex flex-col animate-in fade-in duration-200">
+        {/* Header */}
         <div className="shrink-0 px-4 py-3 border-b border-[var(--border-color)] bg-[var(--bg-card)]">
           <div className="flex items-center gap-3">
             <div className="flex-1">
@@ -104,6 +111,7 @@ export function SearchLayer({
           </div>
         </div>
 
+        {/* Results List */}
         <div className="flex-1 overflow-y-auto px-4 py-3">
           <div className="space-y-2 pb-2">
             {entries.map((entry) => (
@@ -127,6 +135,7 @@ export function SearchLayer({
           )}
         </div>
 
+        {/* Close Button (Mobile) */}
         <div className="shrink-0 px-4 py-4 flex justify-center border-t border-[var(--border-color)] bg-[var(--bg-card)]">
           <button
             onClick={onClose}
@@ -140,8 +149,9 @@ export function SearchLayer({
   }
 
   // ============================================
-  // Desktop: Original (centered window)
+  // Desktop: Centered Floating Panel
   // ============================================
+  // Loading State
   if (isLoading) {
     return (
       <div className="fixed top-36 left-1/2 -translate-x-1/2 w-[900px] max-w-[90vw] bg-[var(--bg-card)] border border-[var(--border-color)] rounded-card shadow-dropdown overflow-y-auto z-[200] animate-in fade-in slide-in-from-top-4 duration-200">
@@ -158,6 +168,7 @@ export function SearchLayer({
     );
   }
 
+  // Empty Results
   if (entries.length === 0) {
     return (
       <div className="fixed top-36 left-1/2 -translate-x-1/2 w-[900px] max-w-[90vw] bg-[var(--bg-card)] border border-[var(--border-color)] rounded-card shadow-dropdown overflow-y-auto z-[200] animate-in fade-in slide-in-from-top-4 duration-200">
@@ -179,8 +190,10 @@ export function SearchLayer({
     );
   }
 
+  // Results
   return (
     <div className="fixed top-36 left-1/2 -translate-x-1/2 w-[900px] max-w-[90vw] max-h-[60vh] bg-[var(--bg-card)] border border-[var(--border-color)] rounded-card shadow-dropdown overflow-hidden z-[200] animate-in fade-in slide-in-from-top-4 duration-200 flex flex-col">
+      {/* Header */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border-color)] bg-[var(--bg-card)] shrink-0 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
         <strong className="text-[var(--text-primary)]">
           🔍 {entries.length} {entries.length === 1 ? 'result' : 'results'} for "{searchTerm}"
@@ -193,6 +206,7 @@ export function SearchLayer({
         </button>
       </div>
 
+      {/* Results List */}
       <div className="overflow-y-auto p-5 flex-1 relative">
         <div className="space-y-2 pb-2">
           {entries.map((entry) => (
@@ -215,6 +229,8 @@ export function SearchLayer({
           </div>
         )}
       </div>
+
+      {/* Fade gradient at bottom (scroll indicator) */}
       <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[var(--bg-card)] to-transparent pointer-events-none" />
     </div>
   );

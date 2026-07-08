@@ -1,6 +1,5 @@
 // components/EntrySection.tsx
 
-import { ReactNode } from 'react';
 import { Entry } from '../types';
 import { EntryRow } from './EntryRow';
 import { SectionKey } from '../hooks/useSectionState';
@@ -37,7 +36,6 @@ interface EntrySectionProps {
 }
 
 export function EntrySection({
-  section,
   title,
   emptyIcon,
   emptyMessage,

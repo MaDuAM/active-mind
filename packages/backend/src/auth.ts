@@ -13,16 +13,32 @@ declare module 'express-session' {
 const prisma = new PrismaClient();
 const router = Router();
 
-// Auxiliary functions for validation
+// ============================================
+// Validation Helpers
+// ============================================
+
+/**
+ * Validate username format
+ * - 3-20 characters
+ * - Alphanumeric and underscore only
+ */
 const isValidUsername = (username: string): boolean => {
   return /^[a-zA-Z0-9_]{3,20}$/.test(username);
 };
 
+/**
+ * Validate password length
+ * - 6-100 characters
+ */
 const isValidPassword = (password: string): boolean => {
   return password.length >= 6 && password.length <= 100;
 };
 
-// Setup – create admin account once (only if no user exists)
+// ============================================
+// Setup Route
+// Creates initial admin user if no users exist
+// Used for first-time setup only
+// ============================================
 router.post('/setup', async (req, res) => {
   const existing = await prisma.user.findFirst();
   if (existing) {
@@ -38,11 +54,14 @@ router.post('/setup', async (req, res) => {
   res.json({ message: 'Admin created. Login with admin/admin123', user: { id: user.id, username: user.username } });
 });
 
-// Register
+// ============================================
+// Register Route
+// Creates a new user account
+// ============================================
 router.post('/register', async (req, res) => {
   const { username, password } = req.body;
   
-  // 1. check username
+  // 1. Validate username
   if (!username) {
     return res.status(400).json({ error: 'Username required' });
   }
@@ -55,7 +74,7 @@ router.post('/register', async (req, res) => {
     });
   }
   
-  // 2. Check password
+  // 2. Validate password
   if (!password) {
     return res.status(400).json({ error: 'Password required' });
   }
@@ -68,7 +87,7 @@ router.post('/register', async (req, res) => {
     });
   }
   
-  // 3. Check for duplicates (DB constraint also catches them, but we provide a better error message)
+  // 3. Check for duplicate username
   const existing = await prisma.user.findUnique({ where: { username } });
   if (existing) {
     return res.status(400).json({ error: 'Username already taken' });
@@ -79,15 +98,19 @@ router.post('/register', async (req, res) => {
     data: { username, passwordHash: hash } 
   });
   
+  // Auto-login after registration
   (req.session as any).userId = user.id;
   res.json({ id: user.id, username: user.username });
 });
 
-// Login
+// ============================================
+// Login Route
+// Authenticates existing user
+// ============================================
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
   
-  // 1. check username
+  // 1. Validate username
   if (!username) {
     return res.status(400).json({ error: 'Username required' });
   }
@@ -95,7 +118,7 @@ router.post('/login', async (req, res) => {
     return res.status(400).json({ error: 'Username must be a string' });
   }
   
-  // 2. Check password
+  // 2. Validate password
   if (!password) {
     return res.status(400).json({ error: 'Password required' });
   }
@@ -113,11 +136,15 @@ router.post('/login', async (req, res) => {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
   
+  // Store userId in session
   (req.session as any).userId = user.id;
   res.json({ id: user.id, username: user.username });
 });
 
-// Logout
+// ============================================
+// Logout Route
+// Destroys server-side session
+// ============================================
 router.post('/logout', (req, res) => {
   req.session.destroy(() => {
     res.clearCookie('connect.sid');
@@ -125,7 +152,10 @@ router.post('/logout', (req, res) => {
   });
 });
 
-// Me
+// ============================================
+// Me Route
+// Returns current user info if authenticated
+// ============================================
 router.get('/me', async (req, res) => {
   const userId = (req.session as any).userId;
   if (!userId) return res.status(401).json({ error: 'Not logged in' });

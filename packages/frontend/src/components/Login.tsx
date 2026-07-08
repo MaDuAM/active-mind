@@ -5,33 +5,47 @@ import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 
 export function Login() {
+  // ============================================
+  // Form State
+  // ============================================
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const { login, register } = useAuth();
   const { showNotification } = useNotification();
 
+  // ============================================
+  // Form Submission Handler
+  // 
+  // Handles both login and register flows.
+  // - Login: Authenticates existing user
+  // - Register: Creates new account, auto-login on success
+  // ============================================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Prevent double submission
     if (isSubmitting) return;
 
     try {
       setIsSubmitting(true);
 
       if (isRegisterMode) {
+        // Register: Validate password match
         if (password !== passwordConfirm) {
           showNotification('error', 'Passwords do not match');
           return;
         }
         await register(username, password);
       } else {
+        // Login: Authenticate user
         await login(username, password);
       }
     } catch (_error) {
-      // The error is already displayed by AuthContext via toast.
+      // Error is already handled by AuthContext via toast notification
     } finally {
       setIsSubmitting(false);
     }
@@ -40,6 +54,9 @@ export function Login() {
   return (
     <div className="h-screen flex items-center justify-center bg-[var(--bg-secondary)] px-4">
       <div className="w-full max-w-md bg-[var(--bg-card)] rounded-card shadow-card p-8 border border-[var(--border-color)] -mt-16">
+        {/* ============================================ */}
+        {/* Header */}
+        {/* ============================================ */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-semibold text-gold-500 tracking-tight">
             {isRegisterMode ? 'Create Account' : 'ActiveMind'}
@@ -49,6 +66,9 @@ export function Login() {
           </p>
         </div>
 
+        {/* ============================================ */}
+        {/* Form */}
+        {/* ============================================ */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Username */}
           <div>
@@ -61,7 +81,7 @@ export function Login() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="input"
-              placeholder="z.B. peter.parker"
+              placeholder="e.g., peter.parker"
               required
               disabled={isSubmitting}
               autoComplete="username"
@@ -86,7 +106,7 @@ export function Login() {
             />
           </div>
 
-          {/* Password Confirm (only upon registration) */}
+          {/* Password Confirm (only in register mode) */}
           {isRegisterMode && (
             <div>
               <label htmlFor="password-confirm" className="label">
@@ -106,7 +126,7 @@ export function Login() {
             </div>
           )}
 
-          {/* Submit */}
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={isSubmitting}
@@ -125,6 +145,7 @@ export function Login() {
               type="button"
               onClick={() => {
                 setIsRegisterMode(!isRegisterMode);
+                // Reset password fields when switching modes
                 setPasswordConfirm('');
                 setPassword('');
               }}

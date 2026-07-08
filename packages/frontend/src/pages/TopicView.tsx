@@ -33,7 +33,7 @@ export default function TopicView({
   });
 
   // ============================================
-  // Queries
+  // Data Fetching
   // ============================================
   const {
     data,
@@ -55,13 +55,12 @@ export default function TopicView({
   const deleteTopicMutation = useDeleteTopic();
 
   const isLoading = entriesLoading || topicsLoading;
-
-  // ============================================
-  // Computed Data
-  // ============================================
   const allEntries = data?.pages.flatMap((page) => page.data) || [];
   const trashCount = trashData?.pages?.[0]?.pagination?.total || 0;
 
+  // ============================================
+  // Computed Data: Group entries by section
+  // ============================================
   const sections = useMemo(() => {
     const activeEntries = allEntries.filter((e: Entry) => !e.deletedAt && e.topicId === topicId);
 
@@ -92,7 +91,7 @@ export default function TopicView({
   }, [allEntries, topicId]);
 
   // ============================================
-  // Section State
+  // Section Expansion State
   // ============================================
   const { expanded, allExpanded, toggleSection, toggleAll } = useSectionState({
     autoExpand: true,
@@ -113,6 +112,15 @@ export default function TopicView({
     (id: number) => onOpenEntry(id),
     [onOpenEntry]
   );
+
+  const handleNewEntrySuccess = useCallback(() => {
+    setShowNewEntryForm(false);
+    refetchEntries();
+  }, [setShowNewEntryForm, refetchEntries]);
+
+  const handleNewEntryCancel = useCallback(() => {
+    setShowNewEntryForm(false);
+  }, [setShowNewEntryForm]);
 
   // ============================================
   // Infinite Scroll
@@ -181,11 +189,8 @@ export default function TopicView({
       {showNewEntryForm && (
         <Suspense fallback={<div className="p-6 text-[var(--text-secondary)]">Loading Form...</div>}>
           <NewEntryForm
-            onSuccess={() => {
-              setShowNewEntryForm(false);
-              refetchEntries();
-            }}
-            onCancel={() => setShowNewEntryForm(false)}
+            onSuccess={handleNewEntrySuccess}
+            onCancel={handleNewEntryCancel}
           />
         </Suspense>
       )}

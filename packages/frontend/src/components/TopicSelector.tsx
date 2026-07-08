@@ -22,16 +22,23 @@ export function TopicSelector({
   disabled = false,
   label = 'Topic Block',
 }: TopicSelectorProps) {
+  // ============================================
+  // Local State for "Create New" mode
+  // ============================================
   const [createNew, setCreateNew] = useState(false);
   const [newTopicName, setNewTopicName] = useState('');
 
+  // ============================================
+  // Select Change Handler
+  // Detects when user selects "Create New" option
+  // ============================================
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     if (value === 'new') {
       setCreateNew(true);
       setNewTopicName('');
     } else if (value === '') {
-      // Empty value → do nothing
+      // Empty value → do nothing (placeholder)
       return;
     } else {
       setCreateNew(false);
@@ -39,6 +46,9 @@ export function TopicSelector({
     }
   };
 
+  // ============================================
+  // Create New Handlers
+  // ============================================
   const handleCreateNew = () => {
     if (newTopicName.trim()) {
       onCreateNew(newTopicName.trim());
@@ -55,6 +65,10 @@ export function TopicSelector({
   return (
     <div>
       <label className="label">{label}</label>
+      
+      {/* ============================================ */}
+      {/* Existing Topic Selector */}
+      {/* ============================================ */}
       {!createNew ? (
         <select
           value={selectedTopicId ?? ''}
@@ -73,6 +87,9 @@ export function TopicSelector({
           <option value="new">+ New Topic Block</option>
         </select>
       ) : (
+        /* ============================================ */
+        /* Create New Topic Input */
+        /* ============================================ */
         <div className="flex gap-2">
           <input
             type="text"

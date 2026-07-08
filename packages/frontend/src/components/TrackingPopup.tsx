@@ -21,9 +21,14 @@ export function TrackingPopup({
   isPending = false,
   initialNote = '',
 }: TrackingPopupProps) {
+  // ============================================
+  // Local State
+  // ============================================
   const [note, setNote] = useState(initialNote);
 
-  // Reset when opened
+  // ============================================
+  // Reset note when popup opens
+  // ============================================
   useEffect(() => {
     if (isOpen) {
       setNote(initialNote);
@@ -32,6 +37,9 @@ export function TrackingPopup({
 
   if (!isOpen) return null;
 
+  // ============================================
+  // Handlers
+  // ============================================
   const handleConfirm = () => {
     onConfirm(note);
   };
@@ -40,6 +48,11 @@ export function TrackingPopup({
     onCancel();
   };
 
+  // ============================================
+  // Keyboard Shortcuts
+  // - Escape: Cancel
+  // - Ctrl/Cmd + Enter: Confirm
+  // ============================================
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
       handleCancel();
@@ -59,7 +72,10 @@ export function TrackingPopup({
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
+        {/* Header */}
         <h3 className="text-lg font-semibold text-[var(--text-primary)]">{title}</h3>
+
+        {/* Note Input */}
         <label className="label mt-4">{noteLabel}</label>
         <textarea
           value={note}
@@ -73,6 +89,8 @@ export function TrackingPopup({
         <div className="text-xs text-[var(--text-muted)] mt-1 text-right">
           {note.length}/500
         </div>
+
+        {/* Actions */}
         <div className="flex justify-end gap-3 mt-6">
           <button onClick={handleCancel} className="btn-secondary" disabled={isPending}>
             Cancel

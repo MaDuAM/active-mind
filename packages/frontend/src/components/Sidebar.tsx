@@ -21,6 +21,10 @@ export function Sidebar({
   isMobileOpen = false,
   onMobileClose,
 }: SidebarProps) {
+  // ============================================
+  // Desktop Collapse State
+  // Auto-collapse on tablet (768-1024px) for better space usage
+  // ============================================
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
       const width = window.innerWidth;
@@ -28,8 +32,10 @@ export function Sidebar({
     }
     return false;
   });
+
   const { data: topics = [], isLoading } = useTopics();
 
+  // Handle responsive collapse on resize
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
@@ -44,25 +50,28 @@ export function Sidebar({
   }, []);
 
   // ============================================
-  // Mobile: Overlay
+  // Mobile: Fullscreen Overlay
   // ============================================
   if (isMobileOpen) {
     return (
       <>
+        {/* Backdrop */}
         <div 
           className="fixed inset-0 z-[300] bg-black/30 backdrop-blur-sm"
           onClick={onMobileClose}
         />
+        {/* Panel */}
         <div className="fixed inset-0 z-[301] bg-[var(--bg-card)] flex flex-col animate-in fade-in slide-in-from-bottom duration-300">
+          {/* Header */}
           <div className="shrink-0 px-4 py-4 border-b border-[var(--border-color)] flex items-center justify-start">
             <span className="text-xl font-semibold text-gold-500">
               Topics
             </span>
           </div>
 
+          {/* Topic List */}
           <div className="flex-1 overflow-y-auto px-4 py-3">
             <div className="space-y-1">
-              {/* Dashboard removed – only topics */}
               {topics.map((topic: Topic) => (
                 <div
                   key={topic.id}
@@ -82,6 +91,7 @@ export function Sidebar({
             </div>
           </div>
 
+          {/* Close Button */}
           <div className="shrink-0 px-4 py-4 flex justify-center border-t border-[var(--border-color)]">
             <button
               onClick={onMobileClose}
@@ -97,7 +107,7 @@ export function Sidebar({
   }
 
   // ============================================
-  // Desktop
+  // Desktop Sidebar
   // ============================================
   if (isLoading) {
     return (
@@ -131,6 +141,9 @@ export function Sidebar({
         collapsed ? 'w-[68px]' : 'w-[210px]'
       } shadow-[2px_0_8px_-2px_rgba(0,0,0,0.05)] dark:shadow-[2px_0_8px_-2px_rgba(255,255,255,0.05)]`}
     >
+      {/* ============================================ */}
+      {/* Dashboard - fixed at top */}
+      {/* ============================================ */}
       <div className="shrink-0">
         <div
           onClick={() => onSelectTopic(null)}
@@ -146,10 +159,12 @@ export function Sidebar({
 
       <hr className="border-[var(--border-color)] my-3 shrink-0" />
 
-      {/* Scroll-Area: Topics-Headline + list */}
+      {/* ============================================ */}
+      {/* Scrollable: Topics List */}
+      {/* ============================================ */}
       <div className="flex-1 min-h-0 overflow-y-auto -mr-3 pr-3">
         <div className="space-y-1 pb-2">
-          {/* Topics-Headline + Collapse-Button */}
+          {/* Topics Header with Collapse Toggle */}
           <div className="flex items-center justify-between shrink-0 mb-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
               {collapsed ? '' : 'Topics'}
@@ -165,12 +180,14 @@ export function Sidebar({
             </button>
           </div>
 
-          {/* Topics-List */}
+          {/* Topics */}
           <div className="space-y-1">{topicItems}</div>
         </div>
       </div>
 
-      {/* Removed Entries – bottom position fix */}
+      {/* ============================================ */}
+      {/* Trash - fixed at bottom */}
+      {/* ============================================ */}
       <div className="shrink-0 pt-3 border-t border-[var(--border-color)] mt-1">
         <div
           onClick={onSelectTrash}

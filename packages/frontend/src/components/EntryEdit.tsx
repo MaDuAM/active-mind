@@ -20,6 +20,10 @@ interface EntryEditProps {
 }
 
 export function EntryEdit({ entry, onSave, onCancel, isPending = false, onChange }: EntryEditProps) {
+  // ============================================
+  // Local Form State
+  // Initialized from entry prop
+  // ============================================
   const [essenceText, setEssenceText] = useState(entry.essenceText);
   const [essenceShort, setEssenceShort] = useState(entry.essenceShort);
   const [actionName, setActionName] = useState(entry.actionName || '');
@@ -29,6 +33,10 @@ export function EntryEdit({ entry, onSave, onCancel, isPending = false, onChange
   );
   const [changeNote, setChangeNote] = useState('');
 
+  // ============================================
+  // Dirty Check: Compares current state with initial entry
+  // Notifies parent via onChange callback
+  // ============================================
   useEffect(() => {
     const hasChanges =
       essenceText !== entry.essenceText ||
@@ -41,6 +49,10 @@ export function EntryEdit({ entry, onSave, onCancel, isPending = false, onChange
     onChange?.(hasChanges);
   }, [essenceText, essenceShort, actionName, benefit, steps, changeNote, entry, onChange]);
 
+  // ============================================
+  // Form Submission
+  // Builds payload and passes to parent
+  // ============================================
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const data: any = {
@@ -50,6 +62,7 @@ export function EntryEdit({ entry, onSave, onCancel, isPending = false, onChange
       benefit,
       changeNote,
     };
+    // Steps only included for ACTIVE entries
     if (entry.area === 'ACTIVE') {
       data.steps = steps;
     }
@@ -59,6 +72,7 @@ export function EntryEdit({ entry, onSave, onCancel, isPending = false, onChange
   return (
     <form onSubmit={handleSubmit} className="space-y-4 flex flex-col h-full">
       <div className="flex-1 space-y-4">
+        {/* Essence Text */}
         <div>
           <label className="label">Essence Text</label>
           <textarea
@@ -70,6 +84,7 @@ export function EntryEdit({ entry, onSave, onCancel, isPending = false, onChange
           />
         </div>
 
+        {/* Essence Short */}
         <div>
           <label className="label">Essence Short</label>
           <input
@@ -80,6 +95,7 @@ export function EntryEdit({ entry, onSave, onCancel, isPending = false, onChange
           />
         </div>
 
+        {/* Action Name (only for PASSIVE/ACTIVE) */}
         {entry.actionName !== undefined && (
           <div>
             <label className="label">Action Name</label>
@@ -93,6 +109,7 @@ export function EntryEdit({ entry, onSave, onCancel, isPending = false, onChange
           </div>
         )}
 
+        {/* Benefit (only for PASSIVE/ACTIVE) */}
         {entry.benefit !== undefined && (
           <div>
             <label className="label">Benefit</label>
@@ -105,6 +122,7 @@ export function EntryEdit({ entry, onSave, onCancel, isPending = false, onChange
           </div>
         )}
 
+        {/* Steps Editor (only for ACTIVE) */}
         {entry.area === 'ACTIVE' && (
           <StepEditor
             steps={steps}
@@ -113,6 +131,7 @@ export function EntryEdit({ entry, onSave, onCancel, isPending = false, onChange
           />
         )}
 
+        {/* Change Note */}
         <div>
           <label className="label">Change note (optional)</label>
           <textarea
@@ -126,7 +145,9 @@ export function EntryEdit({ entry, onSave, onCancel, isPending = false, onChange
         </div>
       </div>
 
+      {/* ============================================ */}
       {/* Desktop: Save/Cancel Buttons */}
+      {/* ============================================ */}
       <div className="hidden sm:flex gap-2 pt-4 border-t border-[var(--border-color)]">
         <button type="submit" disabled={isPending} className="btn-primary">
           {isPending ? 'Saving...' : 'Save'}
@@ -136,7 +157,9 @@ export function EntryEdit({ entry, onSave, onCancel, isPending = false, onChange
         </button>
       </div>
 
-      {/* Mobile: Action Buttons */}
+      {/* ============================================ */}
+      {/* Mobile: Action Buttons (full width) */}
+      {/* ============================================ */}
       <div className="sm:hidden shrink-0 pt-4 mt-4 border-t border-[var(--border-color)]">
         <div className="flex gap-3">
           <button type="submit" disabled={isPending} className="btn-primary text-sm px-3 py-2 flex-1">

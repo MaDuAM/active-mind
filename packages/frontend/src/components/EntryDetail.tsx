@@ -15,6 +15,13 @@ interface EntryDetailProps {
   onClose: () => void;
 }
 
+// ============================================
+// PendingAction: Queues user actions that require a tracking note
+// 
+// Why: Status changes, step changes, and edits all require
+// a tracking note before being persisted. This type stores
+// the pending action until the user confirms via TrackingPopup.
+// ============================================
 type PendingAction =
   | { type: 'status'; data: { newStatus: Status } }
   | { type: 'step'; data: { newStepIndex: number } }
@@ -31,12 +38,18 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
   const { showNotification } = useNotification();
   const { data: entry, isLoading, refetch } = useEntry(entryId);
 
+  // ============================================
+  // Mutations
+  // ============================================
   const statusMutation = useStatusChange();
   const stepMutation = useStepChange();
   const updateMutation = useUpdateEntry();
   const deleteMutation = useDeleteEntry();
   const manualTrackingMutation = useManualTracking();
 
+  // ============================================
+  // UI State
+  // ============================================
   const [isEditing, setIsEditing] = useState(false);
   const [showTrackingPopup, setShowTrackingPopup] = useState(false);
   const [showManualTrack, setShowManualTrack] = useState(false);
@@ -44,6 +57,11 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [pendingCloseAction, setPendingCloseAction] = useState<'close' | 'edit-cancel' | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  
+  // ============================================
+  // Dirty State: Tracks if edit form has actual changes
+  // Used to prevent accidental close with unsaved changes
+  // ============================================
   const [hasActualChanges, setHasActualChanges] = useState(false);
 
   const isDirty = isEditing && hasActualChanges;
@@ -52,6 +70,11 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
     setHasActualChanges(hasChanges);
   };
 
+  // ============================================
+  // Close Handler: Checks for unsaved changes
+  // If editing with dirty state, shows confirmation dialog
+  // Otherwise closes immediately or exits edit mode
+  // ============================================
   const handleClose = () => {
     if (isEditing) {
       if (isDirty) {
@@ -87,6 +110,9 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
     setPendingCloseAction(null);
   };
 
+  // ============================================
+  // Delete Handler: Soft-delete with confirmation
+  // ============================================
   const handleDelete = () => {
     setShowDeleteConfirm(true);
   };
@@ -102,6 +128,10 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
     }
   };
 
+  // ============================================
+  // Status/Step Change: Queue action, show tracking popup
+  // The actual mutation happens after user provides a note
+  // ============================================
   const handleStatusChange = (newStatus: Status) => {
     setPendingAction({ type: 'status', data: { newStatus } });
     setShowTrackingPopup(true);
@@ -112,6 +142,9 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
     setShowTrackingPopup(true);
   };
 
+  // ============================================
+  // Edit Save: Updates entry via API
+  // ============================================
   const handleEditSave = async (data: {
     essenceText: string;
     essenceShort: string;
@@ -134,6 +167,10 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
     }
   };
 
+  // ============================================
+  // Tracking Confirm: Executes pending action with note
+  // Called after user confirms TrackingPopup
+  // ============================================
   const handleTrackingConfirm = async (note: string) => {
     try {
       if (!pendingAction) {
@@ -176,6 +213,10 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
     }
   };
 
+  // ============================================
+  // Manual Tracking: Adds arbitrary tracking entry
+  // User provides timestamp and note
+  // ============================================
   const handleManualTrack = async (timestamp: string, note: string) => {
     try {
       await manualTrackingMutation.mutateAsync({
@@ -187,7 +228,7 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
       setShowManualTrack(false);
       refetch();
     } catch (_error) {
-      // Fehler wird global behandelt
+      // Error is handled globally
     }
   };
 
@@ -233,10 +274,10 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
           </div>
 
           <div className="space-y-4 animate-pulse flex-1">
-            {/* ... Skeleton Inhalt ... */}
+            {/* Skeleton content */}
           </div>
 
-          {/* Mobile X-Button unten */}
+          {/* Mobile X-Button skeleton */}
           <div className="sm:hidden shrink-0 pt-4 mt-4 border-t border-[var(--border-color)] flex justify-center">
             <div className="w-12 h-12 rounded-full bg-[var(--bg-secondary)]" />
           </div>
@@ -287,12 +328,13 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* ============================================ */}
-        {/* HEADER: Desktop: Back-Button + Action Name */}
-        {/* Mobile: only centered Action Name */}
+        {/* HEADER */}
+        {/* Desktop: Back button + Action Name */}
+        {/* Mobile: Only centered action name */}
         {/* ============================================ */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            {/* Desktop: Back-Button */}
+            {/* Desktop: Back button */}
             <button
               onClick={handleClose}
               className="hidden sm:flex w-8 h-8 rounded-full items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-gold-500 hover:text-white transition-colors disabled:opacity-50 text-xl font-serif leading-none"
@@ -316,7 +358,9 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
           <div className="hidden sm:block w-8" />
         </div>
 
-        {/* Content */}
+        {/* ============================================ */}
+        {/* CONTENT: View or Edit mode */}
+        {/* ============================================ */}
         <div className="flex-1">
           {!isEditing ? (
             <EntryView
@@ -340,7 +384,10 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
           )}
         </div>
 
-        {/* Mobile: X-Button bottom mid (Thumb-Zone) - only while non-edit mode */}
+        {/* ============================================ */}
+        {/* MOBILE: X-Button at bottom (thumb zone) */}
+        {/* Only shown when not in edit mode */}
+        {/* ============================================ */}
         {!isEditing && (
           <div className="sm:hidden shrink-0 pt-4 mt-4 border-t border-[var(--border-color)] flex justify-center">
             <button
@@ -354,7 +401,9 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
           </div>
         )}
 
-        {/* Popups */}
+        {/* ============================================ */}
+        {/* POPUPS: Tracking note, manual tracking, confirm dialogs */}
+        {/* ============================================ */}
         <TrackingPopup
           isOpen={showTrackingPopup}
           onConfirm={handleTrackingConfirm}

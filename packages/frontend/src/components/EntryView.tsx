@@ -16,6 +16,7 @@ interface EntryViewProps {
 
 // ============================================
 // Tracking Labels
+// Human-readable labels for tracking types
 // ============================================
 const trackingLabels: Record<TrackingType, string> = {
   CREATION: 'Created',
@@ -27,7 +28,8 @@ const trackingLabels: Record<TrackingType, string> = {
 };
 
 // ============================================
-// Status Badge
+// Status Badge Component
+// Renders colored badge for entry status
 // ============================================
 function StatusBadge({ status }: { status?: Status }) {
   if (!status) return null;
@@ -52,7 +54,9 @@ function StatusBadge({ status }: { status?: Status }) {
 }
 
 // ============================================
-// Copy Button
+// Copy Button Component
+// Copies text to clipboard with visual feedback
+// Falls back to execCommand if clipboard API fails
 // ============================================
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -63,6 +67,7 @@ function CopyButton({ text }: { text: string }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (_error) {
+      // Fallback for older browsers
       const textarea = document.createElement('textarea');
       textarea.value = text;
       document.body.appendChild(textarea);
@@ -102,7 +107,8 @@ function CopyButton({ text }: { text: string }) {
 }
 
 // ============================================
-// Entry View
+// Entry View Component
+// Displays entry details in read-only mode
 // ============================================
 export function EntryView({
   entry,
@@ -122,6 +128,10 @@ export function EntryView({
       ? entry.trackings || []
       : (entry.trackings || []).filter((t) => activeTypes.includes(t.trackingType));
 
+  // ============================================
+  // CSV Export
+  // Exports filtered tracking entries as CSV
+  // ============================================
   const exportCSV = () => {
     const headers = [
       'tracking_type',
@@ -149,12 +159,19 @@ export function EntryView({
     link.click();
   };
 
+  // ============================================
+  // Tracking Filter Toggle
+  // ============================================
   const toggleTrackingType = (type: TrackingType) => {
     setActiveTypes((prev) =>
       prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
     );
   };
 
+  // ============================================
+  // Group Trackings by Date
+  // Groups entries by Today, Yesterday, or date
+  // ============================================
   const groupTrackingsByDate = (trackings: typeof filteredTrackings) => {
     const groups: { [key: string]: typeof trackings } = {};
     const today = new Date().toDateString();
@@ -173,13 +190,12 @@ export function EntryView({
   };
 
   const groupedTrackings = groupTrackingsByDate(filteredTrackings);
-
   const trackingCount = entry.trackings?.length || 0;
 
   return (
     <div className="space-y-4">
       {/* ============================================ */}
-      {/* Status (under the headline) */}
+      {/* Status Badge */}
       {/* ============================================ */}
       {entry.status && (
         <div className="flex items-center gap-2">
@@ -189,7 +205,7 @@ export function EntryView({
       )}
 
       {/* ============================================ */}
-      {/* Essence Long tile – with proper icon */}
+      {/* Essence Card */}
       {/* ============================================ */}
       <div className="card space-y-3 max-h-[40vh] overflow-y-auto">
         <div className="flex items-center justify-between">
@@ -204,7 +220,7 @@ export function EntryView({
       </div>
 
       {/* ============================================ */}
-      {/* Essence Short tile */}
+      {/* Essence Short Card */}
       {/* ============================================ */}
       <div className="card space-y-1">
         <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wider">
@@ -214,7 +230,7 @@ export function EntryView({
       </div>
 
       {/* ============================================ */}
-      {/* Steps */}
+      {/* Steps Section (only for ACTIVE entries) */}
       {/* ============================================ */}
       {entry.area === 'ACTIVE' && entry.steps && entry.steps.length > 0 && (
         <div className="card space-y-2">
@@ -242,14 +258,18 @@ export function EntryView({
               ◀ Previous
             </button>
             <button
-              onClick={() => {
-                const totalSteps = entry.steps?.length || 1;
-                const current = entry.currentStepIndex || 0;
-                // Wenn am letzten Step, springe zu 0, sonst +1
-                const next = current >= totalSteps - 1 ? 0 : current + 1;
-                onStepChange(next);
-              }}
-              disabled={isStepPending}
+              onClick={() =>
+                onStepChange(
+                  Math.min(
+                    (entry.steps?.length || 1) - 1,
+                    (entry.currentStepIndex || 0) + 1
+                  )
+                )
+              }
+              disabled={
+                isStepPending ||
+                (entry.currentStepIndex || 0) >= (entry.steps?.length || 1) - 1
+              }
               className="btn-secondary text-xs disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next ▶
@@ -317,6 +337,7 @@ export function EntryView({
         <div className="pt-4 border-t border-[var(--border-color)]">
           <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Tracking Log</h3>
 
+          {/* Filter Controls */}
           <div className="flex items-center gap-4 mb-3 overflow-x-auto">
             {trackingTypes.map((type) => (
               <label key={type} className="text-sm flex items-center gap-1.5 text-[var(--text-secondary)] cursor-pointer whitespace-nowrap">
@@ -333,6 +354,7 @@ export function EntryView({
             </button>
           </div>
 
+          {/* Tracking Entries */}
           <div className="card p-3 max-h-60 overflow-y-auto space-y-1.5 font-mono text-xs text-[var(--text-secondary)]">
             {Object.entries(groupedTrackings).map(([dateLabel, trackings]) => (
               <div key={dateLabel}>
@@ -372,6 +394,7 @@ export function EntryView({
             ))}
           </div>
 
+          {/* Footer */}
           <div className="mt-2 text-xs text-[var(--text-muted)] text-right">
             {trackingCount} {trackingCount === 1 ? 'tracking entry' : 'tracking entries'}
           </div>

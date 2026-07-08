@@ -17,10 +17,16 @@ interface NewEntryFormProps {
 export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps) {
   const { showNotification } = useNotification();
 
+  // ============================================
+  // Data Fetching & Mutations
+  // ============================================
   const { data: topics = [], isLoading: topicsLoading } = useTopics();
   const createEntryMutation = useCreateEntry();
   const createTopicMutation = useCreateTopic();
 
+  // ============================================
+  // Form State
+  // ============================================
   const initialValues = useRef({
     area: 'KNOWLEDGE' as Area,
     selectedTopicId: null as number | null,
@@ -46,6 +52,10 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
 
   const isSubmitting = createEntryMutation.isPending || createTopicMutation.isPending;
 
+  // ============================================
+  // Dirty Check: Compare current state with initial
+  // Used to prompt confirmation when canceling with unsaved changes
+  // ============================================
   const isDirty =
     area !== initialValues.area ||
     selectedTopicId !== initialValues.selectedTopicId ||
@@ -57,6 +67,9 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
     status !== initialValues.status ||
     pauseReason !== initialValues.pauseReason;
 
+  // ============================================
+  // Cancel Handler
+  // ============================================
   const handleCancel = () => {
     if (isDirty) {
       setShowConfirmDialog(true);
@@ -70,23 +83,29 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
     onCancel();
   };
 
+  // ============================================
+  // Topic Creation Handler
+  // ============================================
   const handleCreateTopic = async (name: string) => {
     try {
       const newTopic = await createTopicMutation.mutateAsync(name);
       setSelectedTopicId(newTopic.id);
       showNotification('success', `Topic "${name}" created`);
     } catch (_error) {
-      // Error handled globaly
+      // Error is handled globally
     }
   };
 
+  // ============================================
+  // Form Submission
+  // ============================================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (isSubmitting) return;
 
     if (!selectedTopicId) {
-      showNotification('error', 'Bitte wähle ein Topic aus');
+      showNotification('error', 'Please select a topic');
       return;
     }
 
@@ -98,6 +117,7 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
         essenceShort,
       };
 
+      // Add action-based fields for PASSIVE and ACTIVE
       if (area !== 'KNOWLEDGE') {
         payload.actionName = actionName;
         if (benefit) payload.benefit = benefit;
@@ -107,18 +127,22 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
         }
       }
 
+      // Add steps only for ACTIVE entries
       if (area === 'ACTIVE') {
-        payload.steps = steps.map((s: Step) => ({ description: s.description }));
+        payload.steps = steps.map((s) => ({ description: s.description }));
       }
 
       await createEntryMutation.mutateAsync(payload);
       showNotification('success', 'Entry successfully created');
       onSuccess();
     } catch (_error) {
-      // Error handled globaly
+      // Error is handled globally
     }
   };
 
+  // ============================================
+  // Validation
+  // ============================================
   const isValid = () => {
     if (!essenceText || !essenceShort) return false;
     if (!selectedTopicId) return false;
@@ -132,6 +156,9 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
     return true;
   };
 
+  // ============================================
+  // Loading State
+  // ============================================
   if (topicsLoading) {
     return (
       <div 
@@ -157,7 +184,9 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
         className="fixed inset-y-0 right-0 w-full sm:w-[80vw] sm:min-w-[350px] sm:max-w-[800px] bg-[var(--bg-card)] shadow-dropdown border-l border-[var(--border-color)] p-6 overflow-y-auto flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* ============================================ */}
         {/* Header */}
+        {/* ============================================ */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-gold-500 text-left w-full">
             New Entry
@@ -165,8 +194,11 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
           <div className="hidden sm:block w-8" />
         </div>
 
+        {/* ============================================ */}
         {/* Form */}
+        {/* ============================================ */}
         <form onSubmit={handleSubmit} className="space-y-4 flex-1 pb-20 sm:pb-0">
+          {/* Topic Selector */}
           <TopicSelector
             topics={topics}
             selectedTopicId={selectedTopicId}
@@ -176,6 +208,7 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
             disabled={isSubmitting}
           />
 
+          {/* Area Selection */}
           <div>
             <label className="label">Area</label>
             <div className="flex gap-4 text-sm text-[var(--text-primary)]">
@@ -194,6 +227,7 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
             </div>
           </div>
 
+          {/* Entry Form Fields */}
           <EntryFormFields
             area={area}
             essenceText={essenceText}
@@ -211,6 +245,7 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
             disabled={isSubmitting}
           />
 
+          {/* Steps Editor (only for ACTIVE) */}
           {area === 'ACTIVE' && (
             <StepEditor
               steps={steps}
@@ -219,7 +254,9 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
             />
           )}
 
+          {/* ============================================ */}
           {/* Desktop: Submit/Cancel Buttons */}
+          {/* ============================================ */}
           <div className="hidden sm:flex gap-3 pt-4 border-t border-[var(--border-color)]">
             <button
               type="submit"
@@ -239,13 +276,16 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
           </div>
         </form>
 
+        {/* ============================================ */}
         {/* Mobile: Action Buttons */}
+        {/* ============================================ */}
         <div className="sm:hidden shrink-0 pt-4 mt-4 border-t border-[var(--border-color)]">
           <div className="flex gap-3">
             <button
               type="submit"
               disabled={!isValid() || isSubmitting}
               className="btn-primary text-sm px-3 py-2 flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleSubmit}
             >
               {isSubmitting ? 'Creating...' : 'Create Entry'}
             </button>
@@ -260,6 +300,9 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
           </div>
         </div>
 
+        {/* ============================================ */}
+        {/* Confirm Dialog */}
+        {/* ============================================ */}
         <ConfirmDialog
           isOpen={showConfirmDialog}
           title="Discard entries?"

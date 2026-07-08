@@ -37,7 +37,10 @@ export function EntryFormFields({
 }: EntryFormFieldsProps) {
   return (
     <>
+      {/* ============================================ */}
       {/* Essence Text */}
+      {/* Core content of the entry - full description */}
+      {/* ============================================ */}
       <div>
         <label className="label">Essence Text *</label>
         <textarea
@@ -54,7 +57,10 @@ export function EntryFormFields({
         </div>
       </div>
 
+      {/* ============================================ */}
       {/* Essence Short */}
+      {/* Summary/headline for lists and quick scanning */}
+      {/* ============================================ */}
       <div>
         <label className="label">Essence Short *</label>
         <input
@@ -70,9 +76,14 @@ export function EntryFormFields({
         </div>
       </div>
 
-      {/* Area-specific fields */}
+      {/* ============================================ */}
+      {/* Area-Specific Fields */}
+      {/* Only shown for PASSIVE and ACTIVE entries */}
+      {/* KNOWLEDGE entries have no action-based fields */}
+      {/* ============================================ */}
       {area !== 'KNOWLEDGE' && (
         <>
+          {/* Action Name */}
           <div>
             <label className="label">Action Name *</label>
             <input
@@ -88,6 +99,7 @@ export function EntryFormFields({
             </div>
           </div>
 
+          {/* Benefit */}
           <div>
             <label className="label">Benefit</label>
             <input
@@ -103,6 +115,7 @@ export function EntryFormFields({
             </div>
           </div>
 
+          {/* Start Status */}
           <div>
             <label className="label">Start Status</label>
             <select
@@ -116,6 +129,7 @@ export function EntryFormFields({
             </select>
           </div>
 
+          {/* Wait Reason (only when status is WAITING) */}
           {status === 'WAITING' && (
             <div>
               <label className="label">Reason for Waiting *</label>

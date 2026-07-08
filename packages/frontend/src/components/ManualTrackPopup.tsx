@@ -15,11 +15,18 @@ export function ManualTrackPopup({
   onCancel,
   isPending = false,
 }: ManualTrackPopupProps) {
+  // ============================================
+  // Local State
+  // ============================================
   const [timestamp, setTimestamp] = useState(
     new Date().toISOString().slice(0, 16)
   );
   const [note, setNote] = useState('');
 
+  // ============================================
+  // Reset State on Open
+  // Sets default timestamp to current time and clears note
+  // ============================================
   useEffect(() => {
     if (isOpen) {
       setTimestamp(new Date().toISOString().slice(0, 16));
@@ -29,12 +36,13 @@ export function ManualTrackPopup({
 
   if (!isOpen) return null;
 
+  // ============================================
+  // Handlers
+  // ============================================
   const handleConfirm = () => {
-  // ============================================
-  // datetime-local input provides format: YYYY-MM-DDTHH:MM
-  // Backend expects ISO string with seconds: YYYY-MM-DDTHH:MM:SS
-  // Set seconds to 00 for consistency
-  // ============================================
+    // datetime-local input provides: YYYY-MM-DDTHH:MM
+    // Backend expects ISO string with seconds: YYYY-MM-DDTHH:MM:SS
+    // Set seconds to 00 for consistency
     onConfirm(timestamp + ':00', note);
   };
 
@@ -42,6 +50,11 @@ export function ManualTrackPopup({
     onCancel();
   };
 
+  // ============================================
+  // Keyboard Shortcuts
+  // - Escape: Cancel
+  // - Ctrl/Cmd + Enter: Confirm
+  // ============================================
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
       handleCancel();
@@ -61,8 +74,10 @@ export function ManualTrackPopup({
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
+        {/* Header */}
         <h3 className="text-lg font-semibold text-[var(--text-primary)]">Manual tracking</h3>
 
+        {/* Timestamp Input */}
         <label className="label mt-4">Date / Time</label>
         <input
           type="datetime-local"
@@ -72,6 +87,7 @@ export function ManualTrackPopup({
           disabled={isPending}
         />
 
+        {/* Note Input */}
         <label className="label mt-4">Note (optional)</label>
         <textarea
           value={note}
@@ -85,6 +101,7 @@ export function ManualTrackPopup({
           {note.length}/500
         </div>
 
+        {/* Actions */}
         <div className="flex justify-end gap-3 mt-6">
           <button onClick={handleCancel} className="btn-secondary" disabled={isPending}>
             Cancel
