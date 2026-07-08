@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTopics } from '../hooks';
 import { Topic } from '../types';
 import { LoadingOverlay } from './LoadingOverlay';
+import { useLoadingDebounce } from '../hooks/useLoadingDebounce';
 
 interface SidebarProps {
   onSelectTopic: (topicId: number | null) => void;
@@ -110,14 +111,16 @@ export function Sidebar({
   // ============================================
   // Desktop Sidebar
   // ============================================
-  if (isLoading) {
+  const showLoading = useLoadingDebounce(isLoading, 200);
+
+  if (showLoading) {
     return (
       <aside
         className={`hidden sm:block h-full border-r border-[var(--border-color)] bg-[var(--bg-primary)] p-3 transition-all duration-200 flex flex-col ${
           collapsed ? 'w-[68px]' : 'w-[210px]'
         } shadow-[2px_0_8px_-2px_rgba(0,0,0,0.05)] dark:shadow-[2px_0_8px_-2px_rgba(255,255,255,0.05)]`}
       >
-        <LoadingOverlay message="Loading topics..." fullScreen={false} />
+        <LoadingOverlay message="Loading topics..." />
       </aside>
     );
   }

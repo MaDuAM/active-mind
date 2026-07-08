@@ -10,6 +10,7 @@ import { ManualTrackPopup } from './ManualTrackPopup';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Status, Step } from '../types';
 import { LoadingOverlay } from './LoadingOverlay';
+import { useLoadingDebounce } from '../hooks/useLoadingDebounce';
 
 interface EntryDetailProps {
   entryId: number;
@@ -253,10 +254,12 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
     return 'Do you really want to close this entry?';
   };
 
+  const showLoading = useLoadingDebounce(isLoading, 200);
+
   // ============================================
   // Skeleton Loading State
   // ============================================
-  if (isLoading) {
+  if (showLoading) {
     return (
       <div 
         className="fixed inset-0 z-[1000] bg-black/20 backdrop-blur-sm"
@@ -266,7 +269,7 @@ export default function EntryDetail({ entryId, onClose }: EntryDetailProps) {
           className="fixed inset-y-0 right-0 w-full sm:w-[85vw] sm:min-w-[400px] sm:max-w-[900px] bg-[var(--bg-card)] shadow-dropdown border-l border-[var(--border-color)] p-6 overflow-y-auto flex flex-col items-center justify-center"
           onClick={(e) => e.stopPropagation()}
         >
-          <LoadingOverlay message="Loading entry..." fullScreen={false} />
+          <LoadingOverlay message="Loading entry..." />
         </div>
       </div>
     );

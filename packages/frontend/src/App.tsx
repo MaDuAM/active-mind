@@ -17,7 +17,7 @@ import { NotFound } from './pages/NotFound';
 import { MobileBottomBar } from './components/MobileBottomBar';
 import { useMediaQuery } from './hooks/useMediaQuery';
 import { LoadingOverlay } from './components/LoadingOverlay';
-
+import { useLoadingDebounce } from './hooks/useLoadingDebounce';
 
 // Lazy load EntryDetail to reduce initial bundle size
 // Only loads when user clicks on an entry
@@ -242,8 +242,9 @@ function AppContent() {
   };
 
   const isLoading = authLoading || entriesLoading || topicsLoading;
+  const showLoading = useLoadingDebounce(isLoading, 200);
 
-  if (isLoading) {
+  if (showLoading) {
     return <LoadingOverlay message="Loading ActiveMind..." />;
   }
 
@@ -457,15 +458,8 @@ function AppContent() {
       {/* Only renders when an entry is selected */}
       {/* ============================================ */}
       {selectedEntryId && (
-        <Suspense fallback={<div className="fixed top-1/2 right-6">Loading ...</div>}>
-          <ErrorBoundary fallback={
-            <div className="fixed top-1/2 right-6 bg-[var(--bg-card)] p-6 border border-error rounded-card shadow-card max-w-sm">
-              <h3 className="text-error font-semibold">Entry could not be loaded</h3>
-              <button onClick={() => setSelectedEntryId(null)} className="mt-3 btn-secondary">Close</button>
-            </div>
-          }>
-            <EntryDetail entryId={selectedEntryId} onClose={() => setSelectedEntryId(null)} />
-          </ErrorBoundary>
+        <Suspense fallback={<LoadingOverlay message="Loading entry..." fullScreen={true} />}>
+          <EntryDetail entryId={selectedEntryId} onClose={() => setSelectedEntryId(null)} />
         </Suspense>
       )}
 

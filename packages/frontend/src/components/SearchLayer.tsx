@@ -3,6 +3,7 @@
 import { EntryRow } from './EntryRow';
 import { Entry, Topic } from '../types';
 import { LoadingOverlay } from './LoadingOverlay';
+import { useLoadingDebounce } from '../hooks/useLoadingDebounce';
 
 interface SearchLayerProps {
   entries: Entry[];
@@ -29,13 +30,14 @@ export function SearchLayer({
   // Helper: Get topic name by ID
   // ============================================
   const getTopicName = (topicId: number) => topics.find((t) => t.id === topicId)?.name || '?';
+  const showLoading = useLoadingDebounce(isLoading, 200);
 
   // ============================================
   // Mobile: Fullscreen Overlay
   // ============================================
   if (isMobile) {
     // Loading State
-    if (isLoading) {
+    if (showLoading) {
       return (
         <div className="fixed inset-0 z-[200] bg-[var(--bg-card)] flex flex-col animate-in fade-in duration-200">
           <div className="shrink-0 px-4 py-3 border-b border-[var(--border-color)] bg-[var(--bg-card)] flex items-center justify-between">
@@ -153,7 +155,7 @@ export function SearchLayer({
   // Desktop: Centered Floating Panel
   // ============================================
   // Loading State
-  if (isLoading) {
+  if (showLoading) {
     return (
       <div className="fixed top-36 left-1/2 -translate-x-1/2 w-[900px] max-w-[90vw] bg-[var(--bg-card)] border border-[var(--border-color)] rounded-card shadow-dropdown overflow-y-auto z-[200] animate-in fade-in slide-in-from-top-4 duration-200">
         <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-3 border-b border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
@@ -166,7 +168,7 @@ export function SearchLayer({
           </button>
         </div>
         <div className="p-10 flex items-center justify-center">
-          <LoadingOverlay message="Loading..." fullScreen={false} />
+          <LoadingOverlay message="Loading..." />
         </div>
       </div>
     );

@@ -7,6 +7,7 @@ import { useSectionState } from '../hooks/useSectionState';
 import { EntrySection } from '../components/EntrySection';
 import { Entry } from '../types';
 import { LoadingOverlay } from '../components/LoadingOverlay';
+import { useLoadingDebounce } from '../hooks/useLoadingDebounce';
 
 const NewEntryForm = lazy(() => import('../components/NewEntryForm'));
 
@@ -56,6 +57,7 @@ export default function TopicView({
   const deleteTopicMutation = useDeleteTopic();
 
   const isLoading = entriesLoading || topicsLoading;
+  const showLoading = useLoadingDebounce(isLoading, 200);
   const allEntries = data?.pages.flatMap((page) => page.data) || [];
   const trashCount = trashData?.pages?.[0]?.pagination?.total || 0;
 
@@ -153,8 +155,8 @@ export default function TopicView({
   // ============================================
   // Skeleton Loading State
   // ============================================
-  if (isLoading && allEntries.length === 0) {
-    return <LoadingOverlay message="Loading entries..." fullScreen={false} />;
+  if (showLoading && allEntries.length === 0) {
+    return <LoadingOverlay message="Loading entries..." />;
   }
 
   return (

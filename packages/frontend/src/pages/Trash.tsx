@@ -9,6 +9,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { Entry } from '../types';
 import { apiClient } from '../lib/apiClient';
 import { LoadingOverlay } from '../components/LoadingOverlay';
+import { useLoadingDebounce } from '../hooks/useLoadingDebounce';
 
 export function Trash() {
   const { showNotification } = useNotification();
@@ -44,6 +45,7 @@ export function Trash() {
   const permanentDeleteMutation = usePermanentDeleteEntry();
 
   const isLoading = entriesLoading || topicsLoading;
+  const showLoading = useLoadingDebounce(isLoading, 200);
   const allEntries = data?.pages.flatMap((page) => page.data) || [];
 
   // ============================================
@@ -125,8 +127,8 @@ export function Trash() {
   // ============================================
   // Skeleton Loading State
   // ============================================
-  if (isLoading && allEntries.length === 0) {
-    return <LoadingOverlay message="Loading removed entries..." fullScreen={false} />;
+  if (showLoading && allEntries.length === 0) {
+    return <LoadingOverlay message="Loading removed entries..." />;
   }
 
   return (

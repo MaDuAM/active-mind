@@ -9,6 +9,7 @@ import { StepEditor } from './StepEditor';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Area, Status, Step, CreateEntryPayload } from '../types';
 import { LoadingOverlay } from './LoadingOverlay';
+import { useLoadingDebounce } from '../hooks/useLoadingDebounce';
 
 interface NewEntryFormProps {
   onSuccess: () => void;
@@ -160,7 +161,9 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
   // ============================================
   // Loading State
   // ============================================
-  if (topicsLoading) {
+  const showLoading = useLoadingDebounce(topicsLoading, 200);
+
+  if (showLoading) {
     return (
       <div 
         className="fixed inset-0 z-[1000] bg-black/20 backdrop-blur-sm"
@@ -170,7 +173,7 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
           className="fixed inset-y-0 right-0 w-full sm:w-[80vw] sm:min-w-[350px] sm:max-w-[800px] bg-[var(--bg-card)] shadow-dropdown border-l border-[var(--border-color)] p-6 overflow-y-auto flex flex-col items-center justify-center"
           onClick={(e) => e.stopPropagation()}
         >
-          <LoadingOverlay message="Loading topics..." fullScreen={false} />
+          <LoadingOverlay message="Loading topics..." />
         </div>
       </div>
     );

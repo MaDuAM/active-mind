@@ -7,6 +7,7 @@ import { useSectionState } from '../hooks/useSectionState';
 import { EntrySection } from '../components/EntrySection';
 import { Entry } from '../types';
 import { LoadingOverlay } from '../components/LoadingOverlay';
+import { useLoadingDebounce } from '../hooks/useLoadingDebounce';
 
 const NewEntryForm = lazy(() => import('../components/NewEntryForm'));
 
@@ -39,6 +40,7 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
   const { data: topics = [], isLoading: topicsLoading } = useTopics(true);
 
   const isLoading = entriesLoading || topicsLoading;
+  const showLoading = useLoadingDebounce(isLoading, 200);
   const allEntries = data?.pages.flatMap((page) => page.data) || [];
 
   // ============================================
@@ -124,8 +126,8 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
   // ============================================
   // Skeleton Loading State
   // ============================================
-  if (isLoading && allEntries.length === 0) {
-    return <LoadingOverlay message="Loading entries..." fullScreen={false} />;
+  if (showLoading && allEntries.length === 0) {
+    return <LoadingOverlay message="Loading entries..." />;
   }
 
   return (
