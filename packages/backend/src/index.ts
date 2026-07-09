@@ -61,11 +61,15 @@ app.use(express.json());
 // 3. Rate Limiting
 // ============================================
 const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // 100 requests per window
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: { error: 'Too many requests, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => {
+    // Nur Schreiboperationen limitieren (POST, PUT, PATCH, DELETE)
+    return ['GET', 'HEAD', 'OPTIONS'].includes(req.method);
+  },
 });
 
 const authLimiter = rateLimit({
@@ -77,8 +81,8 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: true, // Don't count successful logins
 });
 
-app.use('/api/v1/auth/login', authLimiter);
-app.use('/api/v1/auth/register', authLimiter);
+//app.use('/api/v1/auth/login', authLimiter);
+//app.use('/api/v1/auth/register', authLimiter);
 app.use('/api/v1/', globalLimiter);
 
 // ============================================

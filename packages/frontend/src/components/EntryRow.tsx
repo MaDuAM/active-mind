@@ -10,6 +10,8 @@ interface EntryRowProps {
   showTopic?: boolean;
   topicName?: string;
   className?: string;
+  onToggleFavorite?: (id: number) => void;
+  isFavoritePending?: boolean;
 }
 
 function EntryRowComponent({ 
@@ -19,6 +21,8 @@ function EntryRowComponent({
   showTopic = false, 
   topicName,
   className = '',
+  onToggleFavorite,
+  isFavoritePending = false,
 }: EntryRowProps) {
   // ============================================
   // Computed Values
@@ -102,6 +106,19 @@ function EntryRowComponent({
       onMouseEnter={() => onHover?.(entry.id)}
       className={`card cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-3 hover:ring-2 hover:ring-offset-0 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 py-2.5 px-4 ${getBorderColor(entry)} ${getRingColor(entry)} ${className}`}
     >
+      {/* Star Button */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleFavorite?.(entry.id);
+        }}
+        disabled={isFavoritePending}
+        className="shrink-0 w-6 h-6 flex items-center justify-center text-xl leading-none transition-colors hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+        aria-label={entry.isFavorite ? 'Remove favorite' : 'Add favorite'}
+      >
+        {entry.isFavorite ? '⭐' : '☆'}
+      </button>
+
       {/* ============================================ */}
       {/* Left: Action Name */}
       {/* ============================================ */}

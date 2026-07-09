@@ -33,6 +33,14 @@ interface EntrySectionProps {
   getTopicName?: (topicId: number) => string;
   /** Additional class name */
   className?: string;
+  /** Show only favorite entries */
+  showFavoritesOnly: boolean;
+  /** Toggle favorites filter for this section */
+  onToggleFavorites: (section: SectionKey) => void;
+  /** Toggle favorite status for a single entry */
+  onToggleFavorite?: (id: number) => void;
+  /** Whether a favorite mutation is pending */
+  isFavoritePending?: boolean;
 }
 
 export function EntrySection({
@@ -49,8 +57,17 @@ export function EntrySection({
   showTopic = false,
   getTopicName,
   className = '',
+  showFavoritesOnly,
+  onToggleFavorites,
+  onToggleFavorite,
+  isFavoritePending = false,
+  section,
 }: EntrySectionProps) {
-  const isEmpty = entries.length === 0;
+  // Filter entries by favorite if enabled
+  const filteredEntries = showFavoritesOnly 
+    ? entries.filter(e => e.isFavorite) 
+    : entries;
+  const isEmpty = filteredEntries.length === 0;
 
   return (
     <section className={className}>
@@ -60,20 +77,34 @@ export function EntrySection({
         onClick={onToggle}
       >
         <h2 className={`text-sm font-semibold uppercase tracking-wider ${titleColor}`}>
-          {title} ({entries.length})
+          {title} ({filteredEntries.length}/{entries.length})
         </h2>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggle();
-          }}
-          className="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-gold-500 hover:text-white transition-colors text-xl"
-          aria-label={isExpanded ? 'Collapse' : 'Expand'}
-        >
-          <span className="-translate-y-0.5">
-            {isExpanded ? '⏶' : '⏷'}
-          </span>
-        </button>
+        <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+          {/* Favorites Toggle - only show if entries exist */}
+          {entries.length > 0 && (
+            <label className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] cursor-pointer select-none">
+              <span>⭐</span>
+              <input
+                type="checkbox"
+                checked={showFavoritesOnly}
+                onChange={() => onToggleFavorites(section)}
+                className="w-3.5 h-3.5 accent-gold-500 cursor-pointer"
+              />
+            </label>
+          )}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle();
+            }}
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-gold-500 hover:text-white transition-colors text-xl"
+            aria-label={isExpanded ? 'Collapse' : 'Expand'}
+          >
+            <span className="-translate-y-0.5">
+              {isExpanded ? '⏶' : '⏷'}
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* Content */}
@@ -83,13 +114,21 @@ export function EntrySection({
             <div className="flex items-center gap-3 py-3 text-[var(--text-muted)]">
               <span className="text-xl">{emptyIcon}</span>
               <div>
-                <p className="text-sm font-medium">{emptyMessage}</p>
-                <p className="text-xs opacity-60">{emptySubMessage}</p>
+                <p className="text-sm font-medium">
+                  {showFavoritesOnly && entries.length > 0 
+                    ? 'No favorites in this section' 
+                    : emptyMessage}
+                </p>
+                <p className="text-xs opacity-60">
+                  {showFavoritesOnly && entries.length > 0
+                    ? 'Star entries to see them here'
+                    : emptySubMessage}
+                </p>
               </div>
             </div>
           ) : (
             <div className="space-y-2">
-              {entries.map((entry) => (
+              {filteredEntries.map((entry) => (
                 <EntryRow
                   key={entry.id}
                   entry={entry}
@@ -97,6 +136,8 @@ export function EntrySection({
                   onHover={onEntryHover}
                   showTopic={showTopic}
                   topicName={getTopicName?.(entry.topicId)}
+                  onToggleFavorite={onToggleFavorite}
+                  isFavoritePending={isFavoritePending}
                 />
               ))}
             </div>

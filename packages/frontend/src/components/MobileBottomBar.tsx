@@ -8,6 +8,7 @@ interface MobileBottomBarProps {
   onTopics: () => void;
   onNewEntry: () => void;
   onMenu: () => void;
+  activeView?: 'dashboard' | 'topics' | 'search' | 'menu' | null;
 }
 
 export function MobileBottomBar({
@@ -16,6 +17,7 @@ export function MobileBottomBar({
   onTopics,
   onNewEntry,
   onMenu,
+  activeView = null,
 }: MobileBottomBarProps) {
   const { user } = useAuth();
 
@@ -28,7 +30,9 @@ export function MobileBottomBar({
       {/* Search Button */}
       <button
         onClick={onSearch}
-        className="flex flex-col items-center justify-center w-12 h-12 text-[var(--text-muted)] hover:text-gold-500 transition-colors"
+        className={`flex flex-col items-center justify-center w-12 h-12 transition-colors ${
+          activeView === 'search' ? 'text-gold-500' : 'text-[var(--text-muted)] hover:text-gold-500'
+        }`}
         aria-label="Search"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -41,7 +45,9 @@ export function MobileBottomBar({
       {/* Dashboard Button */}
       <button
         onClick={onDashboard}
-        className="flex flex-col items-center justify-center w-12 h-12 text-[var(--text-muted)] hover:text-gold-500 transition-colors"
+        className={`flex flex-col items-center justify-center w-12 h-12 transition-colors ${
+          activeView === 'dashboard' ? 'text-gold-500' : 'text-[var(--text-muted)] hover:text-gold-500'
+        }`}
         aria-label="Dashboard"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -68,7 +74,9 @@ export function MobileBottomBar({
       {/* Topics Button */}
       <button
         onClick={onTopics}
-        className="flex flex-col items-center justify-center w-12 h-12 text-[var(--text-muted)] hover:text-gold-500 transition-colors"
+        className={`flex flex-col items-center justify-center w-12 h-12 transition-colors ${
+          activeView === 'topics' ? 'text-gold-500' : 'text-[var(--text-muted)] hover:text-gold-500'
+        }`}
         aria-label="Topics"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -80,7 +88,9 @@ export function MobileBottomBar({
       {/* Menu Button */}
       <button
         onClick={onMenu}
-        className="flex flex-col items-center justify-center w-12 h-12 text-[var(--text-muted)] hover:text-gold-500 transition-colors"
+        className={`flex flex-col items-center justify-center w-12 h-12 transition-colors ${
+          activeView === 'menu' ? 'text-gold-500' : 'text-[var(--text-muted)] hover:text-gold-500'
+        }`}
         aria-label="Menu"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

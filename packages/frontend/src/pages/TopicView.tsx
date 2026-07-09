@@ -2,14 +2,16 @@
 
 import { useState, lazy, Suspense, useEffect, useMemo, useCallback } from 'react';
 import { useInView } from 'react-intersection-observer';
-import { usePaginatedEntries, useTopics, useDeleteTopic } from '../hooks';
+import { usePaginatedEntries, useTopics, useDeleteTopic, useToggleFavorite } from '../hooks';
 import { useSectionState } from '../hooks/useSectionState';
 import { EntrySection } from '../components/EntrySection';
 import { Entry } from '../types';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 import { useLoadingDebounce } from '../hooks/useLoadingDebounce';
+import { SectionKey } from '../hooks/useSectionState';
+import NewEntryForm from '../components/NewEntryForm';
 
-const NewEntryForm = lazy(() => import('../components/NewEntryForm'));
+// const NewEntryForm = lazy(() => import('../components/NewEntryForm'));
 
 interface TopicViewProps {
   topicId: number;
@@ -17,6 +19,7 @@ interface TopicViewProps {
   onTopicDeleted: () => void;
   showNewEntryForm: boolean;
   setShowNewEntryForm: (value: boolean) => void;
+  isVisible?: boolean;
 }
 
 export default function TopicView({
@@ -26,8 +29,21 @@ export default function TopicView({
   showNewEntryForm,
   setShowNewEntryForm,
 }: TopicViewProps) {
+
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [limit] = useState(25);
+
+  // ============================================
+  // Favorites Filter State
+  // Tracks which sections are filtered to show only favorites
+  // ============================================
+  const [favoritesFilter, setFavoritesFilter] = useState<Record<SectionKey, boolean>>({
+    active: false,
+    passive: false,
+    waiting: false,
+    paused: false,
+    knowledge: false,
+  });
 
   const { ref, inView } = useInView({
     threshold: 0.1,
@@ -44,17 +60,18 @@ export default function TopicView({
     isFetchingNextPage,
     isLoading: entriesLoading,
     refetch: refetchEntries,
-  } = usePaginatedEntries({ topicId, limit }, true);
+  } = usePaginatedEntries({ topicId, limit }, !!topicId);
 
   const {
     data: trashData,
   } = usePaginatedEntries(
     { topicId, deletedOnly: true, limit: 1 },
-    true
+    !!topicId
   );
 
   const { data: topics = [], isLoading: topicsLoading } = useTopics(true);
   const deleteTopicMutation = useDeleteTopic();
+  const toggleFavoriteMutation = useToggleFavorite();
 
   const isLoading = entriesLoading || topicsLoading;
   const showLoading = useLoadingDebounce(isLoading, 200);
@@ -105,7 +122,6 @@ export default function TopicView({
       paused: sections.paused.length > 0,
       knowledge: sections.knowledge.length > 0,
     }),
-    deps: [allEntries.length],
   });
 
   // ============================================
@@ -124,6 +140,20 @@ export default function TopicView({
   const handleNewEntryCancel = useCallback(() => {
     setShowNewEntryForm(false);
   }, [setShowNewEntryForm]);
+
+  // ============================================
+  // Favorites Handlers
+  // ============================================
+  const handleToggleFavoritesFilter = useCallback((section: SectionKey) => {
+    setFavoritesFilter(prev => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  }, []);
+
+  const handleToggleFavorite = useCallback((id: number) => {
+    toggleFavoriteMutation.mutate(id);
+  }, [toggleFavoriteMutation]);
 
   // ============================================
   // Infinite Scroll
@@ -220,6 +250,10 @@ export default function TopicView({
         onToggle={() => toggleSection('active')}
         onEntryClick={handleEntryClick}
         className="mb-3"
+        showFavoritesOnly={favoritesFilter.active}
+        onToggleFavorites={handleToggleFavoritesFilter}
+        onToggleFavorite={handleToggleFavorite}
+        isFavoritePending={toggleFavoriteMutation.isPending}
       />
 
       <hr className="border-[var(--border-color)] my-6" />
@@ -238,6 +272,10 @@ export default function TopicView({
         onToggle={() => toggleSection('passive')}
         onEntryClick={handleEntryClick}
         className="mb-3"
+        showFavoritesOnly={favoritesFilter.passive}
+        onToggleFavorites={handleToggleFavoritesFilter}
+        onToggleFavorite={handleToggleFavorite}
+        isFavoritePending={toggleFavoriteMutation.isPending}
       />
 
       <hr className="border-[var(--border-color)] my-6" />
@@ -256,6 +294,10 @@ export default function TopicView({
         onToggle={() => toggleSection('knowledge')}
         onEntryClick={handleEntryClick}
         className="mb-3"
+        showFavoritesOnly={favoritesFilter.knowledge}
+        onToggleFavorites={handleToggleFavoritesFilter}
+        onToggleFavorite={handleToggleFavorite}
+        isFavoritePending={toggleFavoriteMutation.isPending}
       />
 
       {/* ============================================ */}
@@ -275,6 +317,10 @@ export default function TopicView({
             onToggle={() => toggleSection('waiting')}
             onEntryClick={handleEntryClick}
             className="mb-3"
+            showFavoritesOnly={favoritesFilter.waiting}
+            onToggleFavorites={handleToggleFavoritesFilter}
+            onToggleFavorite={handleToggleFavorite}
+            isFavoritePending={toggleFavoriteMutation.isPending}
           />
         </>
       )}
@@ -296,6 +342,10 @@ export default function TopicView({
             onToggle={() => toggleSection('paused')}
             onEntryClick={handleEntryClick}
             className="opacity-70 mb-3"
+            showFavoritesOnly={favoritesFilter.paused}
+            onToggleFavorites={handleToggleFavoritesFilter}
+            onToggleFavorite={handleToggleFavorite}
+            isFavoritePending={toggleFavoriteMutation.isPending}
           />
         </>
       )}

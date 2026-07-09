@@ -14,6 +14,7 @@ export {
   useManualTracking,
   useCreateTopic,
   useDeleteTopic,
+  useToggleFavorite,  // NEU
   queryKeys,
 } from './useApi';
 

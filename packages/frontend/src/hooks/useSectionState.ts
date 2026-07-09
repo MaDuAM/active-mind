@@ -1,6 +1,6 @@
 // frontend/src/hooks/useSectionState.ts
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 
 export type SectionKey = 'active' | 'passive' | 'waiting' | 'paused' | 'knowledge';
 
@@ -26,16 +26,30 @@ export function useSectionState(options: UseSectionStateOptions = {}) {
     ...initialExpanded,
   }));
 
-  const [allExpanded, setAllExpanded] = useState<'all' | 'none'>('none');
   const hasAutoExpanded = useRef(false);
+
+  // ============================================
+  // Computed: Check if all sections are expanded
+  // ============================================
+  const allExpanded = useMemo(() => {
+    const all = expanded.active && expanded.passive && expanded.waiting && expanded.paused && expanded.knowledge;
+    return all ? 'all' : 'none';
+  }, [expanded]);
 
   const toggleSection = (section: SectionKey) => {
     setExpanded((prev) => ({ ...prev, [section]: !prev[section] }));
-    setAllExpanded('none');
   };
 
   const toggleAll = () => {
-    if (allExpanded === 'none') {
+    if (allExpanded === 'all') {
+      setExpanded({
+        active: false,
+        passive: false,
+        waiting: false,
+        paused: false,
+        knowledge: false,
+      });
+    } else {
       const sectionHasItems = getSectionHasItems?.() ?? {
         active: false,
         passive: false,
@@ -50,16 +64,6 @@ export function useSectionState(options: UseSectionStateOptions = {}) {
         paused: sectionHasItems.paused,
         knowledge: sectionHasItems.knowledge,
       });
-      setAllExpanded('all');
-    } else {
-      setExpanded({
-        active: false,
-        passive: false,
-        waiting: false,
-        paused: false,
-        knowledge: false,
-      });
-      setAllExpanded('none');
     }
   };
 

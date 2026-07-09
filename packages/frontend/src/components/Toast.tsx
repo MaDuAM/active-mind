@@ -1,9 +1,19 @@
 // frontend/src/components/Toast.tsx
 
+import { useEffect } from 'react';
 import { useNotification } from '../context/NotificationContext';
 
 export function Toast() {
   const { notifications, removeNotification } = useNotification();
+
+  // Auto-remove notifications after 5 seconds
+  useEffect(() => {
+    const timers = notifications.map((n) => {
+      const timer = setTimeout(() => removeNotification(n.id), 5000);
+      return timer;
+    });
+    return () => timers.forEach(clearTimeout);
+  }, [notifications, removeNotification]);
 
   // No notifications to display
   if (notifications.length === 0) return null;

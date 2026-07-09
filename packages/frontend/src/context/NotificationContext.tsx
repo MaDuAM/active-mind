@@ -25,17 +25,17 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const showNotification = (type: Notification['type'], message: string) => {
-    const id = Date.now().toString();
+    const id = Date.now().toString() + Math.random().toString(36).substring(2, 6);
     setNotifications(prev => {
       const updated = [...prev, { id, type, message }];
-      // Keep only MAX_NOTIFICATIONS (discard the oldest ones)
       return updated.slice(-MAX_NOTIFICATIONS);
     });
-    setTimeout(() => removeNotification(id), 5000);
   };
 
   const removeNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    setNotifications(prev => {
+      return prev.filter(n => n.id !== id);
+    });
   };
 
   return (

@@ -109,7 +109,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await apiClient.post<{ ok: true }>('/auth/logout');
       setUser(null);
       sessionStorage.removeItem('auth_check_done');
-      // Clear all cached data on logout
       queryClient.clear();
       showNotification('info', 'Logged out successfully');
     } catch (error) {

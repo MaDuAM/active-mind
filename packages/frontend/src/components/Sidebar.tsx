@@ -1,7 +1,6 @@
 // frontend/src/components/Sidebar.tsx
 
 import { useState, useEffect } from 'react';
-import { useTopics } from '../hooks';
 import { Topic } from '../types';
 import { LoadingOverlay } from './LoadingOverlay';
 import { useLoadingDebounce } from '../hooks/useLoadingDebounce';
@@ -13,6 +12,8 @@ interface SidebarProps {
   selectedTopicId?: number | null;
   isMobileOpen?: boolean;
   onMobileClose?: () => void;
+  topics: Topic[];
+  topicsLoading: boolean;
 }
 
 export function Sidebar({ 
@@ -22,11 +23,14 @@ export function Sidebar({
   selectedTopicId,
   isMobileOpen = false,
   onMobileClose,
+  topics,
+  topicsLoading,
 }: SidebarProps) {
   // ============================================
-  // Desktop Collapse State
-  // Auto-collapse on tablet (768-1024px) for better space usage
+  // ALL HOOKS FIRST - BEFORE ANY RETURN
   // ============================================
+
+  // Desktop Collapse State
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
       const width = window.innerWidth;
@@ -35,7 +39,7 @@ export function Sidebar({
     return false;
   });
 
-  const { data: topics = [], isLoading } = useTopics();
+  const showLoading = useLoadingDebounce(topicsLoading, 200);
 
   // Handle responsive collapse on resize
   useEffect(() => {
@@ -109,10 +113,8 @@ export function Sidebar({
   }
 
   // ============================================
-  // Desktop Sidebar
+  // Desktop Sidebar - Loading State
   // ============================================
-  const showLoading = useLoadingDebounce(isLoading, 200);
-
   if (showLoading) {
     return (
       <aside
@@ -125,6 +127,9 @@ export function Sidebar({
     );
   }
 
+  // ============================================
+  // Desktop Sidebar - Normal State
+  // ============================================
   const topicItems = topics.map((topic: Topic) => (
     <div
       key={topic.id}
@@ -145,9 +150,7 @@ export function Sidebar({
         collapsed ? 'w-[68px]' : 'w-[210px]'
       } shadow-[2px_0_8px_-2px_rgba(0,0,0,0.05)] dark:shadow-[2px_0_8px_-2px_rgba(255,255,255,0.05)]`}
     >
-      {/* ============================================ */}
       {/* Dashboard - fixed at top */}
-      {/* ============================================ */}
       <div className="shrink-0">
         <div
           onClick={() => onSelectTopic(null)}
@@ -163,9 +166,7 @@ export function Sidebar({
 
       <hr className="border-[var(--border-color)] my-3 shrink-0" />
 
-      {/* ============================================ */}
       {/* Scrollable: Topics List */}
-      {/* ============================================ */}
       <div className="flex-1 min-h-0 overflow-y-auto -mr-3 pr-3">
         <div className="space-y-1 pb-2">
           {/* Topics Header with Collapse Toggle */}
@@ -189,9 +190,7 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* ============================================ */}
       {/* Trash - fixed at bottom */}
-      {/* ============================================ */}
       <div className="shrink-0 pt-3 border-t border-[var(--border-color)] mt-1">
         <div
           onClick={onSelectTrash}

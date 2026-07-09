@@ -143,6 +143,10 @@ const api = {
   deleteTopic: async (id: number) => {
     return apiClient.delete<{ ok: true }>(`/topics/${id}`);
   },
+
+  toggleFavorite: async (id: number) => {
+    return apiClient.patch<{ id: number; isFavorite: boolean }>(`/entries/${id}/favorite`);
+  },
 };
 
 // ============================================
@@ -366,6 +370,35 @@ export const useDeleteTopic = () => {
     mutationFn: api.deleteTopic,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.topics() });
+      queryClient.invalidateQueries({ queryKey: ['entries-paginated'] });
+    },
+  });
+};
+
+export const useToggleFavorite = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: api.toggleFavorite,
+    onSuccess: (data) => {
+      // Manuell den Cache updaten
+      queryClient.setQueryData(
+        ['entries-paginated'],
+        (oldData: any) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page: any) => ({
+              ...page,
+              data: page.data.map((entry: Entry) =>
+                entry.id === data.id
+                  ? { ...entry, isFavorite: data.isFavorite }
+                  : entry
+              ),
+            })),
+          };
+        }
+      );
+      // Zusätzlich invalidieren für andere Queries
       queryClient.invalidateQueries({ queryKey: ['entries-paginated'] });
     },
   });

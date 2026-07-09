@@ -72,8 +72,10 @@ async function main() {
 
   const topics = [];
   for (const name of topicNames) {
-    const topic = await prisma.topic.create({
-      data: { name, userId: admin.id },
+    const topic = await prisma.topic.upsert({
+      where: { userId_name: { userId: admin.id, name } },
+      update: {},
+      create: { name, userId: admin.id },
     });
     topics.push(topic);
   }
@@ -99,6 +101,9 @@ async function main() {
           ? randomItem(['Warte auf Freigabe', 'Blockiert durch Abhängigkeit', 'Priorität verschoben'])
           : undefined;
 
+      // Favoriten: 30% Chance auf Favorite
+      const isFavorite = Math.random() > 0.7;
+
       await prisma.entry.create({
         data: {
           essenceText: randomItem(essenceTexts) + ` (Topic: ${topic.name}, Nr. ${i + 1})`,
@@ -115,6 +120,7 @@ async function main() {
               }))
             : undefined,
           currentStepIndex: hasSteps ? Math.floor(Math.random() * stepCount) : 0,
+          isFavorite, // NEU
           topicId: topic.id,
           userId: admin.id,
           createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),

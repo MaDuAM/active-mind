@@ -2,12 +2,13 @@
 
 import { useState, lazy, Suspense, useEffect, useMemo, useCallback } from 'react';
 import { useInView } from 'react-intersection-observer';
-import { usePaginatedEntries, useTopics } from '../hooks';
+import { usePaginatedEntries, useTopics, useToggleFavorite } from '../hooks';
 import { useSectionState } from '../hooks/useSectionState';
 import { EntrySection } from '../components/EntrySection';
 import { Entry } from '../types';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 import { useLoadingDebounce } from '../hooks/useLoadingDebounce';
+import { SectionKey } from '../hooks/useSectionState';
 
 const NewEntryForm = lazy(() => import('../components/NewEntryForm'));
 
@@ -19,6 +20,18 @@ interface DashboardProps {
 
 export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }: DashboardProps) {
   const [limit] = useState(25);
+  
+  // ============================================
+  // Favorites Filter State
+  // Tracks which sections are filtered to show only favorites
+  // ============================================
+  const [favoritesFilter, setFavoritesFilter] = useState<Record<SectionKey, boolean>>({
+    active: false,
+    passive: false,
+    waiting: false,
+    paused: false,
+    knowledge: false,
+  });
 
   const { ref, inView } = useInView({
     threshold: 0.1,
@@ -38,6 +51,7 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
   } = usePaginatedEntries({ limit }, true);
 
   const { data: topics = [], isLoading: topicsLoading } = useTopics(true);
+  const toggleFavoriteMutation = useToggleFavorite();
 
   const isLoading = entriesLoading || topicsLoading;
   const showLoading = useLoadingDebounce(isLoading, 200);
@@ -89,7 +103,6 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
       paused: sections.paused.length > 0,
       knowledge: sections.knowledge.length > 0,
     }),
-    deps: [allEntries.length],
   });
 
   // ============================================
@@ -113,6 +126,20 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
   const handleNewEntryCancel = useCallback(() => {
     setShowNewEntryForm(false);
   }, [setShowNewEntryForm]);
+
+  // ============================================
+  // Favorites Handlers
+  // ============================================
+  const handleToggleFavoritesFilter = useCallback((section: SectionKey) => {
+    setFavoritesFilter(prev => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  }, []);
+
+  const handleToggleFavorite = useCallback((id: number) => {
+    toggleFavoriteMutation.mutate(id);
+  }, [toggleFavoriteMutation]);
 
   // ============================================
   // Infinite Scroll
@@ -174,6 +201,10 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
         showTopic
         getTopicName={getTopicName}
         className="mb-3"
+        showFavoritesOnly={favoritesFilter.active}
+        onToggleFavorites={handleToggleFavoritesFilter}
+        onToggleFavorite={handleToggleFavorite}
+        isFavoritePending={toggleFavoriteMutation.isPending}
       />
 
       <hr className="border-[var(--border-color)] my-6" />
@@ -194,6 +225,10 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
         showTopic
         getTopicName={getTopicName}
         className="mb-3"
+        showFavoritesOnly={favoritesFilter.passive}
+        onToggleFavorites={handleToggleFavoritesFilter}
+        onToggleFavorite={handleToggleFavorite}
+        isFavoritePending={toggleFavoriteMutation.isPending}
       />
 
       {/* ============================================ */}
@@ -215,6 +250,10 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
             showTopic
             getTopicName={getTopicName}
             className="mb-3"
+            showFavoritesOnly={favoritesFilter.waiting}
+            onToggleFavorites={handleToggleFavoritesFilter}
+            onToggleFavorite={handleToggleFavorite}
+            isFavoritePending={toggleFavoriteMutation.isPending}
           />
         </>
       )}
@@ -238,6 +277,10 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
             showTopic
             getTopicName={getTopicName}
             className="opacity-70 mb-3"
+            showFavoritesOnly={favoritesFilter.paused}
+            onToggleFavorites={handleToggleFavoritesFilter}
+            onToggleFavorite={handleToggleFavorite}
+            isFavoritePending={toggleFavoriteMutation.isPending}
           />
         </>
       )}

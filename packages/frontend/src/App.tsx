@@ -18,6 +18,7 @@ import { MobileBottomBar } from './components/MobileBottomBar';
 import { useMediaQuery } from './hooks/useMediaQuery';
 import { LoadingOverlay } from './components/LoadingOverlay';
 import { useLoadingDebounce } from './hooks/useLoadingDebounce';
+import { Toast } from './components/Toast';
 
 // Lazy load EntryDetail to reduce initial bundle size
 // Only loads when user clicks on an entry
@@ -340,12 +341,20 @@ function AppContent() {
           selectedTopicId={selectedTopicId}
           isMobileOpen={isMobileSidebarOpen}
           onMobileClose={() => setIsMobileSidebarOpen(false)}
+          topics={topics}
+          topicsLoading={topicsLoading}
         />
         <main className="flex-1 overflow-y-auto pb-20 sm:pb-0">
           <div className="p-6 max-w-5xl mx-auto">
             {selectedView === 'dashboard' && <Dashboard onOpenEntry={setSelectedEntryId} showNewEntryForm={showNewEntryForm} setShowNewEntryForm={setShowNewEntryForm} />}
             {selectedView === 'topic' && selectedTopicId && (
-              <TopicView topicId={selectedTopicId} onOpenEntry={setSelectedEntryId} onTopicDeleted={handleTopicDeleted} showNewEntryForm={showNewEntryForm} setShowNewEntryForm={setShowNewEntryForm} />
+              <TopicView
+                topicId={selectedTopicId}
+                onOpenEntry={setSelectedEntryId}
+                onTopicDeleted={handleTopicDeleted}
+                showNewEntryForm={showNewEntryForm}
+                setShowNewEntryForm={setShowNewEntryForm}
+              />
             )}
             {/* Desktop: Trash in main area */}
             {selectedView === 'trash' && !isMobile && <Trash />}
@@ -425,7 +434,11 @@ function AppContent() {
         onTopics={() => setIsMobileSidebarOpen(true)}
         onNewEntry={() => setShowNewEntryForm(true)}
         onMenu={toggleMenu}
-      />
+        activeView={selectedView === 'dashboard' ? 'dashboard' : 
+          selectedView === 'topic' ? 'topics' : 
+          isMenuOpen ? 'menu' : 
+          showMobileSearch ? 'search' : null}
+        />
 
       {/* ============================================ */}
       {/* SEARCH LAYER: Results overlay */}
@@ -473,6 +486,8 @@ function AppContent() {
         onToggleDarkMode={toggleDarkMode}
         onSelectTrash={handleSelectTrash}
       />
+      {/* Toast Notifications */}
+      <Toast />
     </div>
   );
 }
@@ -487,6 +502,7 @@ function App() {
         <Route path="/" element={<AppContent />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <Toast />
     </ErrorBoundary>
   );
 }

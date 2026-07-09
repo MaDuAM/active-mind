@@ -8,6 +8,7 @@ import * as deleteHandlers from './delete';
 import * as statusHandlers from './status';
 import * as stepHandlers from './step';
 import * as trackingHandlers from './tracking';
+import * as favoriteHandlers from './favorite';
 
 const router = Router();
 
@@ -21,6 +22,7 @@ router.post('/:id/restore', deleteHandlers.restoreEntry);
 router.post('/:id/status', statusHandlers.changeStatus);
 router.post('/:id/step', stepHandlers.changeStep);
 router.post('/:id/tracking/manual', trackingHandlers.addManualTracking);
+router.patch('/:id/favorite', favoriteHandlers.toggleFavorite);
 
 // PUT routes
 router.put('/:id', putHandlers.updateEntry);

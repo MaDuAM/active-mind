@@ -52,6 +52,7 @@ export interface Entry {
   userId: number;
   createdAt: string;
   updatedAt: string;
+  isFavorite: boolean;
   trackings?: Tracking[];
 }
 

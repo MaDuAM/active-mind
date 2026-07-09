@@ -75,6 +75,7 @@ export const getEntries = async (req: Request, res: Response) => {
         deletedAt: true,
         area: true,
         status: true,
+        isFavorite: true,
       }
     : {
         id: true,
@@ -91,6 +92,7 @@ export const getEntries = async (req: Request, res: Response) => {
         deletedAt: true,
         permanentlyRemoved: true,
         pauseReason: true,
+        isFavorite: true,
       };
 
   try {
