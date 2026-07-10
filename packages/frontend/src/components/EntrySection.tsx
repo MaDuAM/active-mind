@@ -84,7 +84,7 @@ export function EntrySection({
           {entries.length > 0 && (
             <label className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] cursor-pointer select-none">
               <span className="text-xl leading-none text-gold-500">
-                🟊
+                ★
               </span>
               <input
                 type="checkbox"

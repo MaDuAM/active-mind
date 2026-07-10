@@ -19,6 +19,7 @@ import { useMediaQuery } from './hooks/useMediaQuery';
 import { LoadingOverlay } from './components/LoadingOverlay';
 import { useLoadingDebounce } from './hooks/useLoadingDebounce';
 import { Toast } from './components/Toast';
+import { ScrollToTop } from './components/ScrollToTop';
 
 // Lazy load EntryDetail to reduce initial bundle size
 // Only loads when user clicks on an entry
@@ -462,6 +463,7 @@ function AppContent() {
             onHoverEntry={() => import('./components/EntryDetail')}
             searchTerm={searchTerm}
             isMobile={isMobile}
+            onSearchChange={handleInputChange}
           />
         </>
       )}
@@ -488,6 +490,8 @@ function AppContent() {
       />
       {/* Toast Notifications */}
       <Toast />
+      {/* Scroll to Top Button */}
+      <ScrollToTop />
     </div>
   );
 }

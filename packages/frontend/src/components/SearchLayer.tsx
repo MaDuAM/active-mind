@@ -14,6 +14,7 @@ interface SearchLayerProps {
   isLoading?: boolean;
   searchTerm?: string;
   isMobile?: boolean;
+  onSearchChange?: (term: string) => void;
 }
 
 export function SearchLayer({
@@ -25,6 +26,7 @@ export function SearchLayer({
   isLoading = false,
   searchTerm = '',
   isMobile = false,
+  onSearchChange,
 }: SearchLayerProps) {
   // ============================================
   // Helper: Get topic name by ID
@@ -68,9 +70,10 @@ export function SearchLayer({
                 <input
                   type="text"
                   value={searchTerm}
+                  onChange={(e) => onSearchChange?.(e.target.value)}
                   className="w-full input rounded-full pl-4 pr-4"
                   placeholder="Search ..."
-                  readOnly
+                  autoFocus
                 />
               </div>
             </div>
@@ -103,9 +106,10 @@ export function SearchLayer({
               <input
                 type="text"
                 value={searchTerm}
+                onChange={(e) => onSearchChange?.(e.target.value)}
                 className="w-full input rounded-full pl-4 pr-4"
                 placeholder="Search ..."
-                readOnly
+                autoFocus
               />
             </div>
           </div>

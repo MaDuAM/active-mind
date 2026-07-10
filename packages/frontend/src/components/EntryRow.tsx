@@ -104,106 +104,134 @@ function EntryRowComponent({
     <div
       onClick={() => onClick(entry.id)}
       onMouseEnter={() => onHover?.(entry.id)}
-      className={`card cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-3 hover:ring-2 hover:ring-offset-0 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 py-2.5 px-4 ${getBorderColor(entry)} ${getRingColor(entry)} ${className}`}
+      className={`card cursor-pointer hover:ring-2 hover:ring-offset-0 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 py-2.5 px-4 ${getBorderColor(entry)} ${getRingColor(entry)} ${className}`}
     >
-      {/* Star Button */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleFavorite?.(entry.id);
-        }}
-        disabled={isFavoritePending}
-        className="shrink-0 w-6 h-6 flex items-center justify-center text-xl leading-none transition-colors hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
-        aria-label={entry.isFavorite ? 'Remove favorite' : 'Add favorite'}
-      >
-        <span className={`text-xl leading-none transition-colors ${
-          entry.isFavorite ? 'text-gold-500' : 'text-[var(--text-muted)] hover:text-gold-400'
-        }`}>
-          {entry.isFavorite ? '🟊' : '☆'}
-        </span>
-      </button>
-
       {/* ============================================ */}
-      {/* Left: Action Name */}
+      {/* MOBILE LAYOUT: Stern + Content vertikal */}
+      {/* Stern links, Action Name + Metadaten rechts daneben */}
       {/* ============================================ */}
-      <span className="text-sm font-medium text-[var(--text-primary)] truncate flex-1 min-w-0">
-        {entry.actionName || entry.essenceShort}
-      </span>
-
-      {/* ============================================ */}
-      {/* Mobile: Metadata in second line */}
-      {/* ============================================ */}
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-[var(--text-secondary)] sm:hidden">
-        {entry.status && (
-          <span className="inline-flex items-center gap-1">
-            <span className={`w-1.5 h-1.5 rounded-full ${getStatusDotColor(entry.status)}`} />
-            {getStatusLabel(entry.status)}
+      <div className="flex sm:hidden items-start gap-3 w-full">
+        {/* Star Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleFavorite?.(entry.id);
+          }}
+          disabled={isFavoritePending}
+          className="shrink-0 w-8 h-8 flex items-center justify-center -ml-1 sm:ml-0 mt-0.5 sm:mt-0 transition-colors hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-label={entry.isFavorite ? 'Remove favorite' : 'Add favorite'}
+        >
+          <span className={`text-3xl sm:text-xl leading-none transition-colors ${
+            entry.isFavorite ? 'text-gold-500' : 'text-[var(--text-muted)] hover:text-gold-400'
+          }`}>
+            {entry.isFavorite ? '★' : '☆'}
           </span>
-        )}
-        {isActive && (
-          <span className="bg-[var(--bg-secondary)] px-2 py-0.5 rounded-full">
-            {stepInfo}
+        </button>
+
+        {/* Content: Action Name + Metadaten */}
+        <div className="flex-1 min-w-0">
+          <span className="text-sm font-medium text-[var(--text-primary)] truncate block">
+            {entry.actionName || entry.essenceShort}
           </span>
-        )}
-        {showTopic && topicName && (
-          <span className="truncate max-w-[100px]">{topicName}</span>
-        )}
-        <span className="text-[var(--text-muted)]">
-          {new Date(entry.createdAt).toLocaleDateString()}
-        </span>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-[var(--text-secondary)]">
+            {entry.status && (
+              <span className="inline-flex items-center gap-1">
+                <span className={`w-1.5 h-1.5 rounded-full ${getStatusDotColor(entry.status)}`} />
+                {getStatusLabel(entry.status)}
+              </span>
+            )}
+            {isActive && (
+              <span className="bg-[var(--bg-secondary)] px-2 py-0.5 rounded-full">
+                {stepInfo}
+              </span>
+            )}
+            {showTopic && topicName && (
+              <span className="truncate max-w-[100px]">{topicName}</span>
+            )}
+            <span className="text-[var(--text-muted)]">
+              {new Date(entry.createdAt).toLocaleDateString()}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* ============================================ */}
-      {/* Desktop & Tablet: Metadata with compact spacing */}
+      {/* DESKTOP LAYOUT: Alles in einer Reihe */}
+      {/* Stern + Action Name links, Metadaten rechts */}
       {/* ============================================ */}
-      <div className="hidden sm:flex items-center gap-2 lg:gap-3 shrink-0">
-        {/* Step Info (only for ACTIVE entries) */}
-        {isActive && (
-          <div className="w-[80px] lg:w-[110px] text-left">
-            <span className="text-xs text-[var(--text-secondary)] bg-[var(--bg-secondary)] px-2 py-0.5 rounded-full">
-              {stepInfo}
+      <div className="hidden sm:flex items-center justify-between w-full gap-3">
+        {/* Linker Block: Stern + Action Name */}
+        <div className="flex items-center gap-3 min-w-0">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFavorite?.(entry.id);
+            }}
+            disabled={isFavoritePending}
+            className="shrink-0 w-6 h-6 flex items-center justify-center transition-colors hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label={entry.isFavorite ? 'Remove favorite' : 'Add favorite'}
+          >
+            <span className={`text-2xl leading-none transition-colors ${
+              entry.isFavorite ? 'text-gold-500' : 'text-[var(--text-muted)] hover:text-gold-400'
+            }`}>
+              {entry.isFavorite ? '★' : '☆'}
             </span>
-          </div>
-        )}
-
-        {/* Benefit Star (only if benefit exists) */}
-        {entry.benefit && (
-          <div className="hidden xl:block w-[40px] lg:w-[60px] text-left">
-            <span className="text-xs text-gold-500 bg-gold-50/50 px-2 py-0.5 rounded-full truncate block">
-              ✨
-            </span>
-          </div>
-        )}
-
-        {/* Topic Name (optional) */}
-        {showTopic && topicName && (
-          <div className="hidden md:block w-[80px] lg:w-[130px] text-left">
-            <span className="text-xs text-[var(--text-secondary)] truncate block">
-              {topicName}
-            </span>
-          </div>
-        )}
-
-        {/* Created Date */}
-        <div className="hidden sm:block w-[80px] lg:w-[100px] text-left">
-          <span className="text-xs text-[var(--text-secondary)] whitespace-nowrap">
-            {new Date(entry.createdAt).toLocaleDateString()}
+          </button>
+          <span className="text-sm font-medium text-[var(--text-primary)] truncate">
+            {entry.actionName || entry.essenceShort}
           </span>
         </div>
 
-        {/* Status Badge */}
-        {entry.status && (
-          <div className="hidden sm:block w-[55px] lg:w-[75px] text-left">
-            <span className="inline-flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
-              <span className={`w-2 h-2 rounded-full ${getStatusDotColor(entry.status)}`} />
-              {getStatusLabel(entry.status)}
+        {/* Rechter Block: Metadaten */}
+        <div className="flex items-center gap-2 lg:gap-3 shrink-0">
+          {/* Step Info (only for ACTIVE entries) */}
+          {isActive && (
+            <div className="w-[80px] lg:w-[110px] text-left">
+              <span className="text-xs text-[var(--text-secondary)] bg-[var(--bg-secondary)] px-2 py-0.5 rounded-full">
+                {stepInfo}
+              </span>
+            </div>
+          )}
+
+          {/* Benefit Star (only if benefit exists) */}
+          {entry.benefit && (
+            <div className="hidden xl:block w-[40px] lg:w-[60px] text-left">
+              <span className="text-xs text-gold-500 bg-gold-50/50 px-2 py-0.5 rounded-full truncate block">
+                ✨
+              </span>
+            </div>
+          )}
+
+          {/* Topic Name (optional) */}
+          {showTopic && topicName && (
+            <div className="hidden md:block w-[80px] lg:w-[130px] text-left">
+              <span className="text-xs text-[var(--text-secondary)] truncate block">
+                {topicName}
+              </span>
+            </div>
+          )}
+
+          {/* Created Date */}
+          <div className="hidden sm:block w-[80px] lg:w-[100px] text-left">
+            <span className="text-xs text-[var(--text-secondary)] whitespace-nowrap">
+              {new Date(entry.createdAt).toLocaleDateString()}
             </span>
           </div>
-        )}
 
-        {/* Chevron/Arrow indicator */}
-        <div className="w-[30px] lg:w-[40px] text-center shrink-0 flex items-center justify-center h-full">
-          <span className="text-[var(--text-muted)] text-xl lg:text-2xl font-mono leading-none">›</span>
+          {/* Status Badge */}
+          {entry.status && (
+            <div className="hidden sm:block w-[55px] lg:w-[75px] text-left">
+              <span className="inline-flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
+                <span className={`w-2 h-2 rounded-full ${getStatusDotColor(entry.status)}`} />
+                {getStatusLabel(entry.status)}
+              </span>
+            </div>
+          )}
+
+          {/* Chevron/Arrow indicator */}
+          <div className="w-[30px] lg:w-[40px] text-center shrink-0 flex items-center justify-center h-full">
+            <span className="text-[var(--text-muted)] text-xl lg:text-2xl font-mono leading-none">›</span>
+          </div>
         </div>
       </div>
     </div>
