@@ -116,7 +116,11 @@ function EntryRowComponent({
         className="shrink-0 w-6 h-6 flex items-center justify-center text-xl leading-none transition-colors hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
         aria-label={entry.isFavorite ? 'Remove favorite' : 'Add favorite'}
       >
-        {entry.isFavorite ? '⭐' : '☆'}
+        <span className={`text-xl leading-none transition-colors ${
+          entry.isFavorite ? 'text-gold-500' : 'text-[var(--text-muted)] hover:text-gold-400'
+        }`}>
+          {entry.isFavorite ? '🟊' : '☆'}
+        </span>
       </button>
 
       {/* ============================================ */}

@@ -83,7 +83,9 @@ export function EntrySection({
           {/* Favorites Toggle - only show if entries exist */}
           {entries.length > 0 && (
             <label className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] cursor-pointer select-none">
-              <span>⭐</span>
+              <span className="text-xl leading-none text-gold-500">
+                🟊
+              </span>
               <input
                 type="checkbox"
                 checked={showFavoritesOnly}
