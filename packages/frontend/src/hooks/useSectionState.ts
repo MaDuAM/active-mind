@@ -33,7 +33,11 @@ export function useSectionState(options: UseSectionStateOptions = {}) {
   // ============================================
   const allExpanded = useMemo(() => {
     const all = expanded.active && expanded.passive && expanded.waiting && expanded.paused && expanded.knowledge;
-    return all ? 'all' : 'none';
+    const any = expanded.active || expanded.passive || expanded.waiting || expanded.paused || expanded.knowledge;
+    
+    if (all) return 'all';
+    if (any) return 'some';
+    return 'none';
   }, [expanded]);
 
   const toggleSection = (section: SectionKey) => {
@@ -41,22 +45,12 @@ export function useSectionState(options: UseSectionStateOptions = {}) {
   };
 
   const toggleAll = () => {
-    if (allExpanded === 'all') {
-      setExpanded({
-        active: false,
-        passive: false,
-        waiting: false,
-        paused: false,
-        knowledge: false,
-      });
+    // Wenn alle offen oder einige offen → alles zu
+    if (allExpanded === 'all' || allExpanded === 'some') {
+      setExpanded({ active: false, passive: false, waiting: false, paused: false, knowledge: false });
     } else {
-      const sectionHasItems = getSectionHasItems?.() ?? {
-        active: false,
-        passive: false,
-        waiting: false,
-        paused: false,
-        knowledge: false,
-      };
+      // Wenn alle zu → alle mit Items öffnen
+      const sectionHasItems = getSectionHasItems?.() ?? { active: false, passive: false, waiting: false, paused: false, knowledge: false };
       setExpanded({
         active: sectionHasItems.active,
         passive: sectionHasItems.passive,

@@ -193,15 +193,6 @@ function EntryRowComponent({
             </div>
           )}
 
-          {/* Benefit Star (only if benefit exists) */}
-          {entry.benefit && (
-            <div className="hidden xl:block w-[40px] lg:w-[60px] text-left">
-              <span className="text-xs text-gold-500 bg-gold-50/50 px-2 py-0.5 rounded-full truncate block">
-                ✨
-              </span>
-            </div>
-          )}
-
           {/* Topic Name (optional) */}
           {showTopic && topicName && (
             <div className="hidden md:block w-[80px] lg:w-[130px] text-left">

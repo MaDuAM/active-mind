@@ -19,12 +19,12 @@ interface EntryViewProps {
 // Human-readable labels for tracking types
 // ============================================
 const trackingLabels: Record<TrackingType, string> = {
-  CREATION: 'Created',
-  STEP_CHANGE: 'Step changed',
-  STATUS_CHANGE: 'Status changed',
-  ENTRY_EDIT: 'Entry edited',
-  MANUAL: 'Manual tracking',
-  RESTORE: 'Restored',
+  CREATION: 'Create',
+  STEP_CHANGE: 'Step',
+  STATUS_CHANGE: 'Status',
+  ENTRY_EDIT: 'Entry',
+  MANUAL: 'Manual',
+  RESTORE: 'Restore',
 };
 
 // ============================================
@@ -229,6 +229,15 @@ export function EntryView({
         <p className="text-sm text-[var(--text-primary)]">{entry.essenceShort}</p>
       </div>
 
+      {entry.benefit && (
+        <div className="card space-y-1 border-gold-500/20 bg-gold-50/10">
+          <span className="text-[10px] font-medium text-gold-500 uppercase tracking-wider">
+            ✨ Benefit
+          </span>
+          <p className="text-sm text-[var(--text-primary)]">{entry.benefit}</p>
+        </div>
+      )}
+
       {/* ============================================ */}
       {/* Steps Section (only for ACTIVE entries) */}
       {/* ============================================ */}
@@ -378,6 +387,9 @@ export function EntryView({
                         {new Date(t.timestamp).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                         {' '}
                         {new Date(t.timestamp).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                      <span className="text-xs font-medium text-gold-500 w-16 shrink-0">
+                        {trackingLabels[t.trackingType]}
                       </span>
                       <span className="text-[var(--text-primary)] truncate">
                         {mainText}

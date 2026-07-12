@@ -1,6 +1,6 @@
 // frontend/src/pages/TopicView.tsx
 
-import { useState, lazy, Suspense, useEffect, useMemo, useCallback } from 'react';
+import { useState, Suspense, useEffect, useMemo, useCallback } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { usePaginatedEntries, useTopics, useDeleteTopic, useToggleFavorite } from '../hooks';
 import { useSectionState } from '../hooks/useSectionState';
@@ -231,7 +231,7 @@ export default function TopicView({
             + New Entry
           </button>
           <button onClick={toggleAll} className="btn-secondary text-sm px-3 py-1.5 w-28">
-            {allExpanded === 'all' ? 'Collapse all' : 'Expand all'}
+            {allExpanded === 'none' ? 'Expand all' : 'Collapse all'}
           </button>
         </div>
       </div>

@@ -14,7 +14,7 @@ export const updateEntry = async (req: Request, res: Response) => {
     return res.status(401).json({ error: 'Not authenticated' });
   }
 
-  const { essenceText, essenceShort, actionName, benefit, steps } = req.body;
+  const { essenceText, essenceShort, actionName, benefit, steps, changeNote } = req.body;
 
   const entry = await prisma.entry.findFirst({
     where: { id: Number(req.params.id), userId },
@@ -85,17 +85,15 @@ export const updateEntry = async (req: Request, res: Response) => {
     },
   });
 
-  // Create tracking entry if change note provided
-  if (req.body.changeNote) {
-    await prisma.tracking.create({
-      data: {
-        entryId: entry.id,
-        trackingType: 'ENTRY_EDIT',
-        note: req.body.changeNote,
-        timestamp: new Date(),
-      },
-    });
-  }
+  // IMMER Tracking-Eintrag anlegen (auch ohne changeNote)
+  await prisma.tracking.create({
+    data: {
+      entryId: entry.id,
+      trackingType: 'ENTRY_EDIT',
+      note: changeNote || 'Entry edited',
+      timestamp: new Date(),
+    },
+  });
 
   res.json(updated);
 };

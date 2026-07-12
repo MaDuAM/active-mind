@@ -180,7 +180,7 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
             + New Entry
           </button>
           <button onClick={toggleAll} className="btn-secondary text-sm px-3 py-1.5 w-28">
-            {allExpanded === 'all' ? 'Collapse all' : 'Expand all'}
+            {allExpanded === 'none' ? 'Expand all' : 'Collapse all'}
           </button>
         </div>
       </div>
