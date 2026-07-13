@@ -70,7 +70,7 @@ export function EntrySection({
   const isEmpty = filteredEntries.length === 0;
 
   return (
-    <section className={className}>
+    <section id={`section-${section}`} className={className}>
       {/* Header */}
       <div
         className="flex items-center justify-between mb-3 cursor-pointer"

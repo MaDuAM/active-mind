@@ -1,24 +1,18 @@
 // frontend/src/hooks/useSectionState.ts
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState } from 'react';
 
 export type SectionKey = 'active' | 'passive' | 'waiting' | 'paused' | 'knowledge';
 
 export interface UseSectionStateOptions {
-  autoExpand?: boolean;
   initialExpanded?: Partial<Record<SectionKey, boolean>>;
-  getSectionHasItems?: () => Record<SectionKey, boolean>;
 }
 
 export function useSectionState(options: UseSectionStateOptions = {}) {
-  const {
-    autoExpand = true,
-    initialExpanded = {},
-    getSectionHasItems,
-  } = options;
+  const { initialExpanded = {} } = options;
 
   const [expanded, setExpanded] = useState<Record<SectionKey, boolean>>(() => ({
-    active: false,
+    active: true,    // Standard: Active offen
     passive: false,
     waiting: false,
     paused: false,
@@ -26,63 +20,64 @@ export function useSectionState(options: UseSectionStateOptions = {}) {
     ...initialExpanded,
   }));
 
-  const hasAutoExpanded = useRef(false);
+  // Prüfen: Alle offen?
+  const allExpanded = expanded.active && expanded.passive && expanded.waiting && expanded.paused && expanded.knowledge
+    ? 'all'
+    : expanded.active || expanded.passive || expanded.waiting || expanded.paused || expanded.knowledge
+    ? 'some'
+    : 'none';
 
-  // ============================================
-  // Computed: Check if all sections are expanded
-  // ============================================
-  const allExpanded = useMemo(() => {
-    const all = expanded.active && expanded.passive && expanded.waiting && expanded.paused && expanded.knowledge;
-    const any = expanded.active || expanded.passive || expanded.waiting || expanded.paused || expanded.knowledge;
-    
-    if (all) return 'all';
-    if (any) return 'some';
-    return 'none';
-  }, [expanded]);
-
+  // Toggle: Eine Sektion öffnen, alle anderen schließen
   const toggleSection = (section: SectionKey) => {
-    setExpanded((prev) => ({ ...prev, [section]: !prev[section] }));
+    setExpanded((prev) => {
+      const isCurrentlyExpanded = prev[section];
+      
+      if (isCurrentlyExpanded) {
+        return { ...prev, [section]: false };
+      }
+      
+      // Alle schließen, dann gewünschte öffnen
+      const newState = {
+        active: false,
+        passive: false,
+        waiting: false,
+        paused: false,
+        knowledge: false,
+        [section]: true,
+      };
+      
+      // 🔥 Nach dem Öffnen: Zum Sektions-Header scrollen
+      setTimeout(() => {
+        const element = document.getElementById(`section-${section}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+      
+      return newState;
+    });
   };
 
+  // Toggle All: Alle öffnen oder alle schließen
   const toggleAll = () => {
-    // Wenn alle offen oder einige offen → alles zu
     if (allExpanded === 'all' || allExpanded === 'some') {
-      setExpanded({ active: false, passive: false, waiting: false, paused: false, knowledge: false });
-    } else {
-      // Wenn alle zu → alle mit Items öffnen
-      const sectionHasItems = getSectionHasItems?.() ?? { active: false, passive: false, waiting: false, paused: false, knowledge: false };
       setExpanded({
-        active: sectionHasItems.active,
-        passive: sectionHasItems.passive,
-        waiting: sectionHasItems.waiting,
-        paused: sectionHasItems.paused,
-        knowledge: sectionHasItems.knowledge,
+        active: false,
+        passive: false,
+        waiting: false,
+        paused: false,
+        knowledge: false,
+      });
+    } else {
+      setExpanded({
+        active: true,
+        passive: true,
+        waiting: true,
+        paused: true,
+        knowledge: true,
       });
     }
   };
-
-  // ============================================
-  // Auto-Expand: Only runs once on first mount
-  // Prevents overriding manual user toggles
-  // ============================================
-  useEffect(() => {
-    if (!autoExpand || !getSectionHasItems || hasAutoExpanded.current) return;
-
-    const sectionHasItems = getSectionHasItems();
-    const anyItems = Object.values(sectionHasItems).some(Boolean);
-
-    if (anyItems) {
-      setExpanded({
-        active: sectionHasItems.active,
-        passive: sectionHasItems.passive,
-        waiting: sectionHasItems.waiting,
-        paused: sectionHasItems.paused,
-        knowledge: sectionHasItems.knowledge,
-      });
-      hasAutoExpanded.current = true;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoExpand, getSectionHasItems]);
 
   return {
     expanded,

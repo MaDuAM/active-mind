@@ -1,11 +1,10 @@
 // frontend/src/pages/Dashboard.tsx
 
-import { useState, lazy, Suspense, useEffect, useMemo, useCallback } from 'react';
-import { useInView } from 'react-intersection-observer';
+import { useState, lazy, Suspense, useMemo, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { usePaginatedEntries, useTopics, useToggleFavorite } from '../hooks';
 import { useSectionState } from '../hooks/useSectionState';
 import { EntrySection } from '../components/EntrySection';
-import { Entry } from '../types';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 import { useLoadingDebounce } from '../hooks/useLoadingDebounce';
 import { SectionKey } from '../hooks/useSectionState';
@@ -19,7 +18,6 @@ interface DashboardProps {
 }
 
 export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }: DashboardProps) {
-  const [limit] = useState(25);
   
   // ============================================
   // Favorites Filter State
@@ -33,76 +31,61 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
     knowledge: false,
   });
 
-  const { ref, inView } = useInView({
-    threshold: 0.1,
-    rootMargin: '100px',
-  });
+  const queryClient = useQueryClient();
 
-  // ============================================
-  // Data Fetching
-  // ============================================
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading: entriesLoading,
-    refetch: refetchEntries,
-  } = usePaginatedEntries({ limit }, true);
+  // 5 separate Queries
+  const { data: activeData, isLoading: activeLoading } = usePaginatedEntries(
+    { area: 'ACTIVE', status: 'ACTIVE', limit: 100 },
+    true
+  );
+  const { data: passiveData, isLoading: passiveLoading } = usePaginatedEntries(
+    { area: 'PASSIVE', status: 'ACTIVE', limit: 100 },
+    true
+  );
+  const { data: waitingData, isLoading: waitingLoading } = usePaginatedEntries(
+    { status: 'WAITING', limit: 100 },
+    true
+  );
+  const { data: pausedData, isLoading: pausedLoading } = usePaginatedEntries(
+    { status: 'PAUSED', limit: 100 },
+    true
+  );
+  const { data: knowledgeData, isLoading: knowledgeLoading } = usePaginatedEntries(
+    { area: 'KNOWLEDGE', limit: 100 },
+    true
+  );
 
   const { data: topics = [], isLoading: topicsLoading } = useTopics(true);
   const toggleFavoriteMutation = useToggleFavorite();
-
-  const isLoading = entriesLoading || topicsLoading;
+  
+  const isLoading = activeLoading || passiveLoading || waitingLoading || pausedLoading || knowledgeLoading || topicsLoading;
+  const activeEntries = activeData?.pages.flatMap((page) => page.data) || [];
+  const passiveEntries = passiveData?.pages.flatMap((page) => page.data) || [];
+  const waitingEntries = waitingData?.pages.flatMap((page) => page.data) || [];
+  const pausedEntries = pausedData?.pages.flatMap((page) => page.data) || [];
+  const knowledgeEntries = knowledgeData?.pages.flatMap((page) => page.data) || [];
+  
   const showLoading = useLoadingDebounce(isLoading, 200);
-  const allEntries = data?.pages.flatMap((page) => page.data) || [];
 
   // ============================================
   // Computed Data: Group entries by section
   // ============================================
-  const sections = useMemo(() => {
-    const active = allEntries.filter(
-      (e: Entry) => e.area === 'ACTIVE' && e.status === 'ACTIVE'
-    );
-    const passive = allEntries.filter(
-      (e: Entry) => e.area === 'PASSIVE' && e.status === 'ACTIVE'
-    );
-    const waiting = allEntries.filter(
-      (e: Entry) => e.status === 'WAITING' && e.area !== 'KNOWLEDGE'
-    );
-    const pausedActive = allEntries.filter(
-      (e: Entry) => e.area === 'ACTIVE' && e.status === 'PAUSED'
-    );
-    const pausedPassive = allEntries.filter(
-      (e: Entry) => e.area === 'PASSIVE' && e.status === 'PAUSED'
-    );
-    const paused = [...pausedActive, ...pausedPassive];
-    const knowledge = allEntries.filter((e: Entry) => e.area === 'KNOWLEDGE');
-
-    return {
-      active,
-      passive,
-      waiting,
-      paused,
-      knowledge,
-      activeCount: active.length,
-      passiveCount: passive.length,
-      knowledgeCount: knowledge.length,
-    };
-  }, [allEntries]);
+  const sections = useMemo(() => ({
+    active: activeEntries,
+    passive: passiveEntries,
+    waiting: waitingEntries,
+    paused: pausedEntries,
+    knowledge: knowledgeEntries,
+    activeCount: activeEntries.length,
+    passiveCount: passiveEntries.length,
+    knowledgeCount: knowledgeEntries.length,
+  }), [activeEntries, passiveEntries, waitingEntries, pausedEntries, knowledgeEntries]);
 
   // ============================================
   // Section Expansion State
   // ============================================
-  const { expanded, allExpanded, toggleSection, toggleAll } = useSectionState({
-    autoExpand: true,
-    getSectionHasItems: () => ({
-      active: sections.active.length > 0,
-      passive: sections.passive.length > 0,
-      waiting: sections.waiting.length > 0,
-      paused: sections.paused.length > 0,
-      knowledge: sections.knowledge.length > 0,
-    }),
+  const { expanded, toggleSection, } = useSectionState({
+    initialExpanded: { active: true },
   });
 
   // ============================================
@@ -120,8 +103,8 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
 
   const handleNewEntrySuccess = useCallback(() => {
     setShowNewEntryForm(false);
-    refetchEntries();
-  }, [setShowNewEntryForm, refetchEntries]);
+    queryClient.invalidateQueries({ queryKey: ['entries-paginated'] });
+  }, [setShowNewEntryForm, queryClient]);
 
   const handleNewEntryCancel = useCallback(() => {
     setShowNewEntryForm(false);
@@ -144,16 +127,16 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
   // ============================================
   // Infinite Scroll
   // ============================================
-  useEffect(() => {
+  /*useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);*/
 
   // ============================================
   // Skeleton Loading State
   // ============================================
-  if (showLoading && allEntries.length === 0) {
+  if (showLoading && activeEntries.length === 0 && passiveEntries.length === 0) {
     return <LoadingOverlay message="Loading entries..." />;
   }
 
@@ -178,9 +161,6 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
             className="hidden sm:inline-block btn-primary text-sm px-3 py-1.5 w-28"
           >
             + New Entry
-          </button>
-          <button onClick={toggleAll} className="btn-secondary text-sm px-3 py-1.5 w-28">
-            {allExpanded === 'none' ? 'Expand all' : 'Collapse all'}
           </button>
         </div>
       </div>
@@ -286,33 +266,19 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
       )}
 
       {/* ============================================ */}
-      {/* Infinite Scroll Trigger */}
-      {/* ============================================ */}
-      {hasNextPage && (
-        <div ref={ref} className="py-6 text-center">
-          {isFetchingNextPage ? (
-            <div className="space-y-2 py-4 animate-pulse">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-12 bg-[var(--bg-secondary)] rounded" />
-              ))}
-            </div>
-          ) : (
-            <div className="text-sm text-[var(--text-muted)]">Scroll for more</div>
-          )}
-        </div>
-      )}
-
-      {/* ============================================ */}
       {/* Footer Stats */}
       {/* ============================================ */}
-      {!hasNextPage && allEntries.length > 0 && (
+      {activeEntries.length > 0 || passiveEntries.length > 0 || knowledgeEntries.length > 0 ? (
         <div className="py-4 text-center text-sm text-[var(--text-muted)] space-y-1">
-          <div>{allEntries.length} entries loaded</div>
           <div className="flex justify-center gap-4 text-xs">
             <span>⚡ Active: {sections.activeCount}</span>
             <span>💡 Passive: {sections.passiveCount}</span>
             <span>📚 Knowledge: {sections.knowledgeCount}</span>
           </div>
+        </div>
+      ) : (
+        <div className="py-4 text-center text-sm text-[var(--text-muted)]">
+          No entries yet. Create your first entry!
         </div>
       )}
     </div>

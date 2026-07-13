@@ -1,17 +1,14 @@
 // frontend/src/pages/TopicView.tsx
 
-import { useState, Suspense, useEffect, useMemo, useCallback } from 'react';
-import { useInView } from 'react-intersection-observer';
+import { useState, Suspense, useMemo, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { usePaginatedEntries, useTopics, useDeleteTopic, useToggleFavorite } from '../hooks';
 import { useSectionState } from '../hooks/useSectionState';
 import { EntrySection } from '../components/EntrySection';
-import { Entry } from '../types';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 import { useLoadingDebounce } from '../hooks/useLoadingDebounce';
 import { SectionKey } from '../hooks/useSectionState';
 import NewEntryForm from '../components/NewEntryForm';
-
-// const NewEntryForm = lazy(() => import('../components/NewEntryForm'));
 
 interface TopicViewProps {
   topicId: number;
@@ -31,7 +28,6 @@ export default function TopicView({
 }: TopicViewProps) {
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [limit] = useState(25);
 
   // ============================================
   // Favorites Filter State
@@ -45,27 +41,27 @@ export default function TopicView({
     knowledge: false,
   });
 
-  const { ref, inView } = useInView({
-    threshold: 0.1,
-    rootMargin: '100px',
-  });
+  const queryClient = useQueryClient();
 
-  // ============================================
-  // Data Fetching
-  // ============================================
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading: entriesLoading,
-    refetch: refetchEntries,
-  } = usePaginatedEntries({ topicId, limit }, !!topicId);
-
-  const {
-    data: trashData,
-  } = usePaginatedEntries(
-    { topicId, deletedOnly: true, limit: 1 },
+  // 5 separate Queries (gefiltert nach topicId)
+  const { data: activeData, isLoading: activeLoading } = usePaginatedEntries(
+    { topicId, area: 'ACTIVE', status: 'ACTIVE', limit: 100 },
+    !!topicId
+  );
+  const { data: passiveData, isLoading: passiveLoading } = usePaginatedEntries(
+    { topicId, area: 'PASSIVE', status: 'ACTIVE', limit: 100 },
+    !!topicId
+  );
+  const { data: waitingData, isLoading: waitingLoading } = usePaginatedEntries(
+    { topicId, status: 'WAITING', limit: 100 },
+    !!topicId
+  );
+  const { data: pausedData, isLoading: pausedLoading } = usePaginatedEntries(
+    { topicId, status: 'PAUSED', limit: 100 },
+    !!topicId
+  );
+  const { data: knowledgeData, isLoading: knowledgeLoading } = usePaginatedEntries(
+    { topicId, area: 'KNOWLEDGE', limit: 100 },
     !!topicId
   );
 
@@ -73,55 +69,38 @@ export default function TopicView({
   const deleteTopicMutation = useDeleteTopic();
   const toggleFavoriteMutation = useToggleFavorite();
 
-  const isLoading = entriesLoading || topicsLoading;
-  const showLoading = useLoadingDebounce(isLoading, 200);
-  const allEntries = data?.pages.flatMap((page) => page.data) || [];
+  const isLoading = activeLoading || passiveLoading || waitingLoading || pausedLoading || knowledgeLoading || topicsLoading;
+  const activeEntries = activeData?.pages.flatMap((page) => page.data) || [];
+  const passiveEntries = passiveData?.pages.flatMap((page) => page.data) || [];
+  const waitingEntries = waitingData?.pages.flatMap((page) => page.data) || [];
+  const pausedEntries = pausedData?.pages.flatMap((page) => page.data) || [];
+  const knowledgeEntries = knowledgeData?.pages.flatMap((page) => page.data) || [];
+
+  const { data: trashData } = usePaginatedEntries(
+    { topicId, deletedOnly: true, limit: 1 },
+    !!topicId
+  );
   const trashCount = trashData?.pages?.[0]?.pagination?.total || 0;
+
+  const showLoading = useLoadingDebounce(isLoading, 200);
 
   // ============================================
   // Computed Data: Group entries by section
   // ============================================
-  const sections = useMemo(() => {
-    const activeEntries = allEntries.filter((e: Entry) => !e.deletedAt && e.topicId === topicId);
-
-    const active = activeEntries.filter(
-      (e: Entry) => e.area === 'ACTIVE' && e.status === 'ACTIVE'
-    );
-    const passive = activeEntries.filter(
-      (e: Entry) => e.area === 'PASSIVE' && e.status === 'ACTIVE'
-    );
-    const waiting = activeEntries.filter(
-      (e: Entry) => e.status === 'WAITING' && e.area !== 'KNOWLEDGE'
-    );
-    const paused = activeEntries.filter(
-      (e: Entry) => e.status === 'PAUSED' && e.area !== 'KNOWLEDGE'
-    );
-    const knowledge = activeEntries.filter(
-      (e: Entry) => e.area === 'KNOWLEDGE'
-    );
-
-    return {
-      active,
-      passive,
-      waiting,
-      paused,
-      knowledge,
-      total: activeEntries.length,
-    };
-  }, [allEntries, topicId]);
+  const sections = useMemo(() => ({
+    active: activeEntries,
+    passive: passiveEntries,
+    waiting: waitingEntries,
+    paused: pausedEntries,
+    knowledge: knowledgeEntries,
+    total: activeEntries.length + passiveEntries.length + waitingEntries.length + pausedEntries.length + knowledgeEntries.length,
+  }), [activeEntries, passiveEntries, waitingEntries, pausedEntries, knowledgeEntries]);
 
   // ============================================
   // Section Expansion State
   // ============================================
-  const { expanded, allExpanded, toggleSection, toggleAll } = useSectionState({
-    autoExpand: true,
-    getSectionHasItems: () => ({
-      active: sections.active.length > 0,
-      passive: sections.passive.length > 0,
-      waiting: sections.waiting.length > 0,
-      paused: sections.paused.length > 0,
-      knowledge: sections.knowledge.length > 0,
-    }),
+  const { expanded, toggleSection } = useSectionState({
+    initialExpanded: { active: true },
   });
 
   // ============================================
@@ -134,8 +113,8 @@ export default function TopicView({
 
   const handleNewEntrySuccess = useCallback(() => {
     setShowNewEntryForm(false);
-    refetchEntries();
-  }, [setShowNewEntryForm, refetchEntries]);
+    queryClient.invalidateQueries({ queryKey: ['entries-paginated'] });
+  }, [setShowNewEntryForm, queryClient]);
 
   const handleNewEntryCancel = useCallback(() => {
     setShowNewEntryForm(false);
@@ -156,15 +135,6 @@ export default function TopicView({
   }, [toggleFavoriteMutation]);
 
   // ============================================
-  // Infinite Scroll
-  // ============================================
-  useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  // ============================================
   // Handlers
   // ============================================
   const topicName = topics.find((t) => t.id === topicId)?.name || 'Unbekannt';
@@ -172,7 +142,7 @@ export default function TopicView({
   const handleDeleteTopic = async () => {
     try {
       await deleteTopicMutation.mutateAsync(topicId);
-      await refetchEntries();
+      queryClient.invalidateQueries({ queryKey: ['entries-paginated'] });
       onTopicDeleted();
     } catch (error) {
       if (error instanceof Error && error.message.includes('Can not delete Topic Block')) {
@@ -185,7 +155,7 @@ export default function TopicView({
   // ============================================
   // Skeleton Loading State
   // ============================================
-  if (showLoading && allEntries.length === 0) {
+  if (showLoading && sections.total === 0) {
     return <LoadingOverlay message="Loading entries..." />;
   }
 
@@ -229,9 +199,6 @@ export default function TopicView({
             className="hidden sm:inline-block btn-primary text-sm px-3 py-1.5 w-28"
           >
             + New Entry
-          </button>
-          <button onClick={toggleAll} className="btn-secondary text-sm px-3 py-1.5 w-28">
-            {allExpanded === 'none' ? 'Expand all' : 'Collapse all'}
           </button>
         </div>
       </div>
@@ -348,29 +315,6 @@ export default function TopicView({
             isFavoritePending={toggleFavoriteMutation.isPending}
           />
         </>
-      )}
-
-      {/* ============================================ */}
-      {/* Infinite Scroll Trigger */}
-      {/* ============================================ */}
-      {hasNextPage && (
-        <div ref={ref} className="py-6 text-center">
-          {isFetchingNextPage ? (
-            <div className="space-y-2 py-4 animate-pulse">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-12 bg-[var(--bg-secondary)] rounded" />
-              ))}
-            </div>
-          ) : (
-            <div className="text-sm text-[var(--text-muted)]">Scroll for more</div>
-          )}
-        </div>
-      )}
-
-      {!hasNextPage && allEntries.length > 0 && (
-        <div className="py-4 text-center text-sm text-[var(--text-muted)]">
-          {allEntries.length} entries loaded
-        </div>
       )}
 
       {/* Delete Confirmation Modal */}
