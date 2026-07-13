@@ -1,64 +1,56 @@
 // frontend/src/hooks/useSearch.ts
 
-import { useMemo, useState, useEffect } from 'react';
-import { Entry } from '../types';
+import { useState, useEffect, useMemo } from 'react';
+import { apiClient } from '../lib/apiClient';
+import { useQuery } from '@tanstack/react-query';
 
-interface UseSearchOptions {
-  delay?: number;
-  maxResults?: number;
-  searchFields?: (keyof Pick<Entry, 'essenceText' | 'essenceShort' | 'actionName' | 'benefit' | 'pauseReason'>)[];
-}
+const searchEntries = async (query: string, page: number = 1, limit: number = 50) => {
+  if (!query.trim()) return { data: [], pagination: { total: 0, totalPages: 0 } };
+  
+  const response = await apiClient.get<{
+    data: any[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+    };
+  }>('/search', { q: query.trim(), page, limit });
+  
+  return response;
+};
 
 export function useSearch(
-  entries: Entry[],
+  _entries: any[],
   searchTerm: string,
-  options: UseSearchOptions = {}
+  options: {
+    delay?: number;
+    maxResults?: number;
+  } = {}
 ) {
-  const {
-    delay = 300,
-    maxResults = 50,
-    searchFields = ['essenceText', 'essenceShort', 'actionName', 'benefit', 'pauseReason'],
-  } = options;
-
+  const { delay = 300, maxResults = 50 } = options;
   const [debouncedTerm, setDebouncedTerm] = useState(searchTerm);
 
-  // Debounce
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedTerm(searchTerm), delay);
     return () => clearTimeout(timer);
   }, [searchTerm, delay]);
 
-  // ============================================
-  // SEARCH: Filtered entries
-  // ============================================
-  const filteredEntries = useMemo(() => {
-    const term = debouncedTerm.trim().toLowerCase();
-    if (!term) return [];
+  // 🔥 isLoading aus useQuery holen
+  const { data, isLoading } = useQuery({
+    queryKey: ['search', debouncedTerm],
+    queryFn: () => searchEntries(debouncedTerm, 1, maxResults),
+    enabled: debouncedTerm.trim().length > 0,
+    staleTime: 30000,
+  });
 
-    const results: Entry[] = [];
+  const results = useMemo(() => {
+    if (!data || !debouncedTerm.trim()) return [];
+    return data.data.slice(0, maxResults);
+  }, [data, debouncedTerm, maxResults]);
 
-    for (const entry of entries) {
-      if (results.length >= maxResults) break;
-
-      const match = searchFields.some((field) => {
-        const value = entry[field];
-        if (typeof value === 'string') {
-          return value.toLowerCase().includes(term);
-        }
-        return false;
-      });
-
-      const stepsMatch = entry.steps?.some((step) =>
-        step.description.toLowerCase().includes(term)
-      );
-
-      if (match || stepsMatch) {
-        results.push(entry);
-      }
-    }
-
-    return results;
-  }, [entries, debouncedTerm, maxResults, searchFields]);
-
-  return filteredEntries;
+  // 🔥 isLoading mit zurückgeben
+  return { results, isLoading };
 }

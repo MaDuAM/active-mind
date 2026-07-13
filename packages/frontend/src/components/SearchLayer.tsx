@@ -60,6 +60,24 @@ export function SearchLayer({
       );
     }
 
+    // Vor dem Empty-Check – Loading prüfen
+    if (isLoading) {
+      return (
+        <div className="fixed inset-0 z-[200] bg-[var(--bg-card)] flex flex-col animate-in fade-in duration-200">
+          <div className="shrink-0 px-4 py-3 border-b border-[var(--border-color)] bg-[var(--bg-card)] flex items-center justify-between">
+            <strong className="text-[var(--text-primary)]">Searching...</strong>
+          </div>
+          <div className="flex-1 flex items-center justify-center text-[var(--text-secondary)]">
+            <div className="w-8 h-8 border-4 border-gold-500 border-t-transparent rounded-full animate-spin" />
+            <span className="ml-3">Loading results...</span>
+          </div>
+          <div className="shrink-0 px-4 py-4 flex justify-center border-t border-[var(--border-color)]">
+            <button onClick={onClose} className="...">✕</button>
+          </div>
+        </div>
+      );
+    }
+
     // Empty Results
     if (entries.length === 0) {
       return (
@@ -173,6 +191,27 @@ export function SearchLayer({
         </div>
         <div className="p-10 flex items-center justify-center">
           <LoadingOverlay message="Loading..." />
+        </div>
+      </div>
+    );
+  }
+
+  // Vor dem Empty-Check – Loading prüfen
+  if (isLoading) {
+    return (
+      <div className="fixed top-36 left-1/2 -translate-x-1/2 w-[900px] max-w-[90vw] bg-[var(--bg-card)] border border-[var(--border-color)] rounded-card shadow-dropdown overflow-y-auto z-[200] animate-in fade-in slide-in-from-top-4 duration-200">
+        <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-3 border-b border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
+          <strong className="text-[var(--text-primary)]">🔍 Searching...</strong>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-gold-500 hover:text-white transition-colors"
+          >
+            ✕
+          </button>
+        </div>
+        <div className="p-10 flex items-center justify-center">
+          <div className="w-8 h-8 border-4 border-gold-500 border-t-transparent rounded-full animate-spin" />
+          <span className="ml-3 text-[var(--text-secondary)]">Loading results...</span>
         </div>
       </div>
     );

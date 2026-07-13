@@ -89,7 +89,11 @@ function AppContent() {
   // Search Logic: Full-text search across entries
   // Returns up to maxResults (50) matching entries
   // ============================================
-  const searchResults = useSearch(entries, searchTerm, { maxResults: 50 });
+  const { results: searchResults, isLoading: searchIsLoading } = useSearch(
+    entries, 
+    searchTerm, 
+    { maxResults: 50 }
+  );
   
   // ============================================
   // Autocomplete Suggestions: Extract unique words from entries
@@ -464,6 +468,7 @@ function AppContent() {
             searchTerm={searchTerm}
             isMobile={isMobile}
             onSearchChange={handleInputChange}
+            isLoading={searchIsLoading}
           />
         </>
       )}

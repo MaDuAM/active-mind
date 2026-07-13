@@ -10,6 +10,7 @@ import { config } from './config';
 import authRouter from './auth';
 import topicRouter from './topics';
 import entryRouter from './entries';
+import searchRouter from './search';
 
 const prisma = new PrismaClient();
 const app = express();
@@ -119,6 +120,7 @@ app.use(session({
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/topics', topicRouter);
 app.use('/api/v1/entries', entryRouter);
+app.use('/api/v1/search', searchRouter);
 
 // ============================================
 // 6. Health Check
