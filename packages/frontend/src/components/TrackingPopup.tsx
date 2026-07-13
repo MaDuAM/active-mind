@@ -1,7 +1,14 @@
-// frontend/src/components/TrackingPopup.tsx
+// ============================================
+// FILE: frontend/src/components/TrackingPopup.tsx
+// PURPOSE: Generic popup for tracking changes with note input
+// DEPENDENCIES: react
+// ============================================
 
 import { useState, useEffect } from 'react';
 
+// ============================================
+// PROPS
+// ============================================
 interface TrackingPopupProps {
   isOpen: boolean;
   onConfirm: (note: string) => void;
@@ -12,6 +19,9 @@ interface TrackingPopupProps {
   initialNote?: string;
 }
 
+// ============================================
+// COMPONENT: TrackingPopup
+// ============================================
 export function TrackingPopup({
   isOpen,
   onConfirm,
@@ -22,12 +32,12 @@ export function TrackingPopup({
   initialNote = '',
 }: TrackingPopupProps) {
   // ============================================
-  // Local State
+  // LOCAL STATE
   // ============================================
   const [note, setNote] = useState(initialNote);
 
   // ============================================
-  // Reset note when popup opens
+  // RESET NOTE ON OPEN
   // ============================================
   useEffect(() => {
     if (isOpen) {
@@ -38,7 +48,7 @@ export function TrackingPopup({
   if (!isOpen) return null;
 
   // ============================================
-  // Handlers
+  // HANDLERS
   // ============================================
   const handleConfirm = () => {
     onConfirm(note);
@@ -49,9 +59,9 @@ export function TrackingPopup({
   };
 
   // ============================================
-  // Keyboard Shortcuts
-  // - Escape: Cancel
-  // - Ctrl/Cmd + Enter: Confirm
+  // KEYBOARD SHORTCUTS
+  //   - Escape: Cancel
+  //   - Ctrl/Cmd + Enter: Confirm
   // ============================================
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
@@ -62,6 +72,9 @@ export function TrackingPopup({
     }
   };
 
+  // ============================================
+  // RENDER
+  // ============================================
   return (
     <div
       className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/30 backdrop-blur-sm"

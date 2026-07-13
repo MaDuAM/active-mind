@@ -1,8 +1,15 @@
-// frontend/src/components/TopicSelector.tsx
+// ============================================
+// FILE: frontend/src/components/TopicSelector.tsx
+// PURPOSE: Topic selection dropdown with inline creation capability
+// DEPENDENCIES: react, types (Topic)
+// ============================================
 
 import { useState } from 'react';
 import { Topic } from '../types';
 
+// ============================================
+// PROPS
+// ============================================
 interface TopicSelectorProps {
   topics: Topic[];
   selectedTopicId: number | null;
@@ -13,6 +20,9 @@ interface TopicSelectorProps {
   label?: string;
 }
 
+// ============================================
+// COMPONENT: TopicSelector
+// ============================================
 export function TopicSelector({
   topics,
   selectedTopicId,
@@ -23,14 +33,14 @@ export function TopicSelector({
   label = 'Topic Block',
 }: TopicSelectorProps) {
   // ============================================
-  // Local State for "Create New" mode
+  // LOCAL STATE for "Create New" mode
   // ============================================
   const [createNew, setCreateNew] = useState(false);
   const [newTopicName, setNewTopicName] = useState('');
 
   // ============================================
-  // Select Change Handler
-  // Detects when user selects "Create New" option
+  // SELECT CHANGE HANDLER
+  // PURPOSE: Detects when user selects "Create New" option
   // ============================================
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
@@ -47,7 +57,7 @@ export function TopicSelector({
   };
 
   // ============================================
-  // Create New Handlers
+  // CREATE NEW HANDLERS
   // ============================================
   const handleCreateNew = () => {
     if (newTopicName.trim()) {
@@ -62,13 +72,14 @@ export function TopicSelector({
     setNewTopicName('');
   };
 
+  // ============================================
+  // RENDER
+  // ============================================
   return (
     <div>
       <label className="label">{label}</label>
       
-      {/* ============================================ */}
       {/* Existing Topic Selector */}
-      {/* ============================================ */}
       {!createNew ? (
         <select
           value={selectedTopicId ?? ''}
@@ -87,9 +98,7 @@ export function TopicSelector({
           <option value="new">+ New Topic Block</option>
         </select>
       ) : (
-        /* ============================================ */
         /* Create New Topic Input */
-        /* ============================================ */
         <div className="flex gap-2">
           <input
             type="text"

@@ -1,4 +1,8 @@
-// frontend/src/pages/Trash.tsx
+// ============================================
+// FILE: frontend/src/pages/Trash.tsx
+// PURPOSE: Trash page - displays soft-deleted entries with restore and permanent delete actions
+// DEPENDENCIES: react, tanstack/react-query, custom hooks, components
+// ============================================
 
 import { useState, useEffect, useCallback } from 'react';
 import { useInView } from 'react-intersection-observer';
@@ -11,6 +15,9 @@ import { apiClient } from '../lib/apiClient';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 import { useLoadingDebounce } from '../hooks/useLoadingDebounce';
 
+// ============================================
+// COMPONENT: Trash
+// ============================================
 export function Trash() {
   const { showNotification } = useNotification();
   const queryClient = useQueryClient();
@@ -19,13 +26,16 @@ export function Trash() {
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
+  // ============================================
+  // INFINITE SCROLL
+  // ============================================
   const { ref, inView } = useInView({
     threshold: 0.1,
     rootMargin: '100px',
   });
 
   // ============================================
-  // Data Fetching
+  // DATA FETCHING
   // ============================================
   const {
     data,
@@ -49,7 +59,7 @@ export function Trash() {
   const allEntries = data?.pages.flatMap((page) => page.data) || [];
 
   // ============================================
-  // Clear All Mutation
+  // CLEAR ALL MUTATION
   // ============================================
   const clearTrashMutation = useMutation({
     mutationFn: async () => {
@@ -70,7 +80,7 @@ export function Trash() {
   });
 
   // ============================================
-  // Infinite Scroll
+  // INFINITE SCROLL EFFECT
   // ============================================
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
@@ -79,7 +89,7 @@ export function Trash() {
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // ============================================
-  // Memoized Callbacks
+  // MEMOIZED CALLBACKS
   // ============================================
   const getTopicName = useCallback(
     (topicId: number) => topics.find((t) => t.id === topicId)?.name || '?',
@@ -87,7 +97,7 @@ export function Trash() {
   );
 
   // ============================================
-  // Handlers
+  // HANDLERS
   // ============================================
   const handleRestore = async (id: number) => {
     try {
@@ -125,12 +135,15 @@ export function Trash() {
   };
 
   // ============================================
-  // Skeleton Loading State
+  // SKELETON LOADING STATE
   // ============================================
   if (showLoading && allEntries.length === 0) {
     return <LoadingOverlay message="Loading removed entries..." />;
   }
 
+  // ============================================
+  // RENDER
+  // ============================================
   return (
     <div className="max-w-7xl mx-auto">
       {/* Header with Clear All button */}

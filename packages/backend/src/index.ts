@@ -1,4 +1,8 @@
-﻿// backend/src/index.ts
+﻿// ============================================
+// FILE: backend/src/index.ts
+// PURPOSE: Express server entry point - configures middleware, routes, and starts server
+// DEPENDENCIES: express, session, cors, helmet, rate-limit, prisma
+// ============================================
 
 import express from 'express';
 const session = require('express-session');
@@ -12,12 +16,16 @@ import topicRouter from './topics';
 import entryRouter from './entries';
 import searchRouter from './search';
 
+// ============================================
+// INITIALIZATION
+// ============================================
 const prisma = new PrismaClient();
 const app = express();
 const PORT = config.PORT;
 
 // ============================================
-// 1. Security: Helmet with CSP
+// MIDDLEWARE: Security (Helmet with CSP)
+// PURPOSE: Sets security headers and Content-Security-Policy
 // ============================================
 app.use(
   helmet({
@@ -43,7 +51,8 @@ app.use(
 );
 
 // ============================================
-// 2. CORS Configuration
+// MIDDLEWARE: CORS
+// PURPOSE: Configures Cross-Origin Resource Sharing
 // ============================================
 const allowedOrigins = [
   'http://localhost:5173',
@@ -59,16 +68,17 @@ app.use(cors({
 app.use(express.json());
 
 // ============================================
-// 3. Rate Limiting
+// MIDDLEWARE: Rate Limiting
+// PURPOSE: Prevents brute-force attacks and API abuse
 // ============================================
 const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // 100 requests per window
   message: { error: 'Too many requests, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => {
-    // Nur Schreiboperationen limitieren (POST, PUT, PATCH, DELETE)
+    // Only limit write operations (POST, PUT, PATCH, DELETE)
     return ['GET', 'HEAD', 'OPTIONS'].includes(req.method);
   },
 });
@@ -82,13 +92,13 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: true, // Don't count successful logins
 });
 
-//app.use('/api/v1/auth/login', authLimiter);
-//app.use('/api/v1/auth/register', authLimiter);
+// app.use('/api/v1/auth/login', authLimiter);
+// app.use('/api/v1/auth/register', authLimiter);
 app.use('/api/v1/', globalLimiter);
 
 // ============================================
-// 4. Session Configuration
-// Uses PostgreSQL session store in production
+// MIDDLEWARE: Session Configuration
+// PURPOSE: Manages user sessions with PostgreSQL store in production
 // ============================================
 const sessionStore = config.NODE_ENV === 'production' 
   ? new (require('connect-pg-simple')(session))({
@@ -115,7 +125,7 @@ app.use(session({
 }));
 
 // ============================================
-// 5. Routes
+// ROUTES
 // ============================================
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/topics', topicRouter);
@@ -123,8 +133,8 @@ app.use('/api/v1/entries', entryRouter);
 app.use('/api/v1/search', searchRouter);
 
 // ============================================
-// 6. Health Check
-// Verifies database connectivity
+// ROUTE: GET /health
+// PURPOSE: Health check endpoint - verifies database connectivity
 // ============================================
 app.get('/api/v1/health', async (req, res) => {
   const health = {
@@ -146,12 +156,12 @@ app.get('/api/v1/health', async (req, res) => {
 });
 
 // ============================================
-// 7. Export for Testing
+// EXPORT
 // ============================================
 export default app;
 
 // ============================================
-// 8. Server Start
+// SERVER START
 // ============================================
 if (config.NODE_ENV !== 'test') {
   app.listen(PORT, () => {

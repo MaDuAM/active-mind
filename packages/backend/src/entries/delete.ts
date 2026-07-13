@@ -1,12 +1,22 @@
-// backend/src/routes/entries/delete.ts
+// ============================================
+// FILE: backend/src/routes/entries/delete.ts
+// PURPOSE: Entry deletion handlers (soft delete, permanent delete, restore)
+// DEPENDENCIES: express, prisma
+// ============================================
 
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
+// ============================================
+// INITIALIZATION
+// ============================================
 const prisma = new PrismaClient();
 
 // ============================================
-// DELETE /entries/:id - Soft delete (move to trash)
+// HANDLER: DELETE /entries/:id
+// PURPOSE: Soft-deletes an entry (moves to trash)
+// BEHAVIOR: Sets deletedAt timestamp, entry remains in database
+// AUTHENTICATION: Required (userId from session)
 // ============================================
 export const softDeleteEntry = async (req: Request, res: Response) => {
   const userId = (req.session as any).userId;
@@ -27,7 +37,10 @@ export const softDeleteEntry = async (req: Request, res: Response) => {
 };
 
 // ============================================
-// DELETE /entries/:id/permanent - Permanently delete
+// HANDLER: DELETE /entries/:id/permanent
+// PURPOSE: Permanently deletes an entry (cannot be undone)
+// BEHAVIOR: Sets permanentlyRemoved flag to true
+// AUTHENTICATION: Required (userId from session)
 // ============================================
 export const permanentDeleteEntry = async (req: Request, res: Response) => {
   const userId = (req.session as any).userId;
@@ -48,7 +61,11 @@ export const permanentDeleteEntry = async (req: Request, res: Response) => {
 };
 
 // ============================================
-// POST /entries/:id/restore - Restore from trash
+// HANDLER: POST /entries/:id/restore
+// PURPOSE: Restores a soft-deleted entry from trash
+// BEHAVIOR: Clears deletedAt, resets status to WAITING (for non-KNOWLEDGE)
+// SIDE EFFECT: Creates RESTORE tracking entry
+// AUTHENTICATION: Required (userId from session)
 // ============================================
 export const restoreEntry = async (req: Request, res: Response) => {
   const userId = (req.session as any).userId;

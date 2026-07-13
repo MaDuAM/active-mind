@@ -1,4 +1,8 @@
-// frontend/src/components/NewEntryForm.tsx
+// ============================================
+// FILE: frontend/src/components/NewEntryForm.tsx
+// PURPOSE: New entry creation form with area-specific fields and validation
+// DEPENDENCIES: react, tanstack/react-query, custom hooks, components
+// ============================================
 
 import { useState, useRef } from 'react';
 import { useNotification } from '../context/NotificationContext';
@@ -11,23 +15,29 @@ import { Area, Status, Step, CreateEntryPayload } from '../types';
 import { LoadingOverlay } from './LoadingOverlay';
 import { useLoadingDebounce } from '../hooks/useLoadingDebounce';
 
+// ============================================
+// PROPS
+// ============================================
 interface NewEntryFormProps {
   onSuccess: () => void;
   onCancel: () => void;
 }
 
+// ============================================
+// COMPONENT: NewEntryForm
+// ============================================
 export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps) {
   const { showNotification } = useNotification();
 
   // ============================================
-  // Data Fetching & Mutations
+  // DATA FETCHING & MUTATIONS
   // ============================================
   const { data: topics = [], isLoading: topicsLoading } = useTopics();
   const createEntryMutation = useCreateEntry();
   const createTopicMutation = useCreateTopic();
 
   // ============================================
-  // Form State
+  // FORM STATE
   // ============================================
   const initialValues = useRef({
     area: 'KNOWLEDGE' as Area,
@@ -55,8 +65,8 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
   const isSubmitting = createEntryMutation.isPending || createTopicMutation.isPending;
 
   // ============================================
-  // Dirty Check: Compare current state with initial
-  // Used to prompt confirmation when canceling with unsaved changes
+  // DIRTY CHECK
+  // PURPOSE: Compares current state with initial to detect unsaved changes
   // ============================================
   const isDirty =
     area !== initialValues.area ||
@@ -70,7 +80,7 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
     pauseReason !== initialValues.pauseReason;
 
   // ============================================
-  // Cancel Handler
+  // CANCEL HANDLER
   // ============================================
   const handleCancel = () => {
     if (isDirty) {
@@ -86,7 +96,7 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
   };
 
   // ============================================
-  // Topic Creation Handler
+  // TOPIC CREATION HANDLER
   // ============================================
   const handleCreateTopic = async (name: string) => {
     try {
@@ -99,7 +109,7 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
   };
 
   // ============================================
-  // Form Submission
+  // FORM SUBMISSION
   // ============================================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,7 +153,7 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
   };
 
   // ============================================
-  // Validation
+  // VALIDATION
   // ============================================
   const isValid = () => {
     if (!essenceText || !essenceShort) return false;
@@ -159,7 +169,7 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
   };
 
   // ============================================
-  // Loading State
+  // LOADING STATE
   // ============================================
   const showLoading = useLoadingDebounce(topicsLoading, 200);
 
@@ -179,6 +189,9 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
     );
   }
 
+  // ============================================
+  // RENDER
+  // ============================================
   return (
     <div 
       className="fixed inset-0 z-[1000] bg-black/20 backdrop-blur-sm"
@@ -188,9 +201,7 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
         className="fixed inset-y-0 right-0 w-full sm:w-[80vw] sm:min-w-[350px] sm:max-w-[800px] bg-[var(--bg-card)] shadow-dropdown border-l border-[var(--border-color)] p-6 overflow-y-auto flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ============================================ */}
         {/* Header */}
-        {/* ============================================ */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-gold-500 text-left w-full">
             New Entry
@@ -198,9 +209,7 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
           <div className="hidden sm:block w-8" />
         </div>
 
-        {/* ============================================ */}
         {/* Form */}
-        {/* ============================================ */}
         <form onSubmit={handleSubmit} className="space-y-4 flex-1 pb-20 sm:pb-0">
           {/* Topic Selector */}
           <TopicSelector
@@ -258,9 +267,7 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
             />
           )}
 
-          {/* ============================================ */}
           {/* Desktop: Submit/Cancel Buttons */}
-          {/* ============================================ */}
           <div className="hidden sm:flex gap-3 pt-4 border-t border-[var(--border-color)]">
             <button
               type="submit"
@@ -280,9 +287,7 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
           </div>
         </form>
 
-        {/* ============================================ */}
         {/* Mobile: Action Buttons */}
-        {/* ============================================ */}
         <div className="sm:hidden shrink-0 pt-4 mt-4 border-t border-[var(--border-color)]">
           <div className="flex gap-3">
             <button
@@ -304,9 +309,7 @@ export default function NewEntryForm({ onSuccess, onCancel }: NewEntryFormProps)
           </div>
         </div>
 
-        {/* ============================================ */}
         {/* Confirm Dialog */}
-        {/* ============================================ */}
         <ConfirmDialog
           isOpen={showConfirmDialog}
           title="Discard entries?"

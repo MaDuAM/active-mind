@@ -1,13 +1,25 @@
-// backend/src/routes/entries/status.ts
+// ============================================
+// FILE: backend/src/routes/entries/status.ts
+// PURPOSE: Entry status change handler
+// DEPENDENCIES: express, prisma, validation
+// ============================================
 
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { isValidStatus } from '../validation';
 
+// ============================================
+// INITIALIZATION
+// ============================================
 const prisma = new PrismaClient();
 
 // ============================================
-// POST /entries/:id/status - Change entry status
+// HANDLER: POST /entries/:id/status
+// PURPOSE: Changes the status of an entry (WAITING ↔ ACTIVE ↔ PAUSED)
+// RESTRICTIONS: Cannot change status of KNOWLEDGE entries
+// VALIDATION: newStatus must be WAITING | ACTIVE | PAUSED
+// SIDE EFFECT: Creates STATUS_CHANGE tracking entry with old/new status
+// AUTHENTICATION: Required (userId from session)
 // ============================================
 export const changeStatus = async (req: Request, res: Response) => {
   const userId = (req.session as any).userId;

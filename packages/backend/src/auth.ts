@@ -1,24 +1,34 @@
-// backend/src/auth.ts
+// ============================================
+// FILE: backend/src/auth.ts
+// PURPOSE: Authentication routes (login, register, logout, session check)
+// DEPENDENCIES: express, bcrypt, prisma, express-session
+// ============================================
 
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import { PrismaClient } from '@prisma/client';
 
+// ============================================
+// TYPE EXTENSIONS
+// ============================================
 declare module 'express-session' {
   interface SessionData {
     userId: number;
   }
 }
 
+// ============================================
+// INITIALIZATION
+// ============================================
 const prisma = new PrismaClient();
 const router = Router();
 
 // ============================================
-// Validation Helpers
+// VALIDATION HELPERS
 // ============================================
 
 /**
- * Validate username format
+ * Validates username format
  * - 3-20 characters
  * - Alphanumeric and underscore only
  */
@@ -27,7 +37,7 @@ const isValidUsername = (username: string): boolean => {
 };
 
 /**
- * Validate password length
+ * Validates password length
  * - 6-100 characters
  */
 const isValidPassword = (password: string): boolean => {
@@ -35,9 +45,10 @@ const isValidPassword = (password: string): boolean => {
 };
 
 // ============================================
-// Setup Route
-// Creates initial admin user if no users exist
-// Used for first-time setup only
+// ROUTE: POST /setup
+// PURPOSE: Creates initial admin user on first run
+// BEHAVIOR: Only works if no users exist in database
+// SECURITY: Returns 400 if any user already exists
 // ============================================
 router.post('/setup', async (req, res) => {
   const existing = await prisma.user.findFirst();
@@ -55,13 +66,15 @@ router.post('/setup', async (req, res) => {
 });
 
 // ============================================
-// Register Route
-// Creates a new user account
+// ROUTE: POST /register
+// PURPOSE: Creates a new user account
+// VALIDATION: Username format, password length, duplicate check
+// BEHAVIOR: Auto-logs in user after successful registration
 // ============================================
 router.post('/register', async (req, res) => {
   const { username, password } = req.body;
   
-  // 1. Validate username
+  // Validate username
   if (!username) {
     return res.status(400).json({ error: 'Username required' });
   }
@@ -74,7 +87,7 @@ router.post('/register', async (req, res) => {
     });
   }
   
-  // 2. Validate password
+  // Validate password
   if (!password) {
     return res.status(400).json({ error: 'Password required' });
   }
@@ -87,7 +100,7 @@ router.post('/register', async (req, res) => {
     });
   }
   
-  // 3. Check for duplicate username
+  // Check for duplicate username
   const existing = await prisma.user.findUnique({ where: { username } });
   if (existing) {
     return res.status(400).json({ error: 'Username already taken' });
@@ -104,13 +117,15 @@ router.post('/register', async (req, res) => {
 });
 
 // ============================================
-// Login Route
-// Authenticates existing user
+// ROUTE: POST /login
+// PURPOSE: Authenticates existing user
+// VALIDATION: Username exists, password matches hash
+// BEHAVIOR: Stores userId in session on success
 // ============================================
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
   
-  // 1. Validate username
+  // Validate username
   if (!username) {
     return res.status(400).json({ error: 'Username required' });
   }
@@ -118,7 +133,7 @@ router.post('/login', async (req, res) => {
     return res.status(400).json({ error: 'Username must be a string' });
   }
   
-  // 2. Validate password
+  // Validate password
   if (!password) {
     return res.status(400).json({ error: 'Password required' });
   }
@@ -142,8 +157,9 @@ router.post('/login', async (req, res) => {
 });
 
 // ============================================
-// Logout Route
-// Destroys server-side session
+// ROUTE: POST /logout
+// PURPOSE: Destroys server-side session
+// BEHAVIOR: Clears cookie and invalidates session
 // ============================================
 router.post('/logout', (req, res) => {
   req.session.destroy(() => {
@@ -153,8 +169,9 @@ router.post('/logout', (req, res) => {
 });
 
 // ============================================
-// Me Route
-// Returns current user info if authenticated
+// ROUTE: GET /me
+// PURPOSE: Returns current user info if authenticated
+// BEHAVIOR: Returns 401 if no valid session
 // ============================================
 router.get('/me', async (req, res) => {
   const userId = (req.session as any).userId;
@@ -163,4 +180,7 @@ router.get('/me', async (req, res) => {
   res.json({ id: user?.id, username: user?.username });
 });
 
+// ============================================
+// EXPORT
+// ============================================
 export default router;

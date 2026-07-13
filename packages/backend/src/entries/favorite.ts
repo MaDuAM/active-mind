@@ -1,12 +1,22 @@
-// backend/src/routes/entries/favorite.ts
+// ============================================
+// FILE: backend/src/routes/entries/favorite.ts
+// PURPOSE: Toggle favorite status for an entry
+// DEPENDENCIES: express, prisma
+// ============================================
 
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
+// ============================================
+// INITIALIZATION
+// ============================================
 const prisma = new PrismaClient();
 
 // ============================================
-// PATCH /entries/:id/favorite - Toggle favorite status
+// HANDLER: PATCH /entries/:id/favorite
+// PURPOSE: Toggles the favorite status of an entry
+// BEHAVIOR: Flips isFavorite boolean (true ↔ false)
+// AUTHENTICATION: Required (userId from session)
 // ============================================
 export const toggleFavorite = async (req: Request, res: Response) => {
   const userId = (req.session as any).userId;

@@ -1,8 +1,15 @@
-// frontend/src/components/MenuOverlay.tsx
+// ============================================
+// FILE: frontend/src/components/MenuOverlay.tsx
+// PURPOSE: User menu overlay with dark mode toggle, trash access, and logout
+// DEPENDENCIES: react, AuthContext
+// ============================================
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
+// ============================================
+// PROPS
+// ============================================
 interface MenuOverlayProps {
   isOpen: boolean;
   onClose: () => void;
@@ -11,6 +18,9 @@ interface MenuOverlayProps {
   onSelectTrash?: () => void;
 }
 
+// ============================================
+// COMPONENT: MenuOverlay
+// ============================================
 export function MenuOverlay({ 
   isOpen, 
   onClose, 
@@ -22,7 +32,7 @@ export function MenuOverlay({
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // ============================================
-  // Keyboard Shortcut: Escape closes menu
+  // KEYBOARD SHORTCUT: Escape closes menu
   // ============================================
   useEffect(() => {
     if (!isOpen) return;
@@ -36,7 +46,7 @@ export function MenuOverlay({
   if (!isOpen) return null;
 
   // ============================================
-  // Logout Handler
+  // HANDLERS
   // ============================================
   const handleLogout = async () => {
     if (isLoggingOut) return;
@@ -49,9 +59,6 @@ export function MenuOverlay({
     }
   };
 
-  // ============================================
-  // Trash Handler (mobile only)
-  // ============================================
   const handleTrashClick = () => {
     if (onSelectTrash) {
       onSelectTrash();
@@ -61,6 +68,9 @@ export function MenuOverlay({
 
   const avatarLetter = user?.username?.charAt(0).toUpperCase() || '?';
 
+  // ============================================
+  // RENDER
+  // ============================================
   return (
     <>
       {/* Backdrop */}
@@ -72,9 +82,7 @@ export function MenuOverlay({
       {/* Menu Panel */}
       <div className="fixed right-0 top-2 w-64 bg-[var(--bg-card)] shadow-dropdown z-[301] flex flex-col p-4 rounded-l-card animate-in fade-in slide-in-from-right duration-300 ease-out shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
         
-        {/* ============================================ */}
         {/* Header: User Info + Close Button */}
-        {/* ============================================ */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full flex items-center justify-center bg-gold-500 text-white font-semibold text-sm shrink-0 hover:scale-105 transition-transform duration-200">
@@ -98,9 +106,7 @@ export function MenuOverlay({
 
         <hr className="border-[var(--border-color)] border-opacity-50" />
 
-        {/* ============================================ */}
         {/* Dark Mode Toggle */}
-        {/* ============================================ */}
         <div
           onClick={onToggleDarkMode}
           className="flex items-center justify-between px-3 py-3 rounded-button text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition cursor-pointer"
@@ -124,10 +130,7 @@ export function MenuOverlay({
 
         <hr className="border-[var(--border-color)] border-opacity-50" />
 
-        {/* ============================================ */}
         {/* Trash Entry (mobile only) */}
-        {/* Hidden on desktop since Trash is in sidebar */}
-        {/* ============================================ */}
         <div className="sm:hidden">
           <div
             onClick={handleTrashClick}
@@ -139,9 +142,7 @@ export function MenuOverlay({
           <hr className="border-[var(--border-color)] border-opacity-50" />
         </div>
 
-        {/* ============================================ */}
         {/* Logout Button */}
-        {/* ============================================ */}
         <button
           onClick={handleLogout}
           disabled={isLoggingOut}
@@ -155,9 +156,7 @@ export function MenuOverlay({
 
         <div className="flex-1" />
 
-        {/* ============================================ */}
         {/* Footer: App Version */}
-        {/* ============================================ */}
         <div className="px-3 pt-2 text-xs text-[var(--text-muted)]">
           ActiveMind · v1.0 · {new Date().getFullYear()}
         </div>

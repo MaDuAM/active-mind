@@ -1,13 +1,32 @@
-// backend/src/routes/entries/post.ts
+// ============================================
+// FILE: backend/src/routes/entries/post.ts
+// PURPOSE: Entry creation handler
+// DEPENDENCIES: express, prisma, validation
+// ============================================
 
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { isValidArea, isValidStatus } from '../validation';
 
+// ============================================
+// INITIALIZATION
+// ============================================
 const prisma = new PrismaClient();
 
 // ============================================
-// POST /entries - Create new entry
+// HANDLER: POST /entries
+// PURPOSE: Creates a new entry
+// VALIDATION:
+//   - essenceText: required, max 5000 chars
+//   - essenceShort: required, max 500 chars
+//   - area: required, must be KNOWLEDGE | PASSIVE | ACTIVE
+//   - topicId: must exist and belong to user
+// AREA-SPECIFIC:
+//   - KNOWLEDGE: no action fields
+//   - PASSIVE: actionName required, benefit optional, status WAITING|ACTIVE
+//   - ACTIVE: actionName required, steps required (1-30), status WAITING|ACTIVE
+// SIDE EFFECT: Creates CREATION tracking entry
+// AUTHENTICATION: Required (userId from session)
 // ============================================
 export const createEntry = async (req: Request, res: Response) => {
   const userId = (req.session as any).userId;
@@ -17,7 +36,7 @@ export const createEntry = async (req: Request, res: Response) => {
 
   const { area, topicId, essenceText, essenceShort, actionName, benefit, steps, status } = req.body;
 
-  // 1. Validate required fields
+  // Validate required fields
   if (!essenceText || essenceText.length > 5000) {
     return res.status(400).json({ error: 'essenceText required, max 5000 characters' });
   }
@@ -25,12 +44,12 @@ export const createEntry = async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'essenceShort required, max 500 characters' });
   }
 
-  // 2. Validate area enum
+  // Validate area enum
   if (!area || !isValidArea(area)) {
     return res.status(400).json({ error: 'Invalid area. Must be KNOWLEDGE, PASSIVE, or ACTIVE' });
   }
 
-  // 3. Validate topic ownership
+  // Validate topic ownership
   const topic = await prisma.topic.findFirst({
     where: { id: Number(topicId), userId },
   });
@@ -38,7 +57,7 @@ export const createEntry = async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Topic not found or not owned by user' });
   }
 
-  // 4. Area-specific validations
+  // Area-specific validations
   const baseData: {
     essenceText: string;
     essenceShort: string;

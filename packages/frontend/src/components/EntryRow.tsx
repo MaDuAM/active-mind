@@ -1,8 +1,15 @@
-// frontend/src/components/EntryRow.tsx
+// ============================================
+// FILE: frontend/src/components/EntryRow.tsx
+// PURPOSE: Entry list item with responsive mobile/desktop layouts and favorite toggle
+// DEPENDENCIES: react, types (Entry)
+// ============================================
 
 import { memo } from 'react';
 import { Entry } from '../types';
 
+// ============================================
+// PROPS
+// ============================================
 interface EntryRowProps {
   entry: Entry;
   onClick: (id: number) => void;
@@ -14,6 +21,9 @@ interface EntryRowProps {
   isFavoritePending?: boolean;
 }
 
+// ============================================
+// COMPONENT: EntryRow
+// ============================================
 function EntryRowComponent({ 
   entry, 
   onClick,
@@ -25,7 +35,7 @@ function EntryRowComponent({
   isFavoritePending = false,
 }: EntryRowProps) {
   // ============================================
-  // Computed Values
+  // COMPUTED VALUES
   // ============================================
   const isActive = entry.area === 'ACTIVE' && entry.steps && entry.steps.length > 0;
   const stepInfo = isActive
@@ -33,7 +43,7 @@ function EntryRowComponent({
     : '';
 
   // ============================================
-  // Status Helpers
+  // STATUS HELPERS
   // ============================================
   const getStatusLabel = (status?: string) => {
     if (!status) return '';
@@ -60,7 +70,7 @@ function EntryRowComponent({
   };
 
   // ============================================
-  // Styling Helpers
+  // STYLING HELPERS
   // ============================================
   const getBorderColor = (entry: Entry) => {
     if (entry.status === 'WAITING') {
@@ -100,16 +110,16 @@ function EntryRowComponent({
     }
   };
 
+  // ============================================
+  // RENDER
+  // ============================================
   return (
     <div
       onClick={() => onClick(entry.id)}
       onMouseEnter={() => onHover?.(entry.id)}
       className={`card cursor-pointer hover:ring-2 hover:ring-offset-0 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 py-2.5 px-4 ${getBorderColor(entry)} ${getRingColor(entry)} ${className}`}
     >
-      {/* ============================================ */}
-      {/* MOBILE LAYOUT: Stern + Content vertikal */}
-      {/* Stern links, Action Name + Metadaten rechts daneben */}
-      {/* ============================================ */}
+      {/* Mobile Layout: Star + Content vertical */}
       <div className="flex sm:hidden items-start gap-3 w-full">
         {/* Star Button */}
         <button
@@ -128,7 +138,7 @@ function EntryRowComponent({
           </span>
         </button>
 
-        {/* Content: Action Name + Metadaten */}
+        {/* Content: Action Name + Metadata */}
         <div className="flex-1 min-w-0">
           <span className="text-sm font-medium text-[var(--text-primary)] truncate block">
             {entry.actionName || entry.essenceShort}
@@ -155,12 +165,9 @@ function EntryRowComponent({
         </div>
       </div>
 
-      {/* ============================================ */}
-      {/* DESKTOP LAYOUT: Alles in einer Reihe */}
-      {/* Stern + Action Name links, Metadaten rechts */}
-      {/* ============================================ */}
+      {/* Desktop Layout: All in one row */}
       <div className="hidden sm:flex items-center justify-between w-full gap-3">
-        {/* Linker Block: Stern + Action Name */}
+        {/* Left: Star + Action Name */}
         <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={(e) => {
@@ -182,7 +189,7 @@ function EntryRowComponent({
           </span>
         </div>
 
-        {/* Rechter Block: Metadaten */}
+        {/* Right: Metadata */}
         <div className="flex items-center gap-2 lg:gap-3 shrink-0">
           {/* Step Info (only for ACTIVE entries) */}
           {isActive && (

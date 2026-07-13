@@ -1,9 +1,16 @@
-// frontend/src/lib/apiClient.ts
+// ============================================
+// FILE: frontend/src/lib/apiClient.ts
+// PURPOSE: HTTP client with built-in retry logic, timeout handling, and error transformation
+// DEPENDENCIES: types (ApiError)
+// ============================================
 
 /// <reference types="vite/client" />
 
 import { ApiError } from '../types';
 
+// ============================================
+// TYPES
+// ============================================
 interface ApiClientOptions extends RequestInit {
   timeout?: number;
   retries?: number;
@@ -16,17 +23,13 @@ interface ApiResponse<T> {
 }
 
 // ============================================
-// API CLIENT
-// 
-// HTTP client with built-in retry logic, timeout handling,
-// and automatic error transformation.
-// 
-// Features:
-// - Automatic retries with exponential backoff
-// - Request timeout with abort controller
-// - Query parameter serialization
-// - Credentials: include (sends cookies)
-// - Error normalization (ApiError)
+// API CLIENT CLASS
+// FEATURES:
+//   - Automatic retries with exponential backoff
+//   - Request timeout with abort controller
+//   - Query parameter serialization
+//   - Credentials: include (sends cookies)
+//   - Error normalization (ApiError)
 // ============================================
 class ApiClient {
   private baseUrl: string;
@@ -38,7 +41,6 @@ class ApiClient {
     defaultTimeout: number = 30000,
     defaultRetries: number = 2
   ) {
-    // Use environment variable or fallback to relative path
     this.baseUrl = baseUrl || 
       (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) || 
       '/api/v1';
@@ -47,11 +49,11 @@ class ApiClient {
   }
 
   // ============================================
-  // buildUrl: Builds URL with query parameters
-  // Handles both absolute and relative URLs
+  // buildUrl
+  // PURPOSE: Builds URL with query parameters
+  // HANDLES: Both absolute and relative URLs
   // ============================================
   private buildUrl(endpoint: string, params?: Record<string, any>): string {
-    // Absolute URL: use URL constructor
     if (this.baseUrl.startsWith('http://') || this.baseUrl.startsWith('https://')) {
       const url = new URL(endpoint, this.baseUrl);
       if (params) {
@@ -64,7 +66,6 @@ class ApiClient {
       return url.toString();
     }
 
-    // Relative URL: manual concatenation
     let url = `${this.baseUrl}${endpoint}`;
     if (params) {
       const searchParams = new URLSearchParams();
@@ -82,10 +83,9 @@ class ApiClient {
   }
 
   // ============================================
-  // fetchWithTimeout: Wraps fetch with abort controller
-  // 
-  // Why: Browser fetch has no built-in timeout.
-  // This creates an AbortController that aborts after `timeout` ms.
+  // fetchWithTimeout
+  // PURPOSE: Wraps fetch with abort controller for timeout support
+  // WHY: Browser fetch has no built-in timeout
   // ============================================
   private async fetchWithTimeout(url: string, options: RequestInit, timeout: number): Promise<Response> {
     const controller = new AbortController();
@@ -113,12 +113,12 @@ class ApiClient {
   }
 
   // ============================================
-  // request: Core request method with retry logic
-  // 
-  // Retry strategy:
-  // - Only retries on network errors or 5xx responses
-  // - Does NOT retry on 4xx (client errors)
-  // - Exponential backoff: 1s, 2s, 4s, ...
+  // request
+  // PURPOSE: Core request method with retry logic
+  // RETRY STRATEGY:
+  //   - Only retries on network errors or 5xx responses
+  //   - Does NOT retry on 4xx (client errors)
+  //   - Exponential backoff: 1s, 2s, 4s, ...
   // ============================================
   private async request<T>(
     endpoint: string,
@@ -147,11 +147,6 @@ class ApiClient {
           data = await response.text();
         }
 
-        // ============================================
-        // Error handling: Normalize API errors
-        // - 401: Unauthorized (AuthContext handles this)
-        // - 4xx/5xx: Transform to ApiError with message
-        // ============================================
         if (!response.ok) {
           // 401: Let AuthContext handle it
           if (response.status === 401) {
@@ -205,7 +200,6 @@ class ApiClient {
   // PUBLIC HTTP METHODS
   // Type-safe wrappers around request()
   // ============================================
-
   async get<T>(endpoint: string, params?: Record<string, any>, options?: ApiClientOptions): Promise<T> {
     const response = await this.request<T>(endpoint, {
       ...options,
@@ -250,6 +244,5 @@ class ApiClient {
 
 // ============================================
 // SINGLETON EXPORT
-// Re-export a single instance for the entire app
 // ============================================
 export const apiClient = new ApiClient();

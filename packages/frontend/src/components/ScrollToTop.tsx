@@ -1,10 +1,23 @@
+// ============================================
+// FILE: frontend/src/components/ScrollToTop.tsx
+// PURPOSE: Floating button that scrolls the main content area to top
+// DEPENDENCIES: react, useMediaQuery
+// ============================================
+
 import { useState, useEffect } from 'react';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 
+// ============================================
+// COMPONENT: ScrollToTop
+// ============================================
 export function ScrollToTop() {
   const [visible, setVisible] = useState(false);
   const isMobile = useMediaQuery('(max-width: 639px)');
 
+  // ============================================
+  // SCROLL LISTENER
+  // PURPOSE: Shows/hides button based on scroll position
+  // ============================================
   useEffect(() => {
     const main = document.querySelector('main');
     if (!main) return;
@@ -17,6 +30,10 @@ export function ScrollToTop() {
     return () => main.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // ============================================
+  // SCROLL HANDLER
+  // PURPOSE: Smooth scrolls main content to top
+  // ============================================
   const scrollToTop = () => {
     const main = document.querySelector('main');
     if (main) {
@@ -26,6 +43,9 @@ export function ScrollToTop() {
 
   if (!visible) return null;
 
+  // ============================================
+  // RENDER
+  // ============================================
   return (
     <button
       onClick={scrollToTop}

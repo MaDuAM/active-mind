@@ -1,8 +1,15 @@
-// frontend/src/components/EntryView.tsx
+// ============================================
+// FILE: frontend/src/components/EntryView.tsx
+// PURPOSE: Read-only entry detail view with tracking log and actions
+// DEPENDENCIES: react, types (Entry, Status, TrackingType)
+// ============================================
 
 import { useState } from 'react';
 import { Entry, TrackingType, Status } from '../types';
 
+// ============================================
+// PROPS
+// ============================================
 interface EntryViewProps {
   entry: Entry;
   onEdit: () => void;
@@ -15,8 +22,7 @@ interface EntryViewProps {
 }
 
 // ============================================
-// Tracking Labels
-// Human-readable labels for tracking types
+// TRACKING LABELS
 // ============================================
 const trackingLabels: Record<TrackingType, string> = {
   CREATION: 'Create',
@@ -28,8 +34,7 @@ const trackingLabels: Record<TrackingType, string> = {
 };
 
 // ============================================
-// Status Badge Component
-// Renders colored badge for entry status
+// SUB-COMPONENT: StatusBadge
 // ============================================
 function StatusBadge({ status }: { status?: Status }) {
   if (!status) return null;
@@ -54,9 +59,7 @@ function StatusBadge({ status }: { status?: Status }) {
 }
 
 // ============================================
-// Copy Button Component
-// Copies text to clipboard with visual feedback
-// Falls back to execCommand if clipboard API fails
+// SUB-COMPONENT: CopyButton
 // ============================================
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -107,8 +110,7 @@ function CopyButton({ text }: { text: string }) {
 }
 
 // ============================================
-// Entry View Component
-// Displays entry details in read-only mode
+// COMPONENT: EntryView
 // ============================================
 export function EntryView({
   entry,
@@ -129,8 +131,7 @@ export function EntryView({
       : (entry.trackings || []).filter((t) => activeTypes.includes(t.trackingType));
 
   // ============================================
-  // CSV Export
-  // Exports filtered tracking entries as CSV
+  // CSV EXPORT
   // ============================================
   const exportCSV = () => {
     const headers = [
@@ -160,7 +161,7 @@ export function EntryView({
   };
 
   // ============================================
-  // Tracking Filter Toggle
+  // TRACKING FILTER TOGGLE
   // ============================================
   const toggleTrackingType = (type: TrackingType) => {
     setActiveTypes((prev) =>
@@ -169,8 +170,7 @@ export function EntryView({
   };
 
   // ============================================
-  // Group Trackings by Date
-  // Groups entries by Today, Yesterday, or date
+  // GROUP TRACKINGS BY DATE
   // ============================================
   const groupTrackingsByDate = (trackings: typeof filteredTrackings) => {
     const groups: { [key: string]: typeof trackings } = {};
@@ -192,11 +192,12 @@ export function EntryView({
   const groupedTrackings = groupTrackingsByDate(filteredTrackings);
   const trackingCount = entry.trackings?.length || 0;
 
+  // ============================================
+  // RENDER
+  // ============================================
   return (
     <div className="space-y-4">
-      {/* ============================================ */}
       {/* Status Badge */}
-      {/* ============================================ */}
       {entry.status && (
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-[var(--text-secondary)]">Status</span>
@@ -204,9 +205,7 @@ export function EntryView({
         </div>
       )}
 
-      {/* ============================================ */}
       {/* Essence Card */}
-      {/* ============================================ */}
       <div className="card space-y-3 max-h-[40vh] overflow-y-auto">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
@@ -219,9 +218,7 @@ export function EntryView({
         </p>
       </div>
 
-      {/* ============================================ */}
       {/* Essence Short Card */}
-      {/* ============================================ */}
       <div className="card space-y-1">
         <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wider">
           Short
@@ -238,9 +235,7 @@ export function EntryView({
         </div>
       )}
 
-      {/* ============================================ */}
       {/* Steps Section (only for ACTIVE entries) */}
-      {/* ============================================ */}
       {entry.area === 'ACTIVE' && entry.steps && entry.steps.length > 0 && (
         <div className="card space-y-2">
           <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wider">
@@ -287,9 +282,7 @@ export function EntryView({
         </div>
       )}
 
-      {/* ============================================ */}
       {/* Actions */}
-      {/* ============================================ */}
       <div className="flex flex-wrap gap-3 pt-4 border-t border-[var(--border-color)]">
         <button onClick={onEdit} className="btn-secondary text-sm px-3 py-1.5 hover:bg-gold-500 hover:text-white">
           Edit
@@ -339,9 +332,7 @@ export function EntryView({
         </button>
       </div>
 
-      {/* ============================================ */}
       {/* Tracking Log */}
-      {/* ============================================ */}
       {entry.trackings && entry.trackings.length > 0 && (
         <div className="pt-4 border-t border-[var(--border-color)]">
           <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Tracking Log</h3>

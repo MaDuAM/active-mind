@@ -1,4 +1,8 @@
-// frontend/src/pages/TopicView.tsx
+// ============================================
+// FILE: frontend/src/pages/TopicView.tsx
+// PURPOSE: Topic detail page - displays entries filtered by a specific topic
+// DEPENDENCIES: react, tanstack/react-query, custom hooks, components
+// ============================================
 
 import { useState, Suspense, useMemo, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -10,6 +14,9 @@ import { useLoadingDebounce } from '../hooks/useLoadingDebounce';
 import { SectionKey } from '../hooks/useSectionState';
 import NewEntryForm from '../components/NewEntryForm';
 
+// ============================================
+// PROPS
+// ============================================
 interface TopicViewProps {
   topicId: number;
   onOpenEntry: (id: number) => void;
@@ -19,6 +26,9 @@ interface TopicViewProps {
   isVisible?: boolean;
 }
 
+// ============================================
+// COMPONENT: TopicView
+// ============================================
 export default function TopicView({
   topicId,
   onOpenEntry,
@@ -26,12 +36,13 @@ export default function TopicView({
   showNewEntryForm,
   setShowNewEntryForm,
 }: TopicViewProps) {
-
+  // ============================================
+  // UI STATE
+  // ============================================
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // ============================================
-  // Favorites Filter State
-  // Tracks which sections are filtered to show only favorites
+  // FAVORITES FILTER STATE
   // ============================================
   const [favoritesFilter, setFavoritesFilter] = useState<Record<SectionKey, boolean>>({
     active: false,
@@ -43,7 +54,9 @@ export default function TopicView({
 
   const queryClient = useQueryClient();
 
-  // 5 separate Queries (gefiltert nach topicId)
+  // ============================================
+  // DATA FETCHING (5 separate queries filtered by topicId)
+  // ============================================
   const { data: activeData, isLoading: activeLoading } = usePaginatedEntries(
     { topicId, area: 'ACTIVE', status: 'ACTIVE', limit: 100 },
     !!topicId
@@ -69,6 +82,9 @@ export default function TopicView({
   const deleteTopicMutation = useDeleteTopic();
   const toggleFavoriteMutation = useToggleFavorite();
 
+  // ============================================
+  // COMPUTED DATA
+  // ============================================
   const isLoading = activeLoading || passiveLoading || waitingLoading || pausedLoading || knowledgeLoading || topicsLoading;
   const activeEntries = activeData?.pages.flatMap((page) => page.data) || [];
   const passiveEntries = passiveData?.pages.flatMap((page) => page.data) || [];
@@ -84,9 +100,6 @@ export default function TopicView({
 
   const showLoading = useLoadingDebounce(isLoading, 200);
 
-  // ============================================
-  // Computed Data: Group entries by section
-  // ============================================
   const sections = useMemo(() => ({
     active: activeEntries,
     passive: passiveEntries,
@@ -97,14 +110,14 @@ export default function TopicView({
   }), [activeEntries, passiveEntries, waitingEntries, pausedEntries, knowledgeEntries]);
 
   // ============================================
-  // Section Expansion State
+  // SECTION EXPANSION STATE
   // ============================================
   const { expanded, toggleSection } = useSectionState({
     initialExpanded: { active: true },
   });
 
   // ============================================
-  // Memoized Callbacks
+  // MEMOIZED CALLBACKS
   // ============================================
   const handleEntryClick = useCallback(
     (id: number) => onOpenEntry(id),
@@ -121,7 +134,7 @@ export default function TopicView({
   }, [setShowNewEntryForm]);
 
   // ============================================
-  // Favorites Handlers
+  // FAVORITES HANDLERS
   // ============================================
   const handleToggleFavoritesFilter = useCallback((section: SectionKey) => {
     setFavoritesFilter(prev => ({
@@ -135,7 +148,7 @@ export default function TopicView({
   }, [toggleFavoriteMutation]);
 
   // ============================================
-  // Handlers
+  // TOPIC DELETION HANDLER
   // ============================================
   const topicName = topics.find((t) => t.id === topicId)?.name || 'Unbekannt';
 
@@ -153,12 +166,15 @@ export default function TopicView({
   };
 
   // ============================================
-  // Skeleton Loading State
+  // SKELETON LOADING STATE
   // ============================================
   if (showLoading && sections.total === 0) {
     return <LoadingOverlay message="Loading entries..." />;
   }
 
+  // ============================================
+  // RENDER
+  // ============================================
   return (
     <div className="max-w-7xl mx-auto">
       {/* New Entry Form Overlay */}
@@ -203,9 +219,7 @@ export default function TopicView({
         </div>
       </div>
 
-      {/* ============================================ */}
-      {/* 1. Active */}
-      {/* ============================================ */}
+      {/* Active Section */}
       <EntrySection
         section="active"
         title="Active"
@@ -225,9 +239,7 @@ export default function TopicView({
 
       <hr className="border-[var(--border-color)] my-6" />
 
-      {/* ============================================ */}
-      {/* 2. Passive */}
-      {/* ============================================ */}
+      {/* Passive Section */}
       <EntrySection
         section="passive"
         title="Passive"
@@ -247,9 +259,7 @@ export default function TopicView({
 
       <hr className="border-[var(--border-color)] my-6" />
 
-      {/* ============================================ */}
-      {/* 3. Knowledge */}
-      {/* ============================================ */}
+      {/* Knowledge Section */}
       <EntrySection
         section="knowledge"
         title="Knowledge"
@@ -267,9 +277,7 @@ export default function TopicView({
         isFavoritePending={toggleFavoriteMutation.isPending}
       />
 
-      {/* ============================================ */}
-      {/* 4. Waiting (only if entries exist) */}
-      {/* ============================================ */}
+      {/* Waiting Section (only if entries exist) */}
       {sections.waiting.length > 0 && (
         <>
           <hr className="border-[var(--border-color)] my-6" />
@@ -292,9 +300,7 @@ export default function TopicView({
         </>
       )}
 
-      {/* ============================================ */}
-      {/* 5. Paused (only if entries exist) */}
-      {/* ============================================ */}
+      {/* Paused Section (only if entries exist) */}
       {sections.paused.length > 0 && (
         <>
           <hr className="border-[var(--border-color)] my-6" />

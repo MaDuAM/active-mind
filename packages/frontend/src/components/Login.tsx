@@ -1,12 +1,19 @@
-// frontend/src/components/Login.tsx
+// ============================================
+// FILE: frontend/src/components/Login.tsx
+// PURPOSE: Login and registration form with toggle between modes
+// DEPENDENCIES: react, AuthContext, NotificationContext
+// ============================================
 
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 
+// ============================================
+// COMPONENT: Login
+// ============================================
 export function Login() {
   // ============================================
-  // Form State
+  // FORM STATE
   // ============================================
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -18,11 +25,10 @@ export function Login() {
   const { showNotification } = useNotification();
 
   // ============================================
-  // Form Submission Handler
-  // 
-  // Handles both login and register flows.
-  // - Login: Authenticates existing user
-  // - Register: Creates new account, auto-login on success
+  // FORM SUBMISSION HANDLER
+  // PURPOSE: Handles both login and register flows
+  //   - Login: Authenticates existing user
+  //   - Register: Creates new account, auto-login on success
   // ============================================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,12 +57,13 @@ export function Login() {
     }
   };
 
+  // ============================================
+  // RENDER
+  // ============================================
   return (
     <div className="h-screen flex items-center justify-center bg-[var(--bg-secondary)] px-4">
       <div className="w-full max-w-md bg-[var(--bg-card)] rounded-card shadow-card p-8 border border-[var(--border-color)] -mt-16">
-        {/* ============================================ */}
         {/* Header */}
-        {/* ============================================ */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-semibold text-gold-500 tracking-tight">
             {isRegisterMode ? 'Create Account' : 'ActiveMind'}
@@ -66,9 +73,7 @@ export function Login() {
           </p>
         </div>
 
-        {/* ============================================ */}
         {/* Form */}
-        {/* ============================================ */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Username */}
           <div>

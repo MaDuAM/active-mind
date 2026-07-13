@@ -1,4 +1,8 @@
-// frontend/src/context/AuthContext.tsx
+// ============================================
+// FILE: frontend/src/context/AuthContext.tsx
+// PURPOSE: Authentication state management with login, register, logout
+// DEPENDENCIES: react, tanstack/react-query, apiClient, NotificationContext
+// ============================================
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -6,6 +10,9 @@ import { useNotification } from './NotificationContext';
 import { User } from '../types';
 import { apiClient } from '../lib/apiClient';
 
+// ============================================
+// TYPES
+// ============================================
 interface AuthContextType {
   user: User | null;
   login: (username: string, password: string) => Promise<void>;
@@ -14,8 +21,14 @@ interface AuthContextType {
   loading: boolean;
 }
 
+// ============================================
+// CONTEXT
+// ============================================
 const AuthContext = createContext<AuthContextType | null>(null);
 
+// ============================================
+// PROVIDER: AuthProvider
+// ============================================
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -23,13 +36,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
 
   // ============================================
-  // AUTH CHECK: Only once per browser session
-  // 
-  // Why sessionStorage? Prevents redundant /me requests
-  // on HMR, page reloads, or StrictMode double-mount.
-  // 
-  // The actual auth state is stored in the session cookie.
-  // This check just validates that the cookie is still valid.
+  // AUTH CHECK
+  // PURPOSE: Validates session on app mount
+  // OPTIMIZATION: Uses sessionStorage to prevent redundant requests on HMR/reload
   // ============================================
   useEffect(() => {
     // Skip if already checked in this session
@@ -57,10 +66,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // ============================================
   // LOGIN
-  // 
-  // Authenticates user credentials with backend.
-  // On success: sets user state, shows welcome toast.
-  // On failure: error toast is shown via notification context.
+  // PURPOSE: Authenticates user credentials
+  // BEHAVIOR: Sets user state, clears cache, shows welcome toast
   // ============================================
   const login = async (username: string, password: string) => {
     try {
@@ -79,10 +86,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // ============================================
   // REGISTER
-  // 
-  // Creates a new user account.
-  // On success: automatically logs in, shows welcome toast.
-  // On failure: error toast is shown.
+  // PURPOSE: Creates a new user account
+  // BEHAVIOR: Auto-logs in on success, shows welcome toast
   // ============================================
   const register = async (username: string, password: string) => {
     try {
@@ -100,9 +105,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // ============================================
   // LOGOUT
-  // 
-  // Destroys server-side session and clears client state.
-  // Resets auth_check_done so next login triggers a fresh check.
+  // PURPOSE: Destroys server-side session and clears client state
+  // BEHAVIOR: Resets auth_check_done so next login triggers a fresh check
   // ============================================
   const logout = async () => {
     try {
@@ -125,9 +129,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 // ============================================
 // HOOK: useAuth
-// 
-// Type-safe access to auth context.
-// Throws if used outside of AuthProvider.
+// PURPOSE: Type-safe access to auth context
+// THROWS: If used outside of AuthProvider
 // ============================================
 export const useAuth = () => {
   const ctx = useContext(AuthContext);

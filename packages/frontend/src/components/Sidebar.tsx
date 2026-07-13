@@ -1,10 +1,17 @@
-// frontend/src/components/Sidebar.tsx
+// ============================================
+// FILE: frontend/src/components/Sidebar.tsx
+// PURPOSE: Desktop sidebar with responsive collapse and mobile overlay
+// DEPENDENCIES: react, Topic, LoadingOverlay, useLoadingDebounce
+// ============================================
 
 import { useState, useEffect } from 'react';
 import { Topic } from '../types';
 import { LoadingOverlay } from './LoadingOverlay';
 import { useLoadingDebounce } from '../hooks/useLoadingDebounce';
 
+// ============================================
+// PROPS
+// ============================================
 interface SidebarProps {
   onSelectTopic: (topicId: number | null) => void;
   onSelectTrash: () => void;
@@ -16,6 +23,9 @@ interface SidebarProps {
   topicsLoading: boolean;
 }
 
+// ============================================
+// COMPONENT: Sidebar
+// ============================================
 export function Sidebar({ 
   onSelectTopic, 
   onSelectTrash, 
@@ -27,10 +37,9 @@ export function Sidebar({
   topicsLoading,
 }: SidebarProps) {
   // ============================================
-  // ALL HOOKS FIRST - BEFORE ANY RETURN
+  // DESKTOP COLLAPSE STATE
+  // Auto-collapses on tablet (768-1024px), expands on desktop (≥1024px)
   // ============================================
-
-  // Desktop Collapse State
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
       const width = window.innerWidth;
@@ -56,7 +65,7 @@ export function Sidebar({
   }, []);
 
   // ============================================
-  // Mobile: Fullscreen Overlay
+  // MOBILE: Fullscreen Overlay
   // ============================================
   if (isMobileOpen) {
     return (
@@ -113,7 +122,7 @@ export function Sidebar({
   }
 
   // ============================================
-  // Desktop Sidebar - Loading State
+  // DESKTOP: Loading State
   // ============================================
   if (showLoading) {
     return (
@@ -128,7 +137,7 @@ export function Sidebar({
   }
 
   // ============================================
-  // Desktop Sidebar - Normal State
+  // DESKTOP: Normal State
   // ============================================
   const topicItems = topics.map((topic: Topic) => (
     <div

@@ -1,5 +1,12 @@
-// frontend/src/components/ConfirmDialog.tsx
+// ============================================
+// FILE: frontend/src/components/ConfirmDialog.tsx
+// PURPOSE: Reusable confirmation dialog with danger actions support
+// DEPENDENCIES: react
+// ============================================
 
+// ============================================
+// PROPS
+// ============================================
 interface ConfirmDialogProps {
   isOpen: boolean;
   title: string;
@@ -11,6 +18,9 @@ interface ConfirmDialogProps {
   isPending?: boolean;
 }
 
+// ============================================
+// COMPONENT: ConfirmDialog
+// ============================================
 export function ConfirmDialog({
   isOpen,
   title,

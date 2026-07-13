@@ -1,4 +1,8 @@
-// frontend/src/pages/Dashboard.tsx
+// ============================================
+// FILE: frontend/src/pages/Dashboard.tsx
+// PURPOSE: Dashboard page - displays entries grouped by status/area sections
+// DEPENDENCIES: react, tanstack/react-query, custom hooks, components
+// ============================================
 
 import { useState, lazy, Suspense, useMemo, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -9,19 +13,28 @@ import { LoadingOverlay } from '../components/LoadingOverlay';
 import { useLoadingDebounce } from '../hooks/useLoadingDebounce';
 import { SectionKey } from '../hooks/useSectionState';
 
+// ============================================
+// LAZY LOADING
+// PURPOSE: Reduces initial bundle size
+// ============================================
 const NewEntryForm = lazy(() => import('../components/NewEntryForm'));
 
+// ============================================
+// PROPS
+// ============================================
 interface DashboardProps {
   onOpenEntry: (id: number) => void;
   showNewEntryForm: boolean;
   setShowNewEntryForm: (value: boolean) => void;
 }
 
+// ============================================
+// COMPONENT: Dashboard
+// ============================================
 export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }: DashboardProps) {
-  
   // ============================================
-  // Favorites Filter State
-  // Tracks which sections are filtered to show only favorites
+  // FAVORITES FILTER STATE
+  // PURPOSE: Tracks which sections are filtered to show only favorites
   // ============================================
   const [favoritesFilter, setFavoritesFilter] = useState<Record<SectionKey, boolean>>({
     active: false,
@@ -33,7 +46,9 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
 
   const queryClient = useQueryClient();
 
-  // 5 separate Queries
+  // ============================================
+  // DATA FETCHING (5 separate queries per section)
+  // ============================================
   const { data: activeData, isLoading: activeLoading } = usePaginatedEntries(
     { area: 'ACTIVE', status: 'ACTIVE', limit: 100 },
     true
@@ -57,19 +72,19 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
 
   const { data: topics = [], isLoading: topicsLoading } = useTopics(true);
   const toggleFavoriteMutation = useToggleFavorite();
-  
+
+  // ============================================
+  // COMPUTED DATA: Group entries by section
+  // ============================================
   const isLoading = activeLoading || passiveLoading || waitingLoading || pausedLoading || knowledgeLoading || topicsLoading;
   const activeEntries = activeData?.pages.flatMap((page) => page.data) || [];
   const passiveEntries = passiveData?.pages.flatMap((page) => page.data) || [];
   const waitingEntries = waitingData?.pages.flatMap((page) => page.data) || [];
   const pausedEntries = pausedData?.pages.flatMap((page) => page.data) || [];
   const knowledgeEntries = knowledgeData?.pages.flatMap((page) => page.data) || [];
-  
+
   const showLoading = useLoadingDebounce(isLoading, 200);
 
-  // ============================================
-  // Computed Data: Group entries by section
-  // ============================================
   const sections = useMemo(() => ({
     active: activeEntries,
     passive: passiveEntries,
@@ -82,14 +97,14 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
   }), [activeEntries, passiveEntries, waitingEntries, pausedEntries, knowledgeEntries]);
 
   // ============================================
-  // Section Expansion State
+  // SECTION EXPANSION STATE
   // ============================================
-  const { expanded, toggleSection, } = useSectionState({
+  const { expanded, toggleSection } = useSectionState({
     initialExpanded: { active: true },
   });
 
   // ============================================
-  // Memoized Callbacks
+  // MEMOIZED CALLBACKS
   // ============================================
   const getTopicName = useCallback(
     (topicId: number) => topics.find((t) => t.id === topicId)?.name || '?',
@@ -111,7 +126,7 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
   }, [setShowNewEntryForm]);
 
   // ============================================
-  // Favorites Handlers
+  // FAVORITES HANDLERS
   // ============================================
   const handleToggleFavoritesFilter = useCallback((section: SectionKey) => {
     setFavoritesFilter(prev => ({
@@ -125,21 +140,15 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
   }, [toggleFavoriteMutation]);
 
   // ============================================
-  // Infinite Scroll
-  // ============================================
-  /*useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);*/
-
-  // ============================================
-  // Skeleton Loading State
+  // SKELETON LOADING STATE
   // ============================================
   if (showLoading && activeEntries.length === 0 && passiveEntries.length === 0) {
     return <LoadingOverlay message="Loading entries..." />;
   }
 
+  // ============================================
+  // RENDER
+  // ============================================
   return (
     <div className="max-w-7xl mx-auto">
       {/* New Entry Form Overlay */}
@@ -165,9 +174,7 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
         </div>
       </div>
 
-      {/* ============================================ */}
       {/* Active Actions */}
-      {/* ============================================ */}
       <EntrySection
         section="active"
         title="Active Actions"
@@ -189,9 +196,7 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
 
       <hr className="border-[var(--border-color)] my-6" />
 
-      {/* ============================================ */}
       {/* Passive Actions */}
-      {/* ============================================ */}
       <EntrySection
         section="passive"
         title="Passive Actions"
@@ -211,9 +216,7 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
         isFavoritePending={toggleFavoriteMutation.isPending}
       />
 
-      {/* ============================================ */}
       {/* Waiting Actions (only if entries exist) */}
-      {/* ============================================ */}
       {sections.waiting.length > 0 && (
         <>
           <hr className="border-[var(--border-color)] my-6" />
@@ -238,9 +241,7 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
         </>
       )}
 
-      {/* ============================================ */}
       {/* Paused (only if entries exist) */}
-      {/* ============================================ */}
       {sections.paused.length > 0 && (
         <>
           <hr className="border-[var(--border-color)] my-6" />
@@ -265,9 +266,7 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
         </>
       )}
 
-      {/* ============================================ */}
       {/* Footer Stats */}
-      {/* ============================================ */}
       {activeEntries.length > 0 || passiveEntries.length > 0 || knowledgeEntries.length > 0 ? (
         <div className="py-4 text-center text-sm text-[var(--text-muted)] space-y-1">
           <div className="flex justify-center gap-4 text-xs">

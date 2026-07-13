@@ -1,7 +1,14 @@
-// frontend/src/components/ManualTrackPopup.tsx
+// ============================================
+// FILE: frontend/src/components/ManualTrackPopup.tsx
+// PURPOSE: Popup dialog for adding manual tracking entries with custom timestamp
+// DEPENDENCIES: react
+// ============================================
 
 import { useState, useEffect } from 'react';
 
+// ============================================
+// PROPS
+// ============================================
 interface ManualTrackPopupProps {
   isOpen: boolean;
   onConfirm: (timestamp: string, note: string) => void;
@@ -9,6 +16,9 @@ interface ManualTrackPopupProps {
   isPending?: boolean;
 }
 
+// ============================================
+// COMPONENT: ManualTrackPopup
+// ============================================
 export function ManualTrackPopup({
   isOpen,
   onConfirm,
@@ -16,7 +26,7 @@ export function ManualTrackPopup({
   isPending = false,
 }: ManualTrackPopupProps) {
   // ============================================
-  // Local State
+  // LOCAL STATE
   // ============================================
   const [timestamp, setTimestamp] = useState(
     new Date().toISOString().slice(0, 16)
@@ -24,8 +34,8 @@ export function ManualTrackPopup({
   const [note, setNote] = useState('');
 
   // ============================================
-  // Reset State on Open
-  // Sets default timestamp to current time and clears note
+  // RESET STATE ON OPEN
+  // PURPOSE: Sets default timestamp to current time and clears note
   // ============================================
   useEffect(() => {
     if (isOpen) {
@@ -37,12 +47,11 @@ export function ManualTrackPopup({
   if (!isOpen) return null;
 
   // ============================================
-  // Handlers
+  // HANDLERS
   // ============================================
   const handleConfirm = () => {
     // datetime-local input provides: YYYY-MM-DDTHH:MM
     // Backend expects ISO string with seconds: YYYY-MM-DDTHH:MM:SS
-    // Set seconds to 00 for consistency
     onConfirm(timestamp + ':00', note);
   };
 
@@ -51,9 +60,9 @@ export function ManualTrackPopup({
   };
 
   // ============================================
-  // Keyboard Shortcuts
-  // - Escape: Cancel
-  // - Ctrl/Cmd + Enter: Confirm
+  // KEYBOARD SHORTCUTS
+  //   - Escape: Cancel
+  //   - Ctrl/Cmd + Enter: Confirm
   // ============================================
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
@@ -64,6 +73,9 @@ export function ManualTrackPopup({
     }
   };
 
+  // ============================================
+  // RENDER
+  // ============================================
   return (
     <div
       className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/30 backdrop-blur-sm"

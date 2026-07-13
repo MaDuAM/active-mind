@@ -1,6 +1,17 @@
-import * as React from "react";
+// ============================================
+// FILE: frontend/src/components/StarIcon.tsx
+// PURPOSE: Reusable star icon component for favorite toggle
+// PROPS
+// ============================================
 
-const StarIcon = ({ filled = false }: { filled?: boolean }) => (
+interface StarIconProps {
+  filled?: boolean;
+}
+
+// ============================================
+// COMPONENT: StarIcon
+// ============================================
+const StarIcon = ({ filled = false }: StarIconProps) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"

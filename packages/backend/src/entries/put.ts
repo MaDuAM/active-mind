@@ -1,12 +1,28 @@
-// backend/src/routes/entries/put.ts
+// ============================================
+// FILE: backend/src/routes/entries/put.ts
+// PURPOSE: Entry update handler
+// DEPENDENCIES: express, prisma
+// ============================================
 
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
+// ============================================
+// INITIALIZATION
+// ============================================
 const prisma = new PrismaClient();
 
 // ============================================
-// PUT /entries/:id - Update entry
+// HANDLER: PUT /entries/:id
+// PURPOSE: Updates an existing entry
+// VALIDATION:
+//   - essenceText: 1-5000 chars (if provided)
+//   - essenceShort: 1-500 chars (if provided)
+//   - actionName: max 30 chars (if provided)
+//   - benefit: max 500 chars (if provided)
+//   - steps: only for ACTIVE entries, 1-30 steps, each description 1-500 chars
+// SIDE EFFECT: Always creates ENTRY_EDIT tracking entry
+// AUTHENTICATION: Required (userId from session)
 // ============================================
 export const updateEntry = async (req: Request, res: Response) => {
   const userId = (req.session as any).userId;
@@ -85,7 +101,7 @@ export const updateEntry = async (req: Request, res: Response) => {
     },
   });
 
-  // IMMER Tracking-Eintrag anlegen (auch ohne changeNote)
+  // Always create tracking entry (even without changeNote)
   await prisma.tracking.create({
     data: {
       entryId: entry.id,

@@ -1,12 +1,25 @@
-// backend/src/routes/entries/tracking.ts
+// ============================================
+// FILE: backend/src/routes/entries/tracking.ts
+// PURPOSE: Manual tracking entry handler
+// DEPENDENCIES: express, prisma
+// ============================================
 
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
+// ============================================
+// INITIALIZATION
+// ============================================
 const prisma = new PrismaClient();
 
 // ============================================
-// POST /entries/:id/tracking/manual - Manual tracking
+// HANDLER: POST /entries/:id/tracking/manual
+// PURPOSE: Adds a manual tracking entry with custom timestamp
+// USE CASE: Backdating progress or recording offline work
+// VALIDATION:
+//   - timestamp: required, must be valid ISO date
+//   - note: optional, max 500 chars
+// AUTHENTICATION: Required (userId from session)
 // ============================================
 export const addManualTracking = async (req: Request, res: Response) => {
   const userId = (req.session as any).userId;

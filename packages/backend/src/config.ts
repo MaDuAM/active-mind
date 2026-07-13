@@ -1,9 +1,13 @@
-// backend/src/config.ts
+// ============================================
+// FILE: backend/src/config.ts
+// PURPOSE: Environment variable validation and configuration
+// DEPENDENCIES: zod
+// ============================================
 
 import { z } from 'zod';
 
 // ============================================
-// Schema definition
+// SCHEMA DEFINITION
 // ============================================
 const envSchema = z.object({
   // Server
@@ -28,7 +32,7 @@ const envSchema = z.object({
 });
 
 // ============================================
-// Validation & Export
+// VALIDATION & EXPORT
 // ============================================
 const parsed = envSchema.safeParse(process.env);
 
@@ -41,6 +45,6 @@ if (!parsed.success) {
 export const config = parsed.data;
 
 // ============================================
-// Type Export for TypeScript
+// TYPE EXPORT
 // ============================================
 export type Config = z.infer<typeof envSchema>;

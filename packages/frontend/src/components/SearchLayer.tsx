@@ -1,10 +1,17 @@
-// frontend/src/components/SearchLayer.tsx
+// ============================================
+// FILE: frontend/src/components/SearchLayer.tsx
+// PURPOSE: Search results overlay with mobile/desktop responsive layouts
+// DEPENDENCIES: react, EntryRow, LoadingOverlay, useLoadingDebounce
+// ============================================
 
 import { EntryRow } from './EntryRow';
 import { Entry, Topic } from '../types';
 import { LoadingOverlay } from './LoadingOverlay';
 import { useLoadingDebounce } from '../hooks/useLoadingDebounce';
 
+// ============================================
+// PROPS
+// ============================================
 interface SearchLayerProps {
   entries: Entry[];
   topics: Topic[];
@@ -17,6 +24,9 @@ interface SearchLayerProps {
   onSearchChange?: (term: string) => void;
 }
 
+// ============================================
+// COMPONENT: SearchLayer
+// ============================================
 export function SearchLayer({
   entries,
   topics,
@@ -28,14 +38,12 @@ export function SearchLayer({
   isMobile = false,
   onSearchChange,
 }: SearchLayerProps) {
-  // ============================================
   // Helper: Get topic name by ID
-  // ============================================
   const getTopicName = (topicId: number) => topics.find((t) => t.id === topicId)?.name || '?';
   const showLoading = useLoadingDebounce(isLoading, 200);
 
   // ============================================
-  // Mobile: Fullscreen Overlay
+  // MOBILE: Fullscreen Overlay
   // ============================================
   if (isMobile) {
     // Loading State
@@ -60,7 +68,7 @@ export function SearchLayer({
       );
     }
 
-    // Vor dem Empty-Check – Loading prüfen
+    // Loading (before empty check)
     if (isLoading) {
       return (
         <div className="fixed inset-0 z-[200] bg-[var(--bg-card)] flex flex-col animate-in fade-in duration-200">
@@ -174,8 +182,9 @@ export function SearchLayer({
   }
 
   // ============================================
-  // Desktop: Centered Floating Panel
+  // DESKTOP: Centered Floating Panel
   // ============================================
+  
   // Loading State
   if (showLoading) {
     return (
@@ -196,7 +205,7 @@ export function SearchLayer({
     );
   }
 
-  // Vor dem Empty-Check – Loading prüfen
+  // Loading (before empty check)
   if (isLoading) {
     return (
       <div className="fixed top-36 left-1/2 -translate-x-1/2 w-[900px] max-w-[90vw] bg-[var(--bg-card)] border border-[var(--border-color)] rounded-card shadow-dropdown overflow-y-auto z-[200] animate-in fade-in slide-in-from-top-4 duration-200">

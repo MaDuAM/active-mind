@@ -1,4 +1,8 @@
-// backend/src/routes/entries/index.ts
+// ============================================
+// FILE: backend/src/routes/entries/index.ts
+// PURPOSE: Entry routes aggregator - mounts all entry sub-routes
+// DEPENDENCIES: express, all entry handlers
+// ============================================
 
 import { Router } from 'express';
 import * as getHandlers from './get';
@@ -10,7 +14,14 @@ import * as stepHandlers from './step';
 import * as trackingHandlers from './tracking';
 import * as favoriteHandlers from './favorite';
 
+// ============================================
+// INITIALIZATION
+// ============================================
 const router = Router();
+
+// ============================================
+// ROUTE MOUNTS
+// ============================================
 
 // GET routes
 router.get('/', getHandlers.getEntries);
@@ -31,4 +42,7 @@ router.put('/:id', putHandlers.updateEntry);
 router.delete('/:id', deleteHandlers.softDeleteEntry);
 router.delete('/:id/permanent', deleteHandlers.permanentDeleteEntry);
 
+// ============================================
+// EXPORT
+// ============================================
 export default router;

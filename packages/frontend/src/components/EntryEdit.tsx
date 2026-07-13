@@ -1,9 +1,16 @@
-// frontend/src/components/EntryEdit.tsx
+// ============================================
+// FILE: frontend/src/components/EntryEdit.tsx
+// PURPOSE: Entry edit form with area-specific fields and dirty tracking
+// DEPENDENCIES: react, types (Entry, Step), StepEditor
+// ============================================
 
 import { useState, useEffect } from 'react';
 import { Entry, Step } from '../types';
 import { StepEditor } from './StepEditor';
 
+// ============================================
+// PROPS
+// ============================================
 interface EntryEditProps {
   entry: Entry;
   onSave: (data: {
@@ -19,9 +26,12 @@ interface EntryEditProps {
   onChange?: (hasChanges: boolean) => void;
 }
 
+// ============================================
+// COMPONENT: EntryEdit
+// ============================================
 export function EntryEdit({ entry, onSave, onCancel, isPending = false, onChange }: EntryEditProps) {
   // ============================================
-  // Local Form State
+  // LOCAL FORM STATE
   // Initialized from entry prop
   // ============================================
   const [essenceText, setEssenceText] = useState(entry.essenceText);
@@ -34,7 +44,8 @@ export function EntryEdit({ entry, onSave, onCancel, isPending = false, onChange
   const [changeNote, setChangeNote] = useState('');
 
   // ============================================
-  // Dirty Check: Compares current state with initial entry
+  // DIRTY CHECK
+  // PURPOSE: Compares current state with initial entry
   // Notifies parent via onChange callback
   // ============================================
   useEffect(() => {
@@ -50,7 +61,7 @@ export function EntryEdit({ entry, onSave, onCancel, isPending = false, onChange
   }, [essenceText, essenceShort, actionName, benefit, steps, changeNote, entry, onChange]);
 
   // ============================================
-  // Form Submission
+  // FORM SUBMISSION
   // Builds payload and passes to parent
   // ============================================
   const handleSubmit = (e: React.FormEvent) => {
@@ -69,6 +80,9 @@ export function EntryEdit({ entry, onSave, onCancel, isPending = false, onChange
     onSave(data);
   };
 
+  // ============================================
+  // RENDER
+  // ============================================
   return (
     <form onSubmit={handleSubmit} className="space-y-4 flex flex-col h-full">
       <div className="flex-1 space-y-4">
@@ -145,9 +159,7 @@ export function EntryEdit({ entry, onSave, onCancel, isPending = false, onChange
         </div>
       </div>
 
-      {/* ============================================ */}
       {/* Desktop: Save/Cancel Buttons */}
-      {/* ============================================ */}
       <div className="hidden sm:flex gap-2 pt-4 border-t border-[var(--border-color)]">
         <button type="submit" disabled={isPending} className="btn-primary">
           {isPending ? 'Saving...' : 'Save'}
@@ -157,9 +169,7 @@ export function EntryEdit({ entry, onSave, onCancel, isPending = false, onChange
         </button>
       </div>
 
-      {/* ============================================ */}
       {/* Mobile: Action Buttons (full width) */}
-      {/* ============================================ */}
       <div className="sm:hidden shrink-0 pt-4 mt-4 border-t border-[var(--border-color)]">
         <div className="flex gap-3">
           <button type="submit" disabled={isPending} className="btn-primary text-sm px-3 py-2 flex-1">

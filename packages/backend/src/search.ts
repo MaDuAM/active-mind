@@ -1,13 +1,24 @@
-// backend/src/routes/search.ts
+// ============================================
+// FILE: backend/src/routes/search.ts
+// PURPOSE: Full-text search endpoint using ILIKE across entry fields
+// DEPENDENCIES: express, prisma
+// ============================================
 
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 
+// ============================================
+// INITIALIZATION
+// ============================================
 const prisma = new PrismaClient();
 const router = Router();
 
 // ============================================
-// GET /search?q=... - Einfache ILIKE-Suche
+// ROUTE: GET /search?q=...
+// PURPOSE: Searches entries using ILIKE pattern matching
+// FIELDS: essenceText, essenceShort, actionName, benefit, step descriptions
+// AUTHENTICATION: Required (userId from session)
+// PAGINATION: Supports page and limit (max 100)
 // ============================================
 router.get('/', async (req, res) => {
   const userId = (req.session as any).userId;
@@ -17,6 +28,7 @@ router.get('/', async (req, res) => {
 
   const { q, limit = 50, page = 1 } = req.query;
 
+  // Validate search query
   if (!q || typeof q !== 'string' || q.trim().length === 0) {
     return res.status(400).json({ error: 'Search query required' });
   }
@@ -27,7 +39,7 @@ router.get('/', async (req, res) => {
   const skip = (pageNum - 1) * limitNum;
 
   try {
-    // 1. ILIKE-Suche über alle relevanten Felder
+    // Search across all relevant fields using ILIKE
     const results = await prisma.$queryRaw`
       SELECT *
       FROM "Entry" e
@@ -49,7 +61,7 @@ router.get('/', async (req, res) => {
       OFFSET ${skip}
     `;
 
-    // 2. Gesamtanzahl
+    // Count total results for pagination
     const countResult = await prisma.$queryRaw<{ count: bigint }[]>`
       SELECT COUNT(*)::bigint
       FROM "Entry" e
@@ -88,4 +100,7 @@ router.get('/', async (req, res) => {
   }
 });
 
+// ============================================
+// EXPORT
+// ============================================
 export default router;

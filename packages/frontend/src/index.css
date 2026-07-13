@@ -1,11 +1,15 @@
-/* frontend/src/index.css*/
+/* ============================================
+   FILE: frontend/src/index.css
+   PURPOSE: Global styles with Tailwind CSS and CSS variables for Light/Dark Mode
+   DEPENDENCIES: tailwindcss
+   ============================================ */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ============================================
-   CSS variables for Light/Dark Mode
+   CSS VARIABLES: Light/Dark Mode
    ============================================ */
 @layer base {
   :root {
@@ -56,7 +60,7 @@
 }
 
 /* ============================================
-   Global basic styles
+   GLOBAL BASIC STYLES
    ============================================ */
 @layer base {
   html {
@@ -128,7 +132,7 @@
 }
 
 /* ============================================
-   Tailwind Component-Layer
+   TAILWIND COMPONENT LAYER
    ============================================ */
 @layer components {
   .card {

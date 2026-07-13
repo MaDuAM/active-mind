@@ -1,14 +1,23 @@
-// backend/src/topics.ts
+// ============================================
+// FILE: backend/src/routes/topics.ts
+// PURPOSE: Topic management endpoints (CRUD operations)
+// DEPENDENCIES: express, prisma
+// ============================================
 
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 
+// ============================================
+// INITIALIZATION
+// ============================================
 const prisma = new PrismaClient();
 const router = Router();
 
 // ============================================
-// GET /topics - Fetch all topics for current user
+// ROUTE: GET /topics
+// PURPOSE: Fetches all topics for the current user
+// AUTHENTICATION: Required (userId from session)
 // ============================================
 router.get('/', async (req, res) => {
   const topics = await prisma.topic.findMany({
@@ -22,29 +31,32 @@ router.get('/', async (req, res) => {
 });
 
 // ============================================
-// POST /topics - Create a new topic
+// ROUTE: POST /topics
+// PURPOSE: Creates a new topic for the current user
+// VALIDATION: Name required, 1-100 characters, no duplicates per user
+// AUTHENTICATION: Required (userId from session)
 // ============================================
 router.post('/', async (req, res) => {
   const { name } = req.body;
   const userId = (req.session as any).userId;
   
-  // 1. Validate name exists
+  // Validate name exists
   if (!name) {
     return res.status(400).json({ error: 'Name required' });
   }
   
-  // 2. Validate name length (1-100 characters)
+  // Validate name length (1-100 characters)
   if (typeof name !== 'string' || name.length === 0 || name.length > 100) {
     return res.status(400).json({ error: 'Name must be 1-100 characters' });
   }
   
-  // 3. Trim whitespace
+  // Trim whitespace
   const trimmedName = name.trim();
   if (trimmedName.length === 0) {
     return res.status(400).json({ error: 'Name cannot be empty or only whitespace' });
   }
   
-  // 4. Check for duplicate (same user, same name)
+  // Check for duplicate (same user, same name)
   const existing = await prisma.topic.findFirst({
     where: { 
       userId,
@@ -62,13 +74,13 @@ router.post('/', async (req, res) => {
 });
 
 // ============================================
-// DELETE /topics/:id - Delete a topic
-// 
-// Rules:
-// - Cannot delete if active entries exist
-// - Cannot delete if trash entries exist
-// - Permanently removed entries are deleted first
-// - Final check ensures no entries remain
+// ROUTE: DELETE /topics/:id
+// PURPOSE: Deletes a topic (only if no entries remain)
+// RULES:
+//   - Cannot delete if active or trash entries exist
+//   - Permanently removed entries are deleted first
+//   - Final safety check ensures no entries remain
+// AUTHENTICATION: Required (userId from session)
 // ============================================
 router.delete('/:id', async (req, res) => {
   const userId = (req.session as any).userId;
@@ -114,4 +126,7 @@ router.delete('/:id', async (req, res) => {
   res.json({ ok: true });
 });
 
+// ============================================
+// EXPORT
+// ============================================
 export default router;

@@ -1,48 +1,40 @@
-// components/EntrySection.tsx
+// ============================================
+// FILE: frontend/src/components/EntrySection.tsx
+// PURPOSE: Reusable section component for displaying grouped entries with favorites filter
+// DEPENDENCIES: react, types (Entry), EntryRow, SectionKey
+// ============================================
 
 import { Entry } from '../types';
 import { EntryRow } from './EntryRow';
 import { SectionKey } from '../hooks/useSectionState';
 
+// ============================================
+// PROPS
+// ============================================
 interface EntrySectionProps {
-  /** Section identifier */
   section: SectionKey;
-  /** Display title (e.g., "Active Actions") */
   title: string;
-  /** Icon/emoji for empty state */
   emptyIcon: string;
-  /** Empty state message */
   emptyMessage: string;
-  /** Empty state sub-message */
   emptySubMessage?: string;
-  /** Color class for the title (e.g., "text-green-400") */
   titleColor: string;
-  /** Entries to display */
   entries: Entry[];
-  /** Whether the section is expanded */
   isExpanded: boolean;
-  /** Toggle handler */
   onToggle: () => void;
-  /** Click handler for entry rows */
   onEntryClick: (id: number) => void;
-  /** Optional hover handler for entry rows */
   onEntryHover?: (id: number) => void;
-  /** Whether to show topic names */
   showTopic?: boolean;
-  /** Map topic ID to topic name */
   getTopicName?: (topicId: number) => string;
-  /** Additional class name */
   className?: string;
-  /** Show only favorite entries */
   showFavoritesOnly: boolean;
-  /** Toggle favorites filter for this section */
   onToggleFavorites: (section: SectionKey) => void;
-  /** Toggle favorite status for a single entry */
   onToggleFavorite?: (id: number) => void;
-  /** Whether a favorite mutation is pending */
   isFavoritePending?: boolean;
 }
 
+// ============================================
+// COMPONENT: EntrySection
+// ============================================
 export function EntrySection({
   title,
   emptyIcon,

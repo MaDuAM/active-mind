@@ -1,7 +1,14 @@
-// frontend/src/components/StepEditor.tsx
+// ============================================
+// FILE: frontend/src/components/StepEditor.tsx
+// PURPOSE: Interactive step editor with add/remove/reorder capabilities
+// DEPENDENCIES: react, types (Step)
+// ============================================
 
 import { Step } from '../types';
 
+// ============================================
+// PROPS
+// ============================================
 interface StepEditorProps {
   steps: Step[];
   onChange: (steps: Step[]) => void;
@@ -10,6 +17,9 @@ interface StepEditorProps {
   disabled?: boolean;
 }
 
+// ============================================
+// COMPONENT: StepEditor
+// ============================================
 export function StepEditor({
   steps,
   onChange,
@@ -18,7 +28,7 @@ export function StepEditor({
   disabled = false,
 }: StepEditorProps) {
   // ============================================
-  // Step Management Handlers
+  // STEP MANAGEMENT HANDLERS
   // ============================================
 
   // Add new step at the end of the list
@@ -66,10 +76,13 @@ export function StepEditor({
   };
 
   // ============================================
-  // Validation
+  // VALIDATION
   // ============================================
   const allStepsFilled = steps.every((step) => step.description.trim() !== '');
 
+  // ============================================
+  // RENDER
+  // ============================================
   return (
     <div>
       {/* Header */}

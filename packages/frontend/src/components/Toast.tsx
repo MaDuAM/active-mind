@@ -1,12 +1,22 @@
-// frontend/src/components/Toast.tsx
+// ============================================
+// FILE: frontend/src/components/Toast.tsx
+// PURPOSE: Toast notification display with auto-dismiss
+// DEPENDENCIES: react, NotificationContext
+// ============================================
 
 import { useEffect } from 'react';
 import { useNotification } from '../context/NotificationContext';
 
+// ============================================
+// COMPONENT: Toast
+// ============================================
 export function Toast() {
   const { notifications, removeNotification } = useNotification();
 
-  // Auto-remove notifications after 5 seconds
+  // ============================================
+  // AUTO-DISMISS
+  // PURPOSE: Removes notifications after 5 seconds
+  // ============================================
   useEffect(() => {
     const timers = notifications.map((n) => {
       const timer = setTimeout(() => removeNotification(n.id), 5000);
@@ -19,7 +29,7 @@ export function Toast() {
   if (notifications.length === 0) return null;
 
   // ============================================
-  // Helper: Get border color based on notification type
+  // HELPER: Get border color based on notification type
   // ============================================
   const getBorderColor = (type: string) => {
     switch (type) {
@@ -36,6 +46,9 @@ export function Toast() {
     }
   };
 
+  // ============================================
+  // RENDER
+  // ============================================
   return (
     <div className="fixed top-5 right-5 z-[9999] flex flex-col gap-2 max-w-sm w-full items-end">
       {notifications.map((n) => (

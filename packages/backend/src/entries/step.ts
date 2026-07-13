@@ -1,12 +1,24 @@
-// backend/src/routes/entries/step.ts
+// ============================================
+// FILE: backend/src/routes/entries/step.ts
+// PURPOSE: Entry step change handler for ACTIVE entries
+// DEPENDENCIES: express, prisma
+// ============================================
 
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
+// ============================================
+// INITIALIZATION
+// ============================================
 const prisma = new PrismaClient();
 
 // ============================================
-// POST /entries/:id/step - Change current step
+// HANDLER: POST /entries/:id/step
+// PURPOSE: Changes the current step index of an ACTIVE entry
+// RESTRICTIONS: Only allowed for ACTIVE entries with steps
+// VALIDATION: newStepIndex must be a valid integer within steps range
+// SIDE EFFECT: Creates STEP_CHANGE tracking entry with previous/new step descriptions
+// AUTHENTICATION: Required (userId from session)
 // ============================================
 export const changeStep = async (req: Request, res: Response) => {
   const userId = (req.session as any).userId;

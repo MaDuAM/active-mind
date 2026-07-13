@@ -1,14 +1,28 @@
-// frontend/src/types.ts
+// ============================================
+// FILE: frontend/src/types.ts
+// PURPOSE: Central TypeScript type definitions for the application
+// DEPENDENCIES: None
+// ============================================
+
+// ============================================
+// DOMAIN TYPES
+// ============================================
 
 export type Area = 'KNOWLEDGE' | 'PASSIVE' | 'ACTIVE';
 export type Status = 'WAITING' | 'ACTIVE' | 'PAUSED';
 export type TrackingType = 'CREATION' | 'STEP_CHANGE' | 'STATUS_CHANGE' | 'ENTRY_EDIT' | 'MANUAL' | 'RESTORE';
 
+// ============================================
+// USER
+// ============================================
 export interface User {
   id: number;
   username: string;
 }
 
+// ============================================
+// TOPIC
+// ============================================
 export interface Topic {
   id: number;
   name: string;
@@ -17,11 +31,17 @@ export interface Topic {
   updatedAt: string;
 }
 
+// ============================================
+// STEP
+// ============================================
 export interface Step {
   order: number;
   description: string;
 }
 
+// ============================================
+// TRACKING
+// ============================================
 export interface Tracking {
   id: number;
   entryId: number;
@@ -35,6 +55,9 @@ export interface Tracking {
   createdAt: string;
 }
 
+// ============================================
+// ENTRY
+// ============================================
 export interface Entry {
   id: number;
   essenceText: string;
@@ -56,10 +79,16 @@ export interface Entry {
   trackings?: Tracking[];
 }
 
+// ============================================
+// TRASH ENTRY (subset of Entry)
+// ============================================
 export interface TrashEntry extends Pick<Entry, 'id' | 'essenceShort' | 'actionName' | 'benefit' | 'topicId'> {
   deletedAt: string;
 }
 
+// ============================================
+// PAYLOAD TYPES
+// ============================================
 export interface CreateEntryPayload {
   area: Area;
   topicId: number;
@@ -73,7 +102,7 @@ export interface CreateEntryPayload {
 }
 
 // ============================================
-// Pagination Types
+// PAGINATION
 // ============================================
 export interface PaginationMeta {
   page: number;
@@ -90,7 +119,7 @@ export interface PaginatedResponse<T> {
 }
 
 // ============================================
-// API Error
+// API ERROR
 // ============================================
 export class ApiError extends Error {
   public status?: number;
@@ -106,7 +135,7 @@ export class ApiError extends Error {
 }
 
 // ============================================
-// Filter Types
+// FILTER TYPES
 // ============================================
 export interface EntryFilters {
   topicId?: number;

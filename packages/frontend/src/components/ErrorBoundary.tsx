@@ -1,7 +1,14 @@
-// frontend/src/components/ErrorBoundary.tsx
+// ============================================
+// FILE: frontend/src/components/ErrorBoundary.tsx
+// PURPOSE: Catches JavaScript errors in child component tree and displays fallback UI
+// DEPENDENCIES: react
+// ============================================
 
 import { Component, ReactNode } from 'react';
 
+// ============================================
+// PROPS & STATE
+// ============================================
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
@@ -14,16 +21,12 @@ interface State {
 }
 
 // ============================================
-// Error Boundary Component
-// 
-// Catches JavaScript errors in child component tree.
-// Prevents the entire app from crashing on UI errors.
-// 
-// Features:
-// - Renders fallback UI when error occurs
-// - Logs errors to console
-// - Optional custom error handler callback
-// - Reset functionality to recover from errors
+// COMPONENT: ErrorBoundary
+// FEATURES:
+//   - Renders fallback UI when error occurs
+//   - Logs errors to console
+//   - Optional custom error handler callback
+//   - Reset functionality to recover from errors
 // ============================================
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
@@ -35,8 +38,8 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   // ============================================
-  // Static getDerivedStateFromError
-  // Updates state when error is thrown in child component
+  // getDerivedStateFromError
+  // PURPOSE: Updates state when error is thrown in child component
   // ============================================
   static getDerivedStateFromError(error: Error): State {
     return {
@@ -47,7 +50,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   // ============================================
   // componentDidCatch
-  // Logs error and calls optional onError callback
+  // PURPOSE: Logs error and calls optional onError callback
   // ============================================
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
@@ -59,7 +62,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   // ============================================
   // handleReset
-  // Resets error state to recover from error
+  // PURPOSE: Resets error state to recover from error
   // ============================================
   handleReset = () => {
     this.setState({
@@ -69,9 +72,7 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   render() {
-    // ============================================
     // Error State: Render fallback UI
-    // ============================================
     if (this.state.hasError) {
       // Use custom fallback if provided
       if (this.props.fallback) {
@@ -103,9 +104,7 @@ export class ErrorBoundary extends Component<Props, State> {
       );
     }
 
-    // ============================================
     // No Error: Render children normally
-    // ============================================
     return this.props.children;
   }
 }

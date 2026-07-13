@@ -1,5 +1,12 @@
-// frontend/src/hooks/index.ts
+// ============================================
+// FILE: frontend/src/hooks/index.ts
+// PURPOSE: Central export barrel for all custom hooks
+// DEPENDENCIES: All hook implementations
+// ============================================
 
+// ============================================
+// API HOOKS
+// ============================================
 export {
   usePaginatedEntries,
   useEntry,
@@ -14,8 +21,11 @@ export {
   useManualTracking,
   useCreateTopic,
   useDeleteTopic,
-  useToggleFavorite,  // NEU
+  useToggleFavorite,
   queryKeys,
 } from './useApi';
 
+// ============================================
+// SEARCH HOOK
+// ============================================
 export { useSearch } from './useSearch';

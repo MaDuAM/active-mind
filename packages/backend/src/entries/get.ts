@@ -1,14 +1,27 @@
-// backend/src/routes/entries/get.ts
+// ============================================
+// FILE: backend/src/routes/entries/get.ts
+// PURPOSE: Entry retrieval handlers (list with filters, single entry with trackings)
+// DEPENDENCIES: express, prisma, validation
+// ============================================
 
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import { isValidArea, isValidStatus } from '../validation';
 
+// ============================================
+// INITIALIZATION
+// ============================================
 const prisma = new PrismaClient();
 
 // ============================================
-// GET /entries - Paginated entry list with filters
+// HANDLER: GET /entries
+// PURPOSE: Retrieves paginated entry list with filters
+// FILTERS: topicId, area, status, deletedOnly
+// SORTING: sortBy, sortOrder (default: createdAt desc)
+// PAGINATION: page, limit (max 100)
+// AUTHENTICATION: Required (userId from session)
+// FIELD SELECTION: Different fields for trash vs active entries
 // ============================================
 export const getEntries = async (req: Request, res: Response) => {
   const userId = (req.session as any).userId;
@@ -125,7 +138,10 @@ export const getEntries = async (req: Request, res: Response) => {
 };
 
 // ============================================
-// GET /entries/:id - Single entry with tracking history
+// HANDLER: GET /entries/:id
+// PURPOSE: Retrieves a single entry with its tracking history
+// INCLUSIONS: Trackings sorted by timestamp desc
+// AUTHENTICATION: Required (userId from session)
 // ============================================
 export const getEntry = async (req: Request, res: Response) => {
   const userId = (req.session as any).userId;

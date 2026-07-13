@@ -1,7 +1,14 @@
-// frontend/src/components/EntryFormFields.tsx
+// ============================================
+// FILE: frontend/src/components/EntryFormFields.tsx
+// PURPOSE: Reusable form fields for entry creation/editing (area-specific)
+// DEPENDENCIES: react, types (Area, Status)
+// ============================================
 
 import { Area, Status } from '../types';
 
+// ============================================
+// PROPS
+// ============================================
 interface EntryFormFieldsProps {
   area: Area;
   essenceText: string;
@@ -19,6 +26,9 @@ interface EntryFormFieldsProps {
   disabled?: boolean;
 }
 
+// ============================================
+// COMPONENT: EntryFormFields
+// ============================================
 export function EntryFormFields({
   area,
   essenceText,
@@ -37,10 +47,7 @@ export function EntryFormFields({
 }: EntryFormFieldsProps) {
   return (
     <>
-      {/* ============================================ */}
-      {/* Essence Text */}
-      {/* Core content of the entry - full description */}
-      {/* ============================================ */}
+      {/* Essence Text - Core content of the entry (full description) */}
       <div>
         <label className="label">Essence Text *</label>
         <textarea
@@ -57,10 +64,7 @@ export function EntryFormFields({
         </div>
       </div>
 
-      {/* ============================================ */}
-      {/* Essence Short */}
-      {/* Summary/headline for lists and quick scanning */}
-      {/* ============================================ */}
+      {/* Essence Short - Summary/headline for lists and quick scanning */}
       <div>
         <label className="label">Essence Short *</label>
         <input
@@ -76,11 +80,7 @@ export function EntryFormFields({
         </div>
       </div>
 
-      {/* ============================================ */}
-      {/* Area-Specific Fields */}
-      {/* Only shown for PASSIVE and ACTIVE entries */}
-      {/* KNOWLEDGE entries have no action-based fields */}
-      {/* ============================================ */}
+      {/* Area-Specific Fields - Only shown for PASSIVE and ACTIVE entries */}
       {area !== 'KNOWLEDGE' && (
         <>
           {/* Action Name */}

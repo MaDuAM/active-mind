@@ -1,7 +1,14 @@
-// frontend/src/components/MobileBottomBar.tsx
+// ============================================
+// FILE: frontend/src/components/MobileBottomBar.tsx
+// PURPOSE: Bottom navigation bar for mobile devices with FAB for new entry
+// DEPENDENCIES: react, AuthContext
+// ============================================
 
 import { useAuth } from '../context/AuthContext';
 
+// ============================================
+// PROPS
+// ============================================
 interface MobileBottomBarProps {
   onSearch: () => void;
   onDashboard: () => void;
@@ -11,6 +18,9 @@ interface MobileBottomBarProps {
   activeView?: 'dashboard' | 'topics' | 'search' | 'menu' | null;
 }
 
+// ============================================
+// COMPONENT: MobileBottomBar
+// ============================================
 export function MobileBottomBar({
   onSearch,
   onDashboard,
