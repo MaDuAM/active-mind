@@ -41,8 +41,9 @@ export const getEntries = async (req: Request, res: Response) => {
   } = req.query;
 
   // Sanitize pagination params
+  const MAX_LIMIT = 1000; // oder 10000 for Tests
+  const limitNum = Math.min(MAX_LIMIT, Math.max(1, Number(limit)));
   const pageNum = Math.max(1, Number(page));
-  const limitNum = Math.min(100, Math.max(1, Number(limit)));
   const skip = (pageNum - 1) * limitNum;
 
   // Build where clause

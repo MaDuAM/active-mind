@@ -137,7 +137,7 @@ export const usePaginatedEntries = (
   },
   enabled: boolean = true
 ) => {
-  const limit = filters?.limit || 100;
+  const limit = filters?.limit || 1000;
 
   return useInfiniteQuery({
     queryKey: ['entries-paginated', { ...filters, limit }],

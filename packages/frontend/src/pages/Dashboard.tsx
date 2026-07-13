@@ -50,23 +50,23 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
   // DATA FETCHING (5 separate queries per section)
   // ============================================
   const { data: activeData, isLoading: activeLoading } = usePaginatedEntries(
-    { area: 'ACTIVE', status: 'ACTIVE', limit: 100 },
+    { area: 'ACTIVE', status: 'ACTIVE', limit: 1000 },
     true
   );
   const { data: passiveData, isLoading: passiveLoading } = usePaginatedEntries(
-    { area: 'PASSIVE', status: 'ACTIVE', limit: 100 },
+    { area: 'PASSIVE', status: 'ACTIVE', limit: 1000 },
     true
   );
   const { data: waitingData, isLoading: waitingLoading } = usePaginatedEntries(
-    { status: 'WAITING', limit: 100 },
+    { status: 'WAITING', limit: 1000 },
     true
   );
   const { data: pausedData, isLoading: pausedLoading } = usePaginatedEntries(
-    { status: 'PAUSED', limit: 100 },
+    { status: 'PAUSED', limit: 1000 },
     true
   );
   const { data: knowledgeData, isLoading: knowledgeLoading } = usePaginatedEntries(
-    { area: 'KNOWLEDGE', limit: 100 },
+    { area: 'KNOWLEDGE', limit: 1000 },
     true
   );
 
@@ -142,7 +142,13 @@ export function Dashboard({ onOpenEntry, showNewEntryForm, setShowNewEntryForm }
   // ============================================
   // SKELETON LOADING STATE
   // ============================================
-  if (showLoading && activeEntries.length === 0 && passiveEntries.length === 0) {
+  const hasData = activeEntries.length > 0 || passiveEntries.length > 0;
+
+  if (isLoading && !hasData) {
+    return <LoadingOverlay message="Loading entries..." />;
+  }
+
+  if (showLoading && hasData) {
     return <LoadingOverlay message="Loading entries..." />;
   }
 

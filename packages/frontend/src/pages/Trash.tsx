@@ -137,7 +137,13 @@ export function Trash() {
   // ============================================
   // SKELETON LOADING STATE
   // ============================================
-  if (showLoading && allEntries.length === 0) {
+  const hasData = allEntries.length > 0;
+
+  if (isLoading && !hasData) {
+    return <LoadingOverlay message="Loading removed entries..." />;
+  }
+
+  if (showLoading && hasData) {
     return <LoadingOverlay message="Loading removed entries..." />;
   }
 

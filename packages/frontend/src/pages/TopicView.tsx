@@ -58,23 +58,23 @@ export default function TopicView({
   // DATA FETCHING (5 separate queries filtered by topicId)
   // ============================================
   const { data: activeData, isLoading: activeLoading } = usePaginatedEntries(
-    { topicId, area: 'ACTIVE', status: 'ACTIVE', limit: 100 },
+    { topicId, area: 'ACTIVE', status: 'ACTIVE', limit: 1000 },
     !!topicId
   );
   const { data: passiveData, isLoading: passiveLoading } = usePaginatedEntries(
-    { topicId, area: 'PASSIVE', status: 'ACTIVE', limit: 100 },
+    { topicId, area: 'PASSIVE', status: 'ACTIVE', limit: 1000 },
     !!topicId
   );
   const { data: waitingData, isLoading: waitingLoading } = usePaginatedEntries(
-    { topicId, status: 'WAITING', limit: 100 },
+    { topicId, status: 'WAITING', limit: 1000 },
     !!topicId
   );
   const { data: pausedData, isLoading: pausedLoading } = usePaginatedEntries(
-    { topicId, status: 'PAUSED', limit: 100 },
+    { topicId, status: 'PAUSED', limit: 1000 },
     !!topicId
   );
   const { data: knowledgeData, isLoading: knowledgeLoading } = usePaginatedEntries(
-    { topicId, area: 'KNOWLEDGE', limit: 100 },
+    { topicId, area: 'KNOWLEDGE', limit: 1000 },
     !!topicId
   );
 
@@ -168,7 +168,13 @@ export default function TopicView({
   // ============================================
   // SKELETON LOADING STATE
   // ============================================
-  if (showLoading && sections.total === 0) {
+  const hasData = sections.total > 0;
+
+  if (isLoading && !hasData) {
+    return <LoadingOverlay message="Loading entries..." />;
+  }
+
+  if (showLoading && hasData) {
     return <LoadingOverlay message="Loading entries..." />;
   }
 

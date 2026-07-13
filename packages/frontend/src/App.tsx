@@ -261,9 +261,10 @@ function AppContent() {
   // LOADING STATE
   // ============================================
   const isLoading = authLoading || entriesLoading || topicsLoading;
+  const hasData = entries.length > 0 || topics.length > 0;
+  
   const showLoading = useLoadingDebounce(isLoading, 200);
-
-  if (showLoading) {
+  if (showLoading && hasData) {
     return <LoadingOverlay message="Loading ActiveMind..." />;
   }
 
