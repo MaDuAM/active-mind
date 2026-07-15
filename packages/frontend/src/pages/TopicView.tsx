@@ -6,13 +6,15 @@
 
 import { useState, Suspense, useMemo, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { usePaginatedEntries, useTopics, useDeleteTopic, useToggleFavorite } from '../hooks';
+import { useEntriesBySection, useTopics, useDeleteTopic, useToggleFavorite } from '../hooks';
 import { useSectionState } from '../hooks/useSectionState';
 import { EntrySection } from '../components/EntrySection';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 import { useLoadingDebounce } from '../hooks/useLoadingDebounce';
 import { SectionKey } from '../hooks/useSectionState';
 import NewEntryForm from '../components/NewEntryForm';
+import { apiClient } from '../lib/apiClient';
+import { useQuery } from '@tanstack/react-query';
 
 // ============================================
 // PROPS
@@ -57,24 +59,8 @@ export default function TopicView({
   // ============================================
   // DATA FETCHING (5 separate queries filtered by topicId)
   // ============================================
-  const { data: activeData, isLoading: activeLoading } = usePaginatedEntries(
-    { topicId, area: 'ACTIVE', status: 'ACTIVE', limit: 1000 },
-    !!topicId
-  );
-  const { data: passiveData, isLoading: passiveLoading } = usePaginatedEntries(
-    { topicId, area: 'PASSIVE', status: 'ACTIVE', limit: 1000 },
-    !!topicId
-  );
-  const { data: waitingData, isLoading: waitingLoading } = usePaginatedEntries(
-    { topicId, status: 'WAITING', limit: 1000 },
-    !!topicId
-  );
-  const { data: pausedData, isLoading: pausedLoading } = usePaginatedEntries(
-    { topicId, status: 'PAUSED', limit: 1000 },
-    !!topicId
-  );
-  const { data: knowledgeData, isLoading: knowledgeLoading } = usePaginatedEntries(
-    { topicId, area: 'KNOWLEDGE', limit: 1000 },
+  const { data: sectionData, isLoading: sectionLoading } = useEntriesBySection(
+    topicId,
     !!topicId
   );
 
@@ -85,18 +71,26 @@ export default function TopicView({
   // ============================================
   // COMPUTED DATA
   // ============================================
-  const isLoading = activeLoading || passiveLoading || waitingLoading || pausedLoading || knowledgeLoading || topicsLoading;
-  const activeEntries = activeData?.pages.flatMap((page) => page.data) || [];
-  const passiveEntries = passiveData?.pages.flatMap((page) => page.data) || [];
-  const waitingEntries = waitingData?.pages.flatMap((page) => page.data) || [];
-  const pausedEntries = pausedData?.pages.flatMap((page) => page.data) || [];
-  const knowledgeEntries = knowledgeData?.pages.flatMap((page) => page.data) || [];
+  const isLoading = sectionLoading || topicsLoading;
+  const activeEntries = sectionData?.active || [];
+  const passiveEntries = sectionData?.passive || [];
+  const waitingEntries = sectionData?.waiting || [];
+  const pausedEntries = sectionData?.paused || [];
+  const knowledgeEntries = sectionData?.knowledge || [];
 
-  const { data: trashData } = usePaginatedEntries(
-    { topicId, deletedOnly: true, limit: 1 },
-    !!topicId
-  );
-  const trashCount = trashData?.pages?.[0]?.pagination?.total || 0;
+  const { data: trashData } = useQuery({
+    queryKey: ['trash-count', topicId],
+    queryFn: async () => {
+      const result = await apiClient.get<{ pagination: { total: number } }>(
+        '/entries',
+        { topicId, deletedOnly: true, limit: 1 }
+      );
+      return result;
+    },
+    enabled: !!topicId,
+    staleTime: 60000,
+  });
+  const trashCount = trashData?.pagination?.total || 0;
 
   const showLoading = useLoadingDebounce(isLoading, 200);
 
@@ -126,7 +120,7 @@ export default function TopicView({
 
   const handleNewEntrySuccess = useCallback(() => {
     setShowNewEntryForm(false);
-    queryClient.invalidateQueries({ queryKey: ['entries-paginated'] });
+    queryClient.invalidateQueries({ queryKey: ['entries-by-section'] });
   }, [setShowNewEntryForm, queryClient]);
 
   const handleNewEntryCancel = useCallback(() => {

@@ -13,6 +13,7 @@ import * as statusHandlers from './status';
 import * as stepHandlers from './step';
 import * as trackingHandlers from './tracking';
 import * as favoriteHandlers from './favorite';
+import * as sectionHandlers from './by-section';
 
 // ============================================
 // INITIALIZATION
@@ -25,6 +26,7 @@ const router = Router();
 
 // GET routes
 router.get('/', getHandlers.getEntries);
+router.get('/by-section', sectionHandlers.getEntriesBySection);
 router.get('/:id', getHandlers.getEntry);
 
 // POST routes

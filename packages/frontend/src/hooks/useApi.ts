@@ -56,6 +56,21 @@ const api = {
     return apiClient.get<Topic[]>('/topics');
   },
 
+  /**
+   * Fetch entries grouped by section (active, passive, waiting, paused, knowledge)
+   * @param topicId - Optional topic ID filter
+   * @returns Object with sections as keys
+   */
+  getEntriesBySection: async (topicId?: number) => {
+    return apiClient.get<{
+      active: Entry[];
+      passive: Entry[];
+      waiting: Entry[];
+      paused: Entry[];
+      knowledge: Entry[];
+    }>('/entries/by-section', topicId ? { topicId } : undefined);
+  },
+
   // POST /entries - Create new entry
   createEntry: async (data: CreateEntryPayload) => {
     return apiClient.post<Entry>('/entries', data);
@@ -177,6 +192,21 @@ export const useTopics = (enabled: boolean = true) => {
     queryFn: api.getTopics,
     staleTime: 300000, // 5 minutes - topics rarely change
     enabled,
+  });
+};
+
+/**
+ * Fetch entries grouped by section (active, passive, waiting, paused, knowledge)
+ * @param topicId - Optional topic ID filter
+ * @param enabled - Whether the query should run
+ * @returns Query result with sections
+ */
+export const useEntriesBySection = (topicId?: number, enabled: boolean = true) => {
+  return useQuery({
+    queryKey: ['entries-by-section', topicId],
+    queryFn: () => api.getEntriesBySection(topicId),
+    enabled,
+    staleTime: 30000,
   });
 };
 

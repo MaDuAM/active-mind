@@ -11,6 +11,7 @@ export {
   usePaginatedEntries,
   useEntry,
   useTopics,
+  useEntriesBySection,
   useCreateEntry,
   useUpdateEntry,
   useDeleteEntry,
