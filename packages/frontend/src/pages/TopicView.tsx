@@ -150,6 +150,7 @@ export default function TopicView({
     try {
       await deleteTopicMutation.mutateAsync(topicId);
       queryClient.invalidateQueries({ queryKey: ['entries-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['entries-by-section'] });
       onTopicDeleted();
     } catch (error) {
       if (error instanceof Error && error.message.includes('Can not delete Topic Block')) {

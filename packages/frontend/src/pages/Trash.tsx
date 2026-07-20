@@ -73,6 +73,7 @@ export function Trash() {
       showNotification('success', 'Removed Entries cleared');
       refetchEntries();
       queryClient.refetchQueries({ queryKey: ['entries-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['entries-by-section'] });
     },
     onError: (error) => {
       showNotification('error', error instanceof Error ? error.message : 'Failed to clear trash');
@@ -103,10 +104,20 @@ export function Trash() {
     try {
       await restoreMutation.mutateAsync(id);
       showNotification('success', 'Entry restored');
+      
+      // 1. Trash list reload
       refetchEntries();
-      queryClient.refetchQueries({
-        queryKey: ['entries-paginated']
+      
+      // 2. ALL Dashboard/Topic-Views invalidation
+      queryClient.invalidateQueries({ 
+        queryKey: ['entries-by-section'] 
       });
+      
+      // 3. Paginated Cache
+      queryClient.invalidateQueries({ 
+        queryKey: ['entries-paginated'] 
+      });
+      
     } catch (_error) {
       // Error is handled globally
     }
@@ -123,9 +134,8 @@ export function Trash() {
       await permanentDeleteMutation.mutateAsync(pendingDeleteId);
       showNotification('success', 'Entry permanently deleted');
       refetchEntries();
-      queryClient.refetchQueries({
-        queryKey: ['entries-paginated']
-      });
+      queryClient.invalidateQueries({ queryKey: ['entries-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['entries-by-section'] });
     } catch (_error) {
       // Error is handled globally
     } finally {

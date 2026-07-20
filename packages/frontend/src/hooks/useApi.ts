@@ -221,6 +221,7 @@ export const useStatusChange = () => {
     mutationFn: api.changeStatus,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entries-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['entries-by-section'] });
     },
   });
 };
@@ -232,6 +233,7 @@ export const useStepChange = () => {
     mutationFn: api.changeStep,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entries-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['entries-by-section'] });
     },
   });
 };
@@ -243,6 +245,7 @@ export const useDeleteEntry = () => {
     mutationFn: api.deleteEntry,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entries-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['entries-by-section'] });
     },
   });
 };
@@ -254,6 +257,7 @@ export const useRestoreEntry = () => {
     mutationFn: api.restoreEntry,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entries-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['entries-by-section'] });
     },
   });
 };
@@ -265,6 +269,7 @@ export const useUpdateEntry = () => {
     mutationFn: api.updateEntry,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['entries-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['entries-by-section'] });
       queryClient.invalidateQueries({ queryKey: queryKeys.entry(data.id) });
     },
   });
@@ -277,6 +282,7 @@ export const useCreateEntry = () => {
     mutationFn: api.createEntry,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entries-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['entries-by-section'] });
     },
   });
 };
@@ -288,6 +294,7 @@ export const usePermanentDeleteEntry = () => {
     mutationFn: api.permanentDeleteEntry,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entries-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['entries-by-section'] });
     },
   });
 };
@@ -299,6 +306,7 @@ export const useManualTracking = () => {
     mutationFn: api.addManualTracking,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entries-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['entries-by-section'] });
     },
   });
 };
@@ -322,6 +330,7 @@ export const useDeleteTopic = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.topics() });
       queryClient.invalidateQueries({ queryKey: ['entries-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['entries-by-section'] });
     },
   });
 };
@@ -352,6 +361,7 @@ export const useToggleFavorite = () => {
       );
       // Additional invalidation for other queries
       queryClient.invalidateQueries({ queryKey: ['entries-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['entries-by-section'] });
     },
   });
 };

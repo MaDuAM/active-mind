@@ -82,7 +82,7 @@ export const restoreEntry = async (req: Request, res: Response) => {
     where: { id: entry.id },
     data: {
       deletedAt: null,
-      status: entry.area === 'KNOWLEDGE' ? null : 'WAITING',
+      status: entry.area === 'KNOWLEDGE' ? null : 'PAUSED',
     },
   });
 
