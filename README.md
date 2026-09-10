@@ -22,7 +22,7 @@ ActiveMind organizes information into three distinct entry types:
 - Full-text search with suggestions and result layering
 - Status change history and tracking logs
 - Soft delete with trash restore
-- Infinite scroll with pagination
+- Full data loading (pagination tested, removed due to UX trade-offs – planned for Post-MVP)
 - Dark mode (system-aware)
 - Responsive design (desktop, tablet, mobile)
 
@@ -59,6 +59,34 @@ I built this project in close collaboration with AI (ChatGPT). But this was not 
 
 ---
 
+## Architecture Reflection
+
+ActiveMind was built as a **modular monolith** – a single deployment with clear internal module boundaries (topics, entries, tracking, auth).
+
+**Why this architecture?**
+- Team size: 2 (me + AI) → Microservices would have been overkill.
+- Data consistency: Private user data with strong consistency needs → Monolith with ACID transactions was the right choice.
+- Evolvability: The domain was still evolving → Modular boundaries allowed later extraction if needed.
+- Operational simplicity: One deployment, one database, one log – without distributed system overhead.
+
+**Trade-offs I accepted consciously:**
+- **No horizontal scaling per module** – the whole app scales together, not individual features.
+- **All data loaded at once** – after testing pagination, it performed worse and broke the fluid UX. I chose the solution that made the app feel right in daily use, knowing it will need revision as data grows.
+- **Minimal automated testing** – I decided to test manually during development instead of investing in a full automated test suite, given the 4-week timeframe and single-user scope.
+
+**What I learned:**
+- Architecture is not a free choice – it is a consequence of requirements and constraints.
+- Some decisions cannot be planned on paper – they only become visible when the system is used.
+- A working, fluid product beats a theoretically perfect architecture that nobody enjoys using.
+
+**What I would do differently next time:**
+- Define a clear API contract (OpenAPI) before implementation.
+- Plan for data growth from day one – but validate the solution against real user experience, not just theory.
+- Set up automated tests earlier – even if minimal, they catch regressions I cannot see manually.
+- Define UI state management before coding – not during.
+
+---
+
 ## Testing & Quality Assurance
 
 The project includes a growing test suite to ensure reliability and catch regressions early.
@@ -68,6 +96,8 @@ The project includes a growing test suite to ensure reliability and catch regres
 | Unit / Integration | Vitest + React Testing Library + MSW | 12 tests passing |
 | Backend | Vitest + Supertest | Basic auth tests |
 | End-to-End | Playwright | Experimental (WIP) |
+
+**Note:** Automated tests are minimal by design – manual testing was prioritized for speed and UX validation during the 4-week build phase.
 
 **Run frontend tests:**
 cd packages/frontend && npm test
@@ -108,13 +138,11 @@ Frontend Optimizations:
 - useSectionState hook with auto-expand only once (prevents overriding manual user toggles)
 - queryClient.clear() on auth actions to prevent cross-user data leaks
 
-What I Would Do Differently Next Time
+What I Would Do Differently Next Time:
 - Start with a clearer API contract (OpenAPI/Swagger) before implementing
 - Add end-to-end tests earlier in the process
 - Use feature flags for faster iteration on experimental UI changes
 - Set up CI/CD from day one
-
----
 
 ## About the Author
 
