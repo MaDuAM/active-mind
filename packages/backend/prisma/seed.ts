@@ -48,6 +48,19 @@ const essenceTexts = [
   'Expanding monitoring with Grafana and Prometheus.',
 ];
 
+const essenceShorts = [
+  'Auth migration to JWT',
+  'OpenAPI docs expansion',
+  'DB query optimization',
+  'Component refactoring',
+  'Test coverage increase',
+  'CI/CD automation',
+  'UI accessibility audit',
+  'Log centralization',
+  'DB upgrade',
+  'Monitoring expansion',
+];
+
 const trackingNotes = [
   'Initial creation',
   'Progress update',
@@ -57,6 +70,18 @@ const trackingNotes = [
   'Deployed to production',
   'Rolled back',
   'Refined requirements',
+];
+
+const waitingReasons = [
+  'Waiting for approval',
+  'Blocked by dependency',
+  'Priority shifted',
+];
+
+const pausedReasons = [
+  'Paused for review',
+  'Waiting for input',
+  'Deprioritized',
 ];
 
 // ============================================
@@ -100,6 +125,7 @@ async function main() {
 
   // 3. Generate entries with tracking history
   let totalEntries = 0;
+  let trashEntries = 0;
 
   for (let tIdx = 0; tIdx < topics.length; tIdx++) {
     const topic = topics[tIdx];
@@ -108,14 +134,33 @@ async function main() {
 
     for (let i = 0; i < entryCount; i++) {
       const area = randomItem(areas);
-      const status = randomItem(statuses);
       const hasSteps = area === 'ACTIVE';
-      const stepCount = hasSteps ? Math.floor(Math.random() * 4) + 1 : 0;
 
-      const pauseReason =
-        status === 'WAITING'
-          ? randomItem(['Waiting for approval', 'Blocked by dependency', 'Priority shifted'])
-          : undefined;
+      // ============================================
+      // STATUS LOGIC (consistent with FS)
+      // ============================================
+      // KNOWLEDGE → no status
+      // PASSIVE / ACTIVE → WAITING (initial) OR ACTIVE OR PAUSED
+      let status: Status | undefined;
+      let pauseReason: string | undefined;
+
+      if (area !== 'KNOWLEDGE') {
+        // 20% chance: WAITING (initial, before first activation)
+        // 50% chance: ACTIVE
+        // 30% chance: PAUSED
+        const roll = Math.random();
+        if (roll < 0.2) {
+          status = 'WAITING';
+          pauseReason = randomItem(waitingReasons);
+        } else if (roll < 0.7) {
+          status = 'ACTIVE';
+        } else {
+          status = 'PAUSED';
+          pauseReason = randomItem(pausedReasons);
+        }
+      }
+
+      const stepCount = hasSteps ? Math.floor(Math.random() * 4) + 1 : 0;
 
       const isFavorite = Math.random() > 0.7;
 
@@ -135,16 +180,24 @@ async function main() {
         : 0;
 
       // ============================================
+      // SOFT DELETE (10% chance → trash)
+      // ============================================
+      const isDeleted = Math.random() < 0.1;
+      const deletedAt = isDeleted
+        ? new Date(baseDate.getTime() + Math.random() * 5 * 24 * 60 * 60 * 1000)
+        : null;
+
+      // ============================================
       // CREATE ENTRY
       // ============================================
       const entry = await prisma.entry.create({
         data: {
           essenceText: randomItem(essenceTexts) + ` (Topic: ${topic.name}, #${i + 1})`,
-          essenceShort: randomItem(actionNames).slice(0, 30),
+          essenceShort: randomItem(essenceShorts),
           area,
           actionName: area !== 'KNOWLEDGE' ? randomItem(actionNames) : undefined,
           benefit: area !== 'KNOWLEDGE' ? randomItem(benefits) : undefined,
-          status: area !== 'KNOWLEDGE' ? status : undefined,
+          status,
           pauseReason,
           steps,
           currentStepIndex,
@@ -153,8 +206,11 @@ async function main() {
           userId: admin.id,
           createdAt: baseDate,
           updatedAt: new Date(baseDate.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000),
+          deletedAt,
         },
       });
+
+      if (isDeleted) trashEntries++;
 
       // ============================================
       // GENERATE TRACKING LOGS
@@ -178,8 +234,8 @@ async function main() {
         note: randomItem(trackingNotes),
       });
 
-      // 2. STATUS_CHANGE (if area !== KNOWLEDGE)
-      if (area !== 'KNOWLEDGE' && Math.random() > 0.3) {
+      // 2. STATUS_CHANGE (if area !== KNOWLEDGE AND status !== WAITING)
+      if (area !== 'KNOWLEDGE' && status !== 'WAITING' && Math.random() > 0.3) {
         const oldStatus = randomItem(statuses.filter(s => s !== status));
         trackings.push({
           entryId: entry.id,
@@ -225,6 +281,16 @@ async function main() {
         });
       }
 
+      // 6. RESTORE (if entry was deleted and restored – 30% chance)
+      if (isDeleted && Math.random() > 0.7) {
+        trackings.push({
+          entryId: entry.id,
+          trackingType: 'RESTORE',
+          timestamp: new Date(deletedAt!.getTime() + Math.random() * 2 * 24 * 60 * 60 * 1000),
+          note: 'Restored from trash',
+        });
+      }
+
       // ✅ FIX: Bulk insert with proper undefined filtering
       if (trackings.length > 0) {
         await prisma.tracking.createMany({
@@ -252,7 +318,7 @@ async function main() {
     );
   }
 
-  console.log(`✅ ${totalEntries} total entries created with tracking history`);
+  console.log(`✅ ${totalEntries} total entries created (${trashEntries} in trash)`);
   console.log('🌱 Seeding completed.');
 }
 
